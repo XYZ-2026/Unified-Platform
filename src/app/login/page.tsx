@@ -59,7 +59,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signup(name, email, password);
-      router.push('/dashboard');
+      router.push('/onboarding');
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Failed to register account.');
