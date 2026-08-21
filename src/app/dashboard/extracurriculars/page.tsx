@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 import {
   Activity,
   Plus,
@@ -12,12 +13,25 @@ import {
   BookOpen,
   Award,
   Trash2,
-  Edit2
+  Edit2,
+  Save,
+  Check
 } from 'lucide-react';
 
+interface ExtracurricularActivity {
+  id: string;
+  title: string;
+  organization: string;
+  category: string;
+  hoursPerWeek: string;
+  description: string;
+}
+
 export default function ExtracurricularsPage() {
+  const { user, userData } = useAuth();
   const [rightTab, setRightTab] = useState<'analyse' | 'chat' | 'examples'>('analyse');
-  const [activities, setActivities] = useState([
+  
+  const [activities, setActivities] = useState<ExtracurricularActivity[]>([
     {
       id: 'act-1',
       title: 'Founder & Lead Developer',
@@ -33,27 +47,99 @@ export default function ExtracurricularsPage() {
   const [newOrg, setNewOrg] = useState('');
   const [newDesc, setNewDesc] = useState('');
 
+  const [savingCms, setSavingCms] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(false);
+
+  // Fetch extracurriculars from Wix CMS user-details collection
+  useEffect(() => {
+    async function loadExtracurriculars() {
+      try {
+        const email = user?.email || userData?.email || '';
+        const uid = user?.uid || '';
+        if (!email && !uid) return;
+
+        const res = await fetch(`/api/wix/user-details?userId=${uid}&userEmail=${encodeURIComponent(email)}`);
+        const json = await res.json();
+
+        if (json.success && json.data && json.data.extracurriculars) {
+          let list = json.data.extracurriculars;
+          if (typeof list === 'string') {
+            try {
+              list = JSON.parse(list);
+            } catch (e) {
+              list = null;
+            }
+          }
+          if (Array.isArray(list) && list.length > 0) {
+            setActivities(list);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching extracurriculars from Wix CMS:', err);
+      }
+    }
+
+    if (user) {
+      loadExtracurriculars();
+    }
+  }, [user, userData]);
+
+  // Sync extracurriculars state to Wix CMS user-details collection
+  const syncToWixCms = async (updatedActivities: ExtracurricularActivity[]) => {
+    setSavingCms(true);
+    setSaveStatus(false);
+    try {
+      const email = user?.email || userData?.email || '';
+      const uid = user?.uid || 'guest-user';
+
+      await fetch('/api/wix/user-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: uid,
+          userEmail: email,
+          extracurriculars: updatedActivities
+        })
+      });
+
+      setSaveStatus(true);
+      setTimeout(() => setSaveStatus(false), 3000);
+    } catch (err) {
+      console.error('Error syncing extracurriculars to Wix CMS:', err);
+    } finally {
+      setSavingCms(false);
+    }
+  };
+
   const handleAddActivity = () => {
     if (!newTitle.trim()) return;
-    setActivities((prev) => [
-      ...prev,
-      {
-        id: `act-${Date.now()}`,
-        title: newTitle,
-        organization: newOrg || 'Independent Project',
-        category: 'Leadership / Academic',
-        hoursPerWeek: '5 hrs/wk • 30 wks/yr',
-        description: newDesc || 'Organized initiatives and contributed to team development.'
-      }
-    ]);
+    const newAct: ExtracurricularActivity = {
+      id: `act-${Date.now()}`,
+      title: newTitle,
+      organization: newOrg || 'Independent Initiative',
+      category: 'Leadership / Academic',
+      hoursPerWeek: '5 hrs/wk • 30 wks/yr',
+      description: newDesc || 'Organized initiatives and contributed to project development.'
+    };
+
+    const updated = [...activities, newAct];
+    setActivities(updated);
+    syncToWixCms(updated);
+
     setNewTitle('');
     setNewOrg('');
     setNewDesc('');
     setShowAddModal(false);
   };
 
+  const handleDeleteActivity = (id: string) => {
+    const updated = activities.filter((a) => a.id !== id);
+    setActivities(updated);
+    syncToWixCms(updated);
+  };
+
   return (
-    <div className="p-5 md:p-8 flex-1 flex flex-col xl:flex-row gap-6 max-w-[1600px] mx-auto w-full">
+    <div className="p-5 md:p-8 flex-1 flex flex-col xl:flex-row gap-6 max-w-[1600px] mx-auto w-full font-[Poppins]">
       {/* ═══════════════════════════════════════════════════════════════
          LEFT MAIN SECTION — Extracurricular Activity Slots
          ═══════════════════════════════════════════════════════════════ */}
@@ -61,18 +147,37 @@ export default function ExtracurricularsPage() {
         {/* HEADER */}
         <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-[26px] font-bold text-[#111111] tracking-[-0.03em]">Extracurriculars</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-[26px] font-bold text-[#111111] tracking-[-0.03em]">Extracurriculars</h2>
+              {saveStatus && (
+                <span className="text-[11px] font-bold bg-[#16a34a]/10 text-[#16a34a] px-3 py-1 rounded-full flex items-center gap-1">
+                  <Check size={13} />
+                  <span>Synced to Wix CMS</span>
+                </span>
+              )}
+            </div>
             <p className="text-[13px] text-[#777777]">
               {activities.length} of 10 Common App slots filled • ordered by significance
             </p>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs"
-          >
-            <Plus size={16} />
-            <span>Add Activity</span>
-          </button>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => syncToWixCms(activities)}
+              disabled={savingCms}
+              className="px-4 py-2.5 rounded-full border border-[#E7E2DE] text-[#555] text-[13px] font-bold hover:bg-[#F7F5F3] transition-all flex items-center gap-2"
+            >
+              <Save size={15} />
+              <span>{savingCms ? 'Saving...' : 'Sync Wix CMS'}</span>
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs"
+            >
+              <Plus size={16} />
+              <span>Add Activity</span>
+            </button>
+          </div>
         </div>
 
         {/* ACTIVITIES LIST OR EMPTY STATE */}
@@ -100,7 +205,7 @@ export default function ExtracurricularsPage() {
             {activities.map((act, index) => (
               <div
                 key={act.id}
-                className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs hover:border-[#690B1B]/40 transition-all space-y-3"
+                className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs hover:border-[#690B1B]/40 transition-all space-y-3 group"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
@@ -112,9 +217,18 @@ export default function ExtracurricularsPage() {
                       <div className="text-[13px] text-[#690B1B] font-semibold">{act.organization}</div>
                     </div>
                   </div>
-                  <span className="text-[11px] font-bold text-[#777] bg-[#F7F5F3] px-3 py-1 rounded-full">
-                    {act.hoursPerWeek}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-[#777] bg-[#F7F5F3] px-3 py-1 rounded-full border border-[#E7E2DE]">
+                      {act.hoursPerWeek}
+                    </span>
+                    <button
+                      onClick={() => handleDeleteActivity(act.id)}
+                      className="p-1.5 rounded-full text-[#999] hover:text-red-600 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                      title="Delete activity"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
                 <p className="text-[14px] text-[#555] leading-relaxed pl-11">
                   {act.description}
@@ -172,7 +286,7 @@ export default function ExtracurricularsPage() {
                   onClick={handleAddActivity}
                   className="px-5 py-2 rounded-full bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#7A1022]"
                 >
-                  Save Activity
+                  Save Activity &amp; Sync Wix
                 </button>
               </div>
             </div>
