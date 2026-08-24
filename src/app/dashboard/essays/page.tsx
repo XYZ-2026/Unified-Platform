@@ -152,10 +152,13 @@ export default function MyEssaysPage() {
               }`}>
                 {essay.status}
               </span>
-              <button className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-2xs">
+              <Link
+                href={`/dashboard/essays/studio?topic=${encodeURIComponent(essay.prompt)}&format=ieee&paperId=${encodeURIComponent(essay.id)}`}
+                className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-2xs"
+              >
                 <Edit3 size={13} />
                 <span>Write SOP</span>
-              </button>
+              </Link>
             </div>
           </div>
         ))}

@@ -27,6 +27,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const pathname = usePathname();
 
+  const isStudio = pathname === '/dashboard/essays/studio';
+
+  if (isStudio) {
+    return <>{children}</>;
+  }
+
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, href: '/dashboard' },
     { id: 'college-list', label: 'My College List', icon: GraduationCap, href: '/dashboard/college-list' },

@@ -21,6 +21,7 @@ interface UserData {
   email: string;
   role?: string;
   photoURL?: string;
+  institution?: string;
 }
 
 interface AuthContextType {
