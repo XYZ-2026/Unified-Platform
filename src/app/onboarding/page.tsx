@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { setCachedUserDetails } from '@/lib/userDetailsCache';
 import {
   ChevronLeft,
   ChevronDown,
@@ -329,22 +330,28 @@ export default function OnboardingPage() {
     if (currentStep < totalSteps) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      // Save onboarding answers to Wix CMS user-details collection
+      // Save onboarding answers to Wix CMS user-details collection and local cache
+      const payload = {
+        userId: user?.uid || 'guest-user',
+        userEmail: user?.email || '',
+        userRole,
+        applicationCycle,
+        targetMajor,
+        intendedMajor: targetMajor,
+        dreamSchool,
+        gpa,
+        country: country || 'Unspecified',
+        financialAid
+      };
+
+      const userKey = user?.uid || user?.email || 'default';
+      setCachedUserDetails(userKey, payload);
+
       try {
         await fetch('/api/wix/user-details', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: user?.uid || 'guest-user',
-            userEmail: user?.email || '',
-            userRole,
-            applicationCycle,
-            targetMajor,
-            dreamSchool,
-            gpa,
-            country: country || 'Unspecified',
-            financialAid
-          })
+          body: JSON.stringify(payload)
         });
       } catch (err) {
         console.error('Error submitting data to Wix CMS:', err);

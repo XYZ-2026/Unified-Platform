@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { getCachedUserDetails, subscribeToUserDetails } from '@/lib/userDetailsCache';
 import {
   Home,
   Sparkles,
@@ -23,9 +25,29 @@ import {
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { user, userData } = useAuth();
+  const [initial, setInitial] = useState('S');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const userKey = user?.uid || user?.email || userData?.email || 'default';
+    const cached = getCachedUserDetails(userKey);
+    const name = cached?.fullName || cached?.name || userData?.name || user?.displayName || user?.email;
+    if (name) {
+      setInitial(name.charAt(0).toUpperCase());
+    }
+
+    const unsub = subscribeToUserDetails((data) => {
+      const updatedName = data.fullName || data.name;
+      if (updatedName) {
+        setInitial(updatedName.charAt(0).toUpperCase());
+      }
+    });
+
+    return () => unsub();
+  }, [user, userData]);
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, href: '/dashboard' },
@@ -289,7 +311,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* USER AVATAR LINK TO SETTINGS */}
             <Link href="/dashboard/settings" className="flex items-center gap-2.5 pl-2 border-l border-[#E7E2DE]">
               <div className="w-[38px] h-[38px] rounded-full bg-[#690B1B] text-white flex items-center justify-center font-bold text-[14px] shadow-xs">
-                S
+                {initial}
               </div>
             </Link>
           </div>

@@ -1,7 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { getCachedUserDetails, subscribeToUserDetails } from '@/lib/userDetailsCache';
 import {
   User,
   Mail,
@@ -16,9 +19,43 @@ import {
 } from 'lucide-react';
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const { user, userData, logout } = useAuth();
+  const [displayName, setDisplayName] = useState('');
   const [transactionalEmails, setTransactionalEmails] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const userKey = user?.uid || user?.email || userData?.email || 'default';
+    const cached = getCachedUserDetails(userKey);
+    if (cached && (cached.fullName || cached.name)) {
+      setDisplayName(cached.fullName || cached.name || '');
+    } else if (userData?.name || userData?.fullName || user?.displayName) {
+      setDisplayName(userData?.name || userData?.fullName || user?.displayName || '');
+    }
+
+    const unsub = subscribeToUserDetails((data) => {
+      if (data.fullName || data.name) {
+        setDisplayName(data.fullName || data.name || '');
+      }
+    });
+
+    return () => unsub();
+  }, [user, userData]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const nameToShow = displayName || userData?.name || user?.displayName || user?.email?.split('@')[0] || 'Student';
+  const emailToShow = user?.email || userData?.email || 'student@abroadsimplified.com';
+  const initial = nameToShow.charAt(0).toUpperCase();
 
   return (
     <div className="p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
@@ -34,11 +71,11 @@ export default function SettingsPage() {
           <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-5">
             <div className="flex flex-col items-center text-center space-y-3 pb-4 border-b border-[#F0EBE6]">
               <div className="w-20 h-20 rounded-full bg-[#690B1B] text-white flex items-center justify-center font-bold text-[32px] shadow-sm">
-                S
+                {initial}
               </div>
               <div>
-                <h3 className="text-[20px] font-bold text-[#111]">Sairam Joshi</h3>
-                <p className="text-[13px] text-[#777]">sairamjoshi25@gmail.com</p>
+                <h3 className="text-[20px] font-bold text-[#111]">{nameToShow}</h3>
+                <p className="text-[13px] text-[#777]">{emailToShow}</p>
               </div>
             </div>
 
@@ -51,17 +88,20 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between py-1">
                 <span className="text-[#777] font-medium">Email Verified</span>
-                <span className="font-bold text-[#690B1B] bg-[#F7F0F1] px-3 py-1 rounded-full">
-                  False
+                <span className="font-bold text-[#16a34a] bg-[#16a34a]/10 px-3 py-1 rounded-full">
+                  {user?.emailVerified ? 'Verified' : 'Active'}
                 </span>
               </div>
               <div className="flex items-center justify-between py-1">
-                <span className="text-[#777] font-medium">Joined Date</span>
-                <span className="font-bold text-[#111]">8/19/2026</span>
+                <span className="text-[#777] font-medium">Application Cycle</span>
+                <span className="font-bold text-[#111]">Fall 2026</span>
               </div>
             </div>
 
-            <button className="w-full py-2.5 px-4 rounded-full border border-[#E7E2DE] bg-[#FDFCFB] text-[#555] hover:text-[#690B1B] hover:border-[#690B1B] text-[13px] font-bold transition-all flex items-center justify-center gap-2">
+            <button
+              onClick={handleLogout}
+              className="w-full py-2.5 px-4 rounded-full border border-[#E7E2DE] bg-[#FDFCFB] text-[#555] hover:text-[#690B1B] hover:border-[#690B1B] text-[13px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
               <LogOut size={16} />
               <span>Log out</span>
             </button>

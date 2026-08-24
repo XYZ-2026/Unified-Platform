@@ -1,7 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { getCachedUserDetails, subscribeToUserDetails } from '@/lib/userDetailsCache';
 import {
   Sparkles,
   Zap,
@@ -19,6 +21,28 @@ import {
 } from 'lucide-react';
 
 export default function DashboardHomePage() {
+  const { user, userData } = useAuth();
+  const [displayName, setDisplayName] = useState('');
+
+  useEffect(() => {
+    const userKey = user?.uid || user?.email || userData?.email || 'default';
+    const cached = getCachedUserDetails(userKey);
+    if (cached && (cached.fullName || cached.name)) {
+      setDisplayName(cached.fullName || cached.name || '');
+    } else if (userData?.name || userData?.fullName || user?.displayName) {
+      setDisplayName(userData?.name || userData?.fullName || user?.displayName || '');
+    }
+
+    const unsub = subscribeToUserDetails((data) => {
+      if (data.fullName || data.name) {
+        setDisplayName(data.fullName || data.name || '');
+      }
+    });
+    return () => unsub();
+  }, [user, userData]);
+
+  const firstName = displayName ? displayName.split(' ')[0] : (userData?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'Student');
+
   return (
     <main className="p-5 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
       {/* PROMOTIONAL TOP BANNER */}
@@ -44,7 +68,7 @@ export default function DashboardHomePage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-[26px] md:text-[30px] font-bold text-[#111111] tracking-[-0.03em]">
-            Good evening, Sairam 👋
+            Good day, {firstName} 👋
           </h2>
           <p className="text-[14px] text-[#777777]">
             Here is your admissions dashboard and action plan for today.

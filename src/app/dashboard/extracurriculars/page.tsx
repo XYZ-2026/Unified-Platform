@@ -4,6 +4,11 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import {
+  getCachedUserDetails,
+  setCachedUserDetails,
+  subscribeToUserDetails
+} from '@/lib/userDetailsCache';
+import {
   Activity,
   Plus,
   Sparkles,
@@ -50,7 +55,42 @@ export default function ExtracurricularsPage() {
   const [savingCms, setSavingCms] = useState(false);
   const [saveStatus, setSaveStatus] = useState(false);
 
-  // Fetch extracurriculars from Wix CMS user-details collection
+  // 1. Instant cache retrieval on mount
+  useEffect(() => {
+    const userKey = user?.uid || user?.email || userData?.email || 'default';
+    const cached = getCachedUserDetails(userKey);
+    if (cached && cached.extracurriculars) {
+      let list = cached.extracurriculars;
+      if (typeof list === 'string') {
+        try {
+          list = JSON.parse(list);
+        } catch (e) {
+          list = null;
+        }
+      }
+      if (Array.isArray(list) && list.length > 0) {
+        setActivities(list);
+      }
+    }
+
+    const unsubscribe = subscribeToUserDetails((updated) => {
+      if (updated && updated.extracurriculars) {
+        let list = updated.extracurriculars;
+        if (typeof list === 'string') {
+          try {
+            list = JSON.parse(list);
+          } catch (e) {}
+        }
+        if (Array.isArray(list)) {
+          setActivities(list);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user, userData]);
+
+  // 2. Fetch extracurriculars from Wix CMS user-details collection in background
   useEffect(() => {
     async function loadExtracurriculars() {
       try {
@@ -58,6 +98,7 @@ export default function ExtracurricularsPage() {
         const uid = user?.uid || '';
         if (!email && !uid) return;
 
+        const userKey = uid || email;
         const res = await fetch(`/api/wix/user-details?userId=${uid}&userEmail=${encodeURIComponent(email)}`);
         const json = await res.json();
 
@@ -72,26 +113,31 @@ export default function ExtracurricularsPage() {
           }
           if (Array.isArray(list) && list.length > 0) {
             setActivities(list);
+            setCachedUserDetails(userKey, { extracurriculars: list });
           }
         }
       } catch (err) {
-        console.error('Error fetching extracurriculars from Wix CMS:', err);
+        console.warn('Error fetching extracurriculars from Wix CMS:', err);
       }
     }
 
-    if (user) {
+    if (user || userData) {
       loadExtracurriculars();
     }
   }, [user, userData]);
 
-  // Sync extracurriculars state to Wix CMS user-details collection
+  // 3. Sync extracurriculars state to Wix CMS user-details collection & local cache
   const syncToWixCms = async (updatedActivities: ExtracurricularActivity[]) => {
     setSavingCms(true);
     setSaveStatus(false);
-    try {
-      const email = user?.email || userData?.email || '';
-      const uid = user?.uid || 'guest-user';
+    const email = user?.email || userData?.email || '';
+    const uid = user?.uid || 'guest-user';
+    const userKey = user?.uid || user?.email || userData?.email || 'default';
 
+    // Instant local cache update
+    setCachedUserDetails(userKey, { extracurriculars: updatedActivities });
+
+    try {
       await fetch('/api/wix/user-details', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -106,6 +152,8 @@ export default function ExtracurricularsPage() {
       setTimeout(() => setSaveStatus(false), 3000);
     } catch (err) {
       console.error('Error syncing extracurriculars to Wix CMS:', err);
+      setSaveStatus(true);
+      setTimeout(() => setSaveStatus(false), 3000);
     } finally {
       setSavingCms(false);
     }
