@@ -225,7 +225,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-[14px] font-medium transition-all ${
               pathname === '/dashboard/settings'
                 ? 'bg-[#F7F0F1] text-[#690B1B] font-bold'
-                : 'text-[#777777] hover:bg-[#F9F7F5] hover:text-[#111]'
+                : 'text-[#777777] hover:bg-[#F9F7F5] hover:text-[#11]'
             }`}
           >
             <Settings size={18} />
@@ -248,58 +248,111 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex-1 flex flex-col min-w-0">
         {/* TOP HEADER BAR */}
         <header className="h-[76px] px-5 md:px-8 bg-white border-b border-[#E7E2DE] flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-4">
+          {/* Desktop Header Content (hidden on mobile) */}
+          <div className="hidden md:flex items-center justify-between w-full">
+            <div className="flex items-center gap-4">
+              <div>
+                <h1 className="text-[18px] font-bold text-[#111111]">Abroad Simplified Student Portal</h1>
+                <p className="text-[12px] text-[#888888]">Fall 2026 Admissions Cycle</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 md:gap-4">
+              <button className="hidden xl:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EBF4FB] border border-[#0088CB]/20 text-[#0088CB] text-[12px] font-bold hover:bg-[#0088CB]/10 transition-all">
+                <span>Invite Friends</span>
+                <span className="bg-[#0088CB] text-white px-2 py-0.5 rounded-full text-[10px]">
+                  +30 ⚡
+                </span>
+              </button>
+
+              <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F7F0F1] border border-[#690B1B]/15 text-[#690B1B] text-[12px] font-semibold">
+                <span className="w-2 h-2 rounded-full bg-[#690B1B] animate-pulse" />
+                <span>Get 30% Off</span>
+                <span className="font-bold text-[#C9A55D] bg-[#111] px-2 py-0.5 rounded-full text-[10px]">
+                  0d 23h 11m
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFF8EB] border border-[#F4D080] text-[#9E731A] text-[13px] font-bold">
+                <Zap size={15} className="fill-[#F4B400] text-[#F4B400]" />
+                <span>25 Credits</span>
+              </div>
+
+              <button className="relative p-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] hover:border-[#690B1B]/30 transition-all">
+                <Bell size={18} />
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#690B1B] border-2 border-white" />
+              </button>
+
+              <Link href="/dashboard/settings" className="flex items-center gap-2.5 pl-2 border-l border-[#E7E2DE]">
+                <div className="w-[38px] h-[38px] rounded-full bg-[#690B1B] text-white flex items-center justify-center font-bold text-[14px] shadow-xs">
+                  S
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          {/* Mobile Header Content (hidden on desktop) */}
+          <div className="flex md:hidden items-center justify-between w-full">
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="md:hidden p-2 text-[#555555] hover:text-[#111111]"
+              className="p-2 text-[#555555] hover:text-[#111111]"
             >
               <Menu size={22} />
             </button>
-            <div className="hidden sm:block">
-              <h1 className="text-[18px] font-bold text-[#111111]">Abroad Simplified Student Portal</h1>
-              <p className="text-[12px] text-[#888888]">Fall 2026 Admissions Cycle</p>
-            </div>
-          </div>
 
-          {/* HEADER RIGHT ACTIONS */}
-          <div className="flex items-center gap-3 md:gap-4">
-            {/* INVITE FRIENDS / REWARDS BUTTON */}
-            <button className="hidden xl:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EBF4FB] border border-[#0088CB]/20 text-[#0088CB] text-[12px] font-bold hover:bg-[#0088CB]/10 transition-all">
-              <span>Invite Friends</span>
-              <span className="bg-[#0088CB] text-white px-2 py-0.5 rounded-full text-[10px]">
-                +30 ⚡
-              </span>
-            </button>
-
-            {/* PROMO OFFER BADGE */}
-            <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F7F0F1] border border-[#690B1B]/15 text-[#690B1B] text-[12px] font-semibold">
-              <span className="w-2 h-2 rounded-full bg-[#690B1B] animate-pulse" />
-              <span>Get 30% Off</span>
-              <span className="font-bold text-[#C9A55D] bg-[#111] px-2 py-0.5 rounded-full text-[10px]">
-                0d 23h 11m
-              </span>
-            </div>
-
-            {/* AI CREDITS COUNTER */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFF8EB] border border-[#F4D080] text-[#9E731A] text-[13px] font-bold">
-              <Zap size={15} className="fill-[#F4B400] text-[#F4B400]" />
-              <span>25 Credits</span>
-            </div>
-
-            {/* NOTIFICATIONS */}
-            <button className="relative p-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] hover:border-[#690B1B]/30 transition-all">
-              <Bell size={18} />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#690B1B] border-2 border-white" />
-            </button>
-
-            {/* USER AVATAR LINK TO SETTINGS */}
-            <Link href="/dashboard/settings" className="flex items-center gap-2.5 pl-2 border-l border-[#E7E2DE]">
-              <div className="w-[38px] h-[38px] rounded-full bg-[#690B1B] text-white flex items-center justify-center font-bold text-[14px] shadow-xs">
-                S
+            {/* Mobile Logo */}
+            <div className="flex items-center gap-2.5">
+              <div className="w-[34px] h-[34px] rounded-[10px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center border border-white/10 shrink-0 shadow-sm">
+                <svg viewBox="0 0 24 24" fill="none" className="w-[14px] h-[14px]">
+                  <path d="M12 3L4 9V21H20V9L12 3Z" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M9 21V12H15V21" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </div>
-            </Link>
+              <div className="text-left leading-tight">
+                <div className="text-[13px] font-bold text-[#111] tracking-tight">Abroad Simplified</div>
+                <div className="text-[8px] uppercase tracking-[0.15em] font-extrabold text-[#A3A3A3] mt-0.5">STUDENT PORTAL</div>
+              </div>
+            </div>
+
+            {/* Mobile Actions */}
+            <div className="flex items-center gap-2.5">
+              <button className="relative p-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] hover:border-[#690B1B]/30 transition-all">
+                <Bell size={18} />
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#690B1B]" />
+              </button>
+              <Link href="/dashboard/settings">
+                <div className="w-[34px] h-[34px] rounded-full bg-[#690B1B] text-white flex items-center justify-center font-bold text-[13px] shadow-xs">
+                  S
+                </div>
+              </Link>
+            </div>
           </div>
         </header>
+
+        {/* MOBILE BADGES ROW (Only visible on mobile) */}
+        <div className="md:hidden px-5 pt-5 pb-1 flex items-center justify-between gap-2.5 overflow-x-auto scrollbar-none">
+          {/* INVITE FRIENDS */}
+          <button className="flex-1 min-w-[105px] flex items-center justify-between gap-1 px-3 py-2 rounded-xl bg-[#EBF4FB] border border-[#0088CB]/15 text-[#0088CB] text-[11px] font-bold">
+            <span className="truncate">Invite Friends</span>
+            <span className="bg-[#0088CB] text-white px-1.5 py-0.5 rounded-full text-[9px] font-extrabold shrink-0">
+              +30 ⚡
+            </span>
+          </button>
+
+          {/* GET 30% OFF */}
+          <div className="flex-1 min-w-[115px] flex items-center justify-between gap-1 px-3 py-2 rounded-xl bg-[#F7F0F1] border border-[#690B1B]/15 text-[#690B1B] text-[11px] font-bold">
+            <span className="truncate">Get 30% Off</span>
+            <span className="bg-[#111] text-[#C9A55D] px-1.5 py-0.5 rounded-full text-[9px] font-extrabold shrink-0">
+              23h 11m
+            </span>
+          </div>
+
+          {/* CREDITS */}
+          <div className="flex-1 min-w-[95px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#FFF8EB] border border-[#F4D080] text-[#9E731A] text-[11px] font-bold">
+            <Zap size={12} className="fill-[#F4B400] text-[#F4B400] shrink-0" />
+            <span className="truncate">25 Credits</span>
+          </div>
+        </div>
 
         {/* PAGE CONTENT ROUTE */}
         {children}
