@@ -13,7 +13,9 @@ import {
   Building2,
   Filter,
   Layers,
-  ChevronDown
+  ChevronDown,
+  ChevronRight,
+  Zap
 } from 'lucide-react';
 
 export default function ApplicationTrackerPage() {
@@ -68,7 +70,7 @@ export default function ApplicationTrackerPage() {
     },
     {
       id: 'task-5',
-      title: 'University of Pennsylvania · Early Decision Deadline',
+      title: 'University of Pennsylvania - Early Decision Deadline',
       category: 'Application',
       date: 'Nov 01',
       dueIn: 'in 2 months',
@@ -113,15 +115,15 @@ export default function ApplicationTrackerPage() {
       {/* ═══════════════════════════════════════════════════════════════
          HEADER AREA & ADD DEADLINE BUTTON
          ═══════════════════════════════════════════════════════════════ */}
-      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-[26px] font-bold text-[#111111] tracking-[-0.03em]">Application Tracker</h2>
-          <p className="text-[13px] text-[#777777]">1 school · 3 application systems · 10 key dates tracked</p>
+      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-2">
+        <div className="flex items-center justify-between gap-4 w-full">
+          <h2 className="text-[22px] sm:text-[26px] font-bold text-[#111111] tracking-[-0.03em]">Application Tracker</h2>
+          <button className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] sm:text-[13px] font-bold transition-all flex items-center gap-1.5 sm:gap-2 shadow-xs shrink-0 cursor-pointer">
+            <Plus size={14} className="sm:w-4 sm:h-4" />
+            <span>Add Deadline</span>
+          </button>
         </div>
-        <button className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs">
-          <Plus size={16} />
-          <span>Add Deadline</span>
-        </button>
+        <p className="text-[12.5px] sm:text-[13.5px] text-[#777777]">1 school · 3 application systems · 10 key dates tracked</p>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -136,7 +138,7 @@ export default function ApplicationTrackerPage() {
               className={`px-4 py-1.5 rounded-full text-[13px] font-bold transition-all ${
                 viewMode === 'timeline'
                   ? 'bg-white text-[#690B1B] shadow-2xs'
-                  : 'text-[#666666] hover:text-[#111]'
+                  : 'text-[#666666] hover:text-[#11]'
               }`}
             >
               Timeline
@@ -146,7 +148,7 @@ export default function ApplicationTrackerPage() {
               className={`px-4 py-1.5 rounded-full text-[13px] font-bold transition-all ${
                 viewMode === 'calendar'
                   ? 'bg-white text-[#690B1B] shadow-2xs'
-                  : 'text-[#666666] hover:text-[#111]'
+                  : 'text-[#666666] hover:text-[#11]'
               }`}
             >
               Calendar
@@ -162,31 +164,31 @@ export default function ApplicationTrackerPage() {
         </div>
 
         {/* VISUAL TIMELINE GRAPH GRAPHIC */}
-        <div className="p-4 bg-[#FDFCFB] border border-[#E7E2DE] rounded-[16px] space-y-6 overflow-x-auto">
+        <div className="p-4 bg-[#FDFCFB] border border-[#E7E2DE] rounded-[16px] space-y-6 overflow-x-auto scrollbar-none">
           {/* TRACK LINES */}
-          <div className="space-y-6 min-w-[600px]">
+          <div className="space-y-6 min-w-[500px]">
             <div className="flex items-center gap-4">
-              <span className="w-28 text-[11px] font-bold text-[#A3A3A3] uppercase tracking-wider">Common App</span>
+              <span className="w-24 text-[10px] font-bold text-[#A3A3A3] uppercase tracking-wider shrink-0">Common App</span>
               <div className="flex-1 h-px bg-[#E7E2DE] relative">
-                <div className="absolute left-[30%] -top-3 px-2 py-1 bg-white border border-[#E7E2DE] rounded-full text-[11px] font-bold text-[#690B1B] shadow-2xs">
+                <div className="absolute left-[30%] -top-3.5 px-2.5 py-1.5 bg-[#FDF0F2] border border-[#690B1B]/15 rounded-full text-[10.5px] font-bold text-[#690B1B] shadow-2xs whitespace-nowrap">
                   Draft Common App...
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="w-28 text-[11px] font-bold text-[#A3A3A3] uppercase tracking-wider">Financial Aid</span>
+              <span className="w-24 text-[10px] font-bold text-[#A3A3A3] uppercase tracking-wider shrink-0">Financial Aid</span>
               <div className="flex-1 h-px bg-[#E7E2DE] relative">
-                <div className="absolute left-[55%] -top-3 px-2 py-1 bg-white border border-[#E7E2DE] rounded-full text-[11px] font-bold text-[#0088CB] shadow-2xs">
+                <div className="absolute left-[65%] -top-3.5 px-2.5 py-1.5 bg-[#EBF4FB] border border-[#0088CB]/15 rounded-full text-[10.5px] font-bold text-[#0088CB] shadow-2xs whitespace-nowrap">
                   2 aid dates ($)
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="w-28 text-[11px] font-bold text-[#A3A3A3] uppercase tracking-wider">You</span>
+              <span className="w-24 text-[10px] font-bold text-[#A3A3A3] uppercase tracking-wider shrink-0">You</span>
               <div className="flex-1 h-px bg-[#E7E2DE] relative">
-                <div className="absolute left-[45%] -top-3 px-2 py-1 bg-white border border-[#E7E2DE] rounded-full text-[11px] font-bold text-[#16a34a] shadow-2xs">
+                <div className="absolute left-[45%] -top-3.5 px-2.5 py-1.5 bg-[#EBF7EE] border border-[#16a34a]/15 rounded-full text-[10.5px] font-bold text-[#16a34a] shadow-2xs whitespace-nowrap">
                   Ask teacher recs
                 </div>
               </div>
@@ -194,7 +196,7 @@ export default function ApplicationTrackerPage() {
           </div>
 
           {/* DATES FOOTER */}
-          <div className="flex justify-between text-[11px] text-[#888888] pt-2 border-t border-[#F0EBE6] min-w-[600px]">
+          <div className="flex justify-between text-[10.5px] text-[#888888] pt-2 border-t border-[#F0EBE6] min-w-[500px]">
             <span>Nov 11</span>
             <span>Nov 18</span>
             <span>Nov 25</span>
@@ -209,7 +211,7 @@ export default function ApplicationTrackerPage() {
          UPCOMING CHECKLIST & FILTERS
          ═══════════════════════════════════════════════════════════════ */}
       <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#F0EBE6] pb-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#F0EBE6] pb-4">
           <h3 className="text-[20px] font-bold text-[#111111]">Upcoming Tasks & Deadlines</h3>
 
           {/* FILTER PILLS */}
@@ -223,9 +225,9 @@ export default function ApplicationTrackerPage() {
               <button
                 key={f.id}
                 onClick={() => setActiveFilter(f.id)}
-                className={`px-3 py-1 rounded-full text-[12px] font-bold transition-all ${
+                className={`px-3.5 py-1.5 rounded-full text-[12px] font-bold transition-all cursor-pointer ${
                   activeFilter === f.id
-                    ? 'bg-[#690B1B] text-white'
+                    ? 'bg-[#690B1B] text-white shadow-xs'
                     : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
                 }`}
               >
@@ -250,32 +252,38 @@ export default function ApplicationTrackerPage() {
                 return (
                   <div
                     key={t.id}
-                    className="flex items-center justify-between p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] hover:border-[#690B1B]/30 transition-all"
+                    className="flex items-center justify-between p-4 rounded-[14px] bg-white border border-[#E7E2DE] hover:border-[#690B1B]/30 hover:shadow-2xs transition-all gap-3 cursor-pointer"
                   >
-                    <div className="flex items-center gap-3.5">
+                    <div className="flex items-center gap-3.5 min-w-0">
                       <button
-                        onClick={() => toggleTask(t.id)}
-                        className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all ${
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleTask(t.id);
+                        }}
+                        className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all shrink-0 ${
                           isDone ? 'bg-[#16a34a] border-[#16a34a] text-white' : 'border-[#CCCCCC] bg-white'
                         }`}
                       >
                         {isDone && <CheckCircle2 size={16} />}
                       </button>
-                      <div className="w-8 h-8 rounded-lg bg-[#F7F0F1] text-[#690B1B] flex items-center justify-center">
-                        <IconComponent size={16} />
+                      <div className="w-9 h-9 rounded-xl bg-[#F7F0F1] text-[#690B1B] flex items-center justify-center shrink-0">
+                        <IconComponent size={18} />
                       </div>
-                      <div>
-                        <div className={`text-[15px] font-bold ${isDone ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
+                      <div className="min-w-0">
+                        <div className={`text-[14px] sm:text-[15px] font-bold truncate ${isDone ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
                           {t.title}
                         </div>
-                        <div className="text-[12px] text-[#777777]">
+                        <div className="text-[11.5px] text-[#777777] mt-0.5">
                           {t.category} • {t.date}
                         </div>
                       </div>
                     </div>
-                    <span className="text-[12px] font-bold text-[#690B1B] bg-[#F7F0F1] px-3 py-1 rounded-full">
-                      {t.dueIn}
-                    </span>
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <span className="text-[11px] font-bold text-[#690B1B] bg-[#F7F0F1] px-2.5 py-1 rounded-full">
+                        {t.dueIn}
+                      </span>
+                      <ChevronRight size={16} className="text-[#CCCCCC]" />
+                    </div>
                   </div>
                 );
               })}
@@ -294,38 +302,74 @@ export default function ApplicationTrackerPage() {
                 return (
                   <div
                     key={t.id}
-                    className="flex items-center justify-between p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] hover:border-[#690B1B]/30 transition-all"
+                    className="flex items-center justify-between p-4 rounded-[14px] bg-white border border-[#E7E2DE] hover:border-[#690B1B]/30 hover:shadow-2xs transition-all gap-3 cursor-pointer"
                   >
-                    <div className="flex items-center gap-3.5">
+                    <div className="flex items-center gap-3.5 min-w-0">
                       <button
-                        onClick={() => toggleTask(t.id)}
-                        className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all ${
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleTask(t.id);
+                        }}
+                        className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all shrink-0 ${
                           isDone ? 'bg-[#16a34a] border-[#16a34a] text-white' : 'border-[#CCCCCC] bg-white'
                         }`}
                       >
                         {isDone && <CheckCircle2 size={16} />}
                       </button>
-                      <div className="w-8 h-8 rounded-lg bg-[#F7F5F3] text-[#555555] flex items-center justify-center">
-                        <IconComponent size={16} />
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                        t.type === 'aid'
+                          ? 'bg-[#EBF4FB] text-[#0088CB]'
+                          : t.type === 'application'
+                          ? 'bg-[#F7F5F3] text-[#555555]'
+                          : 'bg-[#F7F5F3] text-[#555555]'
+                      }`}>
+                        <IconComponent size={18} />
                       </div>
-                      <div>
-                        <div className={`text-[15px] font-bold ${isDone ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
+                      <div className="min-w-0">
+                        <div className={`text-[14px] sm:text-[15px] font-bold truncate ${isDone ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
                           {t.title}
                         </div>
-                        <div className="text-[12px] text-[#777777]">
+                        <div className="text-[11.5px] text-[#777777] mt-0.5">
                           {t.category} • {t.date}
                         </div>
                       </div>
                     </div>
-                    <span className="text-[12px] font-medium text-[#777777]">
-                      {t.dueIn}
-                    </span>
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <span className="text-[11px] font-bold text-[#777777] bg-[#F7F5F3] px-2.5 py-1 rounded-full">
+                        {t.dueIn}
+                      </span>
+                      <ChevronRight size={16} className="text-[#CCCCCC]" />
+                    </div>
                   </div>
                 );
               })}
           </div>
         </div>
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════════
+         UPGRADE PRO BANNER (Mockup Page Footer)
+         ═══════════════════════════════════════════════════════════════ */}
+      <Link
+        href="/dashboard"
+        className="w-full flex items-center justify-between p-4 rounded-[16px] bg-gradient-to-r from-[#690B1B] to-[#8A1226] text-white shadow-sm hover:opacity-95 transition-all mt-6 cursor-pointer"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8.5 h-8.5 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+            <Zap size={18} className="text-[#C9A55D] fill-[#C9A55D]" />
+          </div>
+          <div className="text-left leading-tight">
+            <div className="text-[14px] font-bold">Upgrade Pro</div>
+            <div className="text-[11px] text-[#F7D8A0] mt-0.5">Get Unlimited AI SOP Reviews</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <span className="text-[10.5px] font-bold bg-[#C9A55D] text-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
+            30% OFF
+          </span>
+          <ChevronRight size={16} className="text-white/70" />
+        </div>
+      </Link>
     </div>
   );
 }
