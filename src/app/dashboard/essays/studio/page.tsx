@@ -210,6 +210,7 @@ function StudioContent() {
 
   const role = searchParams?.get("role"); // "reviewer" or "publisher"
   const paperId = searchParams?.get("paperId");
+  const essayId = searchParams?.get("essayId");
 
   const [showReviewModal, setShowReviewModal] = useState<"none" | "reject" | "comment">("none");
   const [reviewComment, setReviewComment] = useState("");
@@ -244,6 +245,43 @@ function StudioContent() {
         const currentAuthor = userData?.fullName || "Author Name";
         const currentEmail = userData?.email || "author@example.com";
         const currentAffiliation = userData?.institution || "Independent Researcher";
+
+        // Check if an essay from Wix CMS was requested
+        if (essayId) {
+          try {
+            const essayRes = await fetch(`/api/wix/essays?id=${encodeURIComponent(essayId)}`);
+            const essayJson = await essayRes.json();
+            if (essayJson.success && essayJson.essay) {
+              const e = essayJson.essay;
+              const titleHtml = `<h1 style="text-align: center">${(e.title || rawTopic).toUpperCase()}</h1>
+<p style="text-align: center"><strong>${e.school || "University"}</strong> &bull; ${e.tag || "Admitted SOP"}</p>
+<hr>`;
+              const essaySections: SectionContent[] = [
+                {
+                  id: "title",
+                  title: "Title & Prompt",
+                  html: titleHtml
+                },
+                {
+                  id: "essay-body",
+                  title: "Statement of Purpose / Essay",
+                  html: sanitizeHtml(e.content || `<p>${e.previewText}</p>`)
+                }
+              ];
+
+              setSections(essaySections);
+              setPaperAuthor(e.author || currentAuthor);
+              setPaperAffiliation(e.school || currentAffiliation);
+              setDraftId(essayId);
+              setPaperStatus("Draft Ready");
+              setIsGenerating(false);
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.warn("Could not load specific essay from Wix CMS API:", err);
+          }
+        }
 
         const { getPapersList } = await import("@/lib/papersStore");
         const stored = await getPapersList();

@@ -1,134 +1,155 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Search,
-  Filter,
   GraduationCap,
   MapPin,
   DollarSign,
-  Award,
   ArrowRight,
   Sparkles,
   ExternalLink,
-  SlidersHorizontal,
-  Bookmark
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Globe,
+  BookOpen,
+  TrendingUp,
+  Building2,
+  Award
 } from 'lucide-react';
 
+interface University {
+  id: string;
+  universityId: string;
+  name: string;
+  country: string;
+  countryCode: string;
+  state: string;
+  qsRanking: string;
+  tuition: string;
+  livingCosts: string;
+  acceptanceRate: string;
+  website: string;
+  bannerAlt: string;
+  popularMajors: string[];
+  slug: string;
+}
+
+// Country flag emoji mapping
+function getCountryFlag(code: string): string {
+  const flags: Record<string, string> = {
+    US: '🇺🇸', GB: '🇬🇧', UK: '🇬🇧', CA: '🇨🇦', DE: '🇩🇪',
+    AU: '🇦🇺', FR: '🇫🇷', NL: '🇳🇱', SG: '🇸🇬', IN: '🇮🇳',
+    CN: '🇨🇳', JP: '🇯🇵', KR: '🇰🇷', CH: '🇨🇭', SE: '🇸🇪',
+    IE: '🇮🇪', NZ: '🇳🇿', IT: '🇮🇹', ES: '🇪🇸', HK: '🇭🇰',
+  };
+  return flags[code?.toUpperCase()] || '🌍';
+}
+
+// University type/logo mapping
+function getUniversityEmoji(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('institute') || lower.includes('technology')) return '⚙️';
+  if (lower.includes('medical') || lower.includes('health')) return '🏥';
+  if (lower.includes('art') || lower.includes('design') || lower.includes('music')) return '🎨';
+  if (lower.includes('law')) return '⚖️';
+  if (lower.includes('community') || lower.includes('college')) return '🎓';
+  if (lower.includes('state')) return '🏛️';
+  return '🏫';
+}
+
 export default function UniversityFinderPage() {
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const ITEMS_PER_PAGE = 30;
 
-  const universities = [
-    {
-      id: 'mit',
-      name: 'Massachusetts Institute of Technology (MIT)',
-      location: 'Cambridge, MA, USA',
-      country: 'USA',
-      type: 'Private Research',
-      rank: '#1 QS World',
-      acceptanceRate: '3.9%',
-      tuition: '$59,750 / year',
-      logo: '🏛️',
-      tags: ['Engineering', 'Computer Science', 'AI Hub']
-    },
-    {
-      id: 'upenn',
-      name: 'University of Pennsylvania (UPenn)',
-      location: 'Philadelphia, PA, USA',
-      country: 'USA',
-      type: 'Ivy League',
-      rank: '#15 QS World',
-      acceptanceRate: '5.4%',
-      tuition: '$63,452 / year',
-      logo: '🎓',
-      tags: ['Business', 'Wharton', 'Medicine']
-    },
-    {
-      id: 'stanford',
-      name: 'Stanford University',
-      location: 'Stanford, CA, USA',
-      country: 'USA',
-      type: 'Private Research',
-      rank: '#4 QS World',
-      acceptanceRate: '3.7%',
-      tuition: '$61,731 / year',
-      logo: '🌲',
-      tags: ['Silicon Valley', 'AI & Tech', 'Entrepreneurship']
-    },
-    {
-      id: 'harvard',
-      name: 'Harvard University',
-      location: 'Cambridge, MA, USA',
-      country: 'USA',
-      type: 'Ivy League',
-      rank: '#5 QS World',
-      acceptanceRate: '3.4%',
-      tuition: '$57,261 / year',
-      logo: '📕',
-      tags: ['Law', 'Medicine', 'Global Leadership']
-    },
-    {
-      id: 'imperial',
-      name: 'Imperial College London',
-      location: 'London, UK',
-      country: 'UK',
-      type: 'Public Research',
-      rank: '#6 QS World',
-      acceptanceRate: '14.3%',
-      tuition: '£36,700 / year',
-      logo: '🇬🇧',
-      tags: ['STEM', '1-Yr Masters', 'London Hub']
-    },
-    {
-      id: 'tum',
-      name: 'Technical University of Munich (TUM)',
-      location: 'Munich, Germany',
-      country: 'DE',
-      type: 'Tuition-Free Public',
-      rank: '#37 QS World',
-      acceptanceRate: '28.0%',
-      tuition: '€0 (Tuition Free)',
-      logo: '🇩🇪',
-      tags: ['Automotive', 'Engineering', 'No Tuition']
-    },
-    {
-      id: 'toronto',
-      name: 'University of Toronto',
-      location: 'Toronto, Canada',
-      country: 'CA',
-      type: 'Public Research',
-      rank: '#21 QS World',
-      acceptanceRate: '43.0%',
-      tuition: 'CAD $58,000 / year',
-      logo: '🇨🇦',
-      tags: ['AI Research', 'PR Pathway', 'Top Canada']
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1); // Reset to page 1 on new search
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Reset page on country change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCountry]);
+
+  // Fetch universities from Wix CMS
+  const fetchUniversities = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: ITEMS_PER_PAGE.toString(),
+      });
+      if (debouncedSearch) params.set('search', debouncedSearch);
+      if (selectedCountry !== 'ALL') params.set('country', selectedCountry);
+
+      const res = await fetch(`/api/wix/universities?${params.toString()}`);
+      const data = await res.json();
+
+      if (data.success && Array.isArray(data.universities)) {
+        setUniversities(data.universities);
+        setTotalCount(data.totalCount || 0);
+        setTotalPages(data.totalPages || 1);
+      } else {
+        setUniversities([]);
+        setTotalCount(0);
+      }
+    } catch (err) {
+      console.warn('Error fetching universities:', err);
+      setUniversities([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  }, [currentPage, debouncedSearch, selectedCountry]);
 
-  const filteredUniversities = universities.filter((u) => {
-    const matchesSearch = u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCountry = selectedCountry === 'ALL' || u.country === selectedCountry;
-    return matchesSearch && matchesCountry;
-  });
+  useEffect(() => {
+    fetchUniversities();
+  }, [fetchUniversities]);
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+  const endIndex = Math.min(currentPage * ITEMS_PER_PAGE, totalCount);
 
   return (
     <div className="p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
       {/* HERO PROMO BANNER */}
-      <div className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[20px] p-6 sm:p-8 text-white shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 border border-white/10">
-        <div className="space-y-2 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#C9A55D] text-[11px] font-bold uppercase tracking-wider">
-            <Sparkles size={13} />
-            <span>Global Database</span>
+      <div className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[24px] p-6 sm:p-8 text-white shadow-sm space-y-3 border border-white/10 relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+        <div className="absolute left-1/2 bottom-0 w-60 h-60 bg-white/3 rounded-full blur-2xl -mb-32 pointer-events-none" />
+
+        <div className="flex items-center justify-between flex-wrap gap-4 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#C9A55D] text-[12px] font-bold">
+            <Sparkles size={14} />
+            <span>Wix CMS Live • University Database</span>
           </div>
-          <h2 className="text-[26px] md:text-[34px] font-bold leading-tight">
-            USA, UK, Canada &amp; Europe Universities
-          </h2>
-          <p className="text-[14px] text-white/80 max-w-[600px]">
-            Explore 500+ verified universities with real admission criteria, tuition fees, and scholarship opportunities.
-          </p>
+
+          <button
+            onClick={fetchUniversities}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/90 text-[12px] font-semibold transition-all cursor-pointer shadow-2xs"
+          >
+            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+            <span>Refresh CMS</span>
+          </button>
         </div>
+
+        <h2 className="text-[28px] md:text-[36px] font-bold leading-tight relative z-10">
+          University Finder
+        </h2>
+        <p className="text-[14px] text-white/80 max-w-[700px] relative z-10 leading-relaxed">
+          Explore {totalCount > 0 ? `${totalCount.toLocaleString()}+` : ''} verified universities synced directly from our database. Search by name, state, or major to find your perfect fit.
+        </p>
       </div>
 
       {/* SEARCH AND FILTERS TOOLBAR */}
@@ -140,19 +161,19 @@ export default function UniversityFinderPage() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by university name, major, or location..."
-              className="w-full h-[48px] pl-11 pr-4 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[14px] text-[#111] placeholder:text-[#999] outline-none focus:border-[#690B1B]"
+              placeholder="Search by university name, state, or major..."
+              className="w-full h-[48px] pl-11 pr-4 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[14px] text-[#111] placeholder:text-[#999] outline-none focus:border-[#690B1B] transition-all"
             />
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto">
-            {['ALL', 'USA', 'UK', 'CA', 'DE'].map((c) => (
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {['ALL', 'US', 'UK', 'CA', 'DE', 'AU'].map((c) => (
               <button
                 key={c}
                 onClick={() => setSelectedCountry(c)}
-                className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all ${
+                className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer ${
                   selectedCountry === c
-                    ? 'bg-[#690B1B] text-white'
+                    ? 'bg-[#690B1B] text-white shadow-xs'
                     : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
                 }`}
               >
@@ -161,76 +182,217 @@ export default function UniversityFinderPage() {
             ))}
           </div>
         </div>
+
+        <div className="flex items-center justify-between border-t border-[#F0EBE6] pt-3">
+          <span className="text-[12px] text-[#888] font-medium flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#16a34a]" />
+            <span>
+              {loading
+                ? 'Loading universities from Wix CMS...'
+                : `${totalCount.toLocaleString()} universities found`}
+            </span>
+          </span>
+          {totalCount > 0 && (
+            <span className="text-[12px] text-[#888] font-medium">
+              Showing {startIndex}–{endIndex} of {totalCount.toLocaleString()}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* UNIVERSITIES LIST */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between text-[13px] text-[#777] px-2 font-medium">
-          <span>Showing {filteredUniversities.length} Universities</span>
-          <span>Sorted by QS World Ranking</span>
+      {/* UNIVERSITY CARDS */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 space-y-4 animate-pulse">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gray-200" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-3/4 bg-gray-200 rounded" />
+                  <div className="h-3 w-1/2 bg-gray-100 rounded" />
+                </div>
+              </div>
+              <div className="h-16 bg-gray-100 rounded-xl" />
+              <div className="flex gap-2">
+                <div className="h-6 w-16 bg-gray-100 rounded-full" />
+                <div className="h-6 w-20 bg-gray-100 rounded-full" />
+              </div>
+            </div>
+          ))}
         </div>
-
-        <div className="space-y-4">
-          {filteredUniversities.map((u) => (
+      ) : universities.length === 0 ? (
+        <div className="bg-white border border-[#E7E2DE] rounded-[24px] p-12 text-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-[#F7F0F1] text-[#690B1B] mx-auto flex items-center justify-center">
+            <GraduationCap size={28} />
+          </div>
+          <h3 className="text-[20px] font-bold text-[#111]">
+            {searchTerm ? `No universities found for "${searchTerm}"` : 'No universities found'}
+          </h3>
+          <p className="text-[14px] text-[#777] max-w-[460px] mx-auto leading-relaxed">
+            Try changing your search terms or clearing your filters.
+          </p>
+          {searchTerm && (
+            <button
+              onClick={() => { setSearchTerm(''); setSelectedCountry('ALL'); }}
+              className="px-5 py-2 rounded-full bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#7A1022] transition-all cursor-pointer"
+            >
+              Clear Search
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {universities.map((u) => (
             <div
               key={u.id}
-              className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs hover:border-[#690B1B] transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group"
+              className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs hover:border-[#690B1B] hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
             >
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-[16px] bg-[#F7F0F1] border border-[#690B1B]/15 flex items-center justify-center text-[30px] shrink-0">
-                  {u.logo}
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Link href={`/dashboard/schools/${u.id}`} className="text-[18px] font-bold text-[#111] hover:text-[#690B1B] transition-colors">
+              {/* Header */}
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 rounded-[14px] bg-[#F7F0F1] border border-[#690B1B]/10 flex items-center justify-center text-[24px] shrink-0">
+                    {getUniversityEmoji(u.name)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[15px] font-bold text-[#111] leading-snug line-clamp-2 group-hover:text-[#690B1B] transition-colors">
                       {u.name}
-                    </Link>
-                    <span className="text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-2.5 py-0.5 rounded-full uppercase">
-                      {u.country}
-                    </span>
+                    </h3>
+                    <div className="flex items-center gap-1.5 mt-1 text-[12px] text-[#777]">
+                      <MapPin size={12} className="text-[#999] shrink-0" />
+                      <span className="truncate">{u.state ? `${u.state}, ` : ''}{u.country}</span>
+                      <span className="shrink-0">{getCountryFlag(u.countryCode)}</span>
+                    </div>
                   </div>
+                </div>
 
-                  <div className="flex items-center gap-3 text-[13px] text-[#777] flex-wrap">
-                    <span className="flex items-center gap-1">
-                      <MapPin size={14} className="text-[#999]" />
-                      {u.location}
-                    </span>
-                    <span>•</span>
-                    <span className="font-semibold text-[#111]">{u.type}</span>
-                    <span>•</span>
-                    <span className="font-bold text-[#C9A55D]">{u.rank}</span>
+                {/* Stats Row */}
+                <div className="grid grid-cols-3 gap-2 p-3 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE]">
+                  <div className="text-center">
+                    <div className="text-[10px] text-[#999] font-semibold uppercase tracking-wider">QS Rank</div>
+                    <div className="text-[13px] font-bold text-[#690B1B] mt-0.5">
+                      {u.qsRanking === 'Unranked' ? '—' : u.qsRanking}
+                    </div>
                   </div>
+                  <div className="text-center border-x border-[#E7E2DE]">
+                    <div className="text-[10px] text-[#999] font-semibold uppercase tracking-wider">Tuition</div>
+                    <div className="text-[13px] font-bold text-[#111] mt-0.5 truncate px-1">{u.tuition}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[10px] text-[#999] font-semibold uppercase tracking-wider">Accept</div>
+                    <div className="text-[13px] font-bold text-[#16a34a] mt-0.5">{u.acceptanceRate}</div>
+                  </div>
+                </div>
 
-                  <div className="flex items-center gap-2 pt-2 flex-wrap">
-                    {u.tags.map((tag) => (
-                      <span key={tag} className="text-[11px] bg-[#F7F5F3] text-[#555] px-2.5 py-1 rounded-md font-medium">
+                {/* Major Tags */}
+                {u.popularMajors.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {u.popularMajors.slice(0, 4).map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[10px] bg-[#F7F5F3] text-[#555] px-2 py-0.5 rounded-md font-medium"
+                      >
                         {tag}
                       </span>
                     ))}
+                    {u.popularMajors.length > 4 && (
+                      <span className="text-[10px] text-[#999] px-1 py-0.5 font-medium">
+                        +{u.popularMajors.length - 4} more
+                      </span>
+                    )}
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* STATS & CTA */}
-              <div className="flex items-center gap-6 self-stretch md:self-auto justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 border-[#F0EBE6]">
-                <div className="text-left md:text-right">
-                  <div className="text-[12px] text-[#777]">Acceptance Rate</div>
-                  <div className="text-[16px] font-bold text-[#690B1B]">{u.acceptanceRate}</div>
-                  <div className="text-[12px] text-[#888]">{u.tuition}</div>
-                </div>
+              {/* Footer */}
+              <div className="pt-3 border-t border-[#F0EBE6] flex items-center justify-between">
+                {u.website ? (
+                  <a
+                    href={u.website.startsWith('http') ? u.website : `https://${u.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] text-[#690B1B] font-semibold flex items-center gap-1 hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Globe size={12} />
+                    <span>Website</span>
+                    <ExternalLink size={10} />
+                  </a>
+                ) : (
+                  <span />
+                )}
 
                 <Link
-                  href={`/dashboard/schools/${u.id}`}
-                  className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-1.5 shadow-2xs group-hover:scale-[1.02]"
+                  href={`/dashboard/schools/${u.slug}`}
+                  className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer group-hover:scale-[1.02]"
                 >
                   <span>View School</span>
-                  <ArrowRight size={14} />
+                  <ArrowRight size={13} />
                 </Link>
               </div>
             </div>
           ))}
         </div>
-      </div>
+      )}
+
+      {/* PAGINATION */}
+      {totalPages > 1 && !loading && (
+        <div className="flex items-center justify-center gap-2 pt-4">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              currentPage === 1
+                ? 'bg-[#F7F5F3] text-[#CCC] cursor-not-allowed'
+                : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
+            }`}
+          >
+            <ChevronLeft size={14} />
+            <span>Previous</span>
+          </button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => {
+              let pageNum: number;
+              if (totalPages <= 7) {
+                pageNum = i + 1;
+              } else if (currentPage <= 4) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 3) {
+                pageNum = totalPages - 6 + i;
+              } else {
+                pageNum = currentPage - 3 + i;
+              }
+
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`w-10 h-10 rounded-[10px] text-[13px] font-bold transition-all cursor-pointer ${
+                    currentPage === pageNum
+                      ? 'bg-[#690B1B] text-white shadow-xs'
+                      : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              currentPage === totalPages
+                ? 'bg-[#F7F5F3] text-[#CCC] cursor-not-allowed'
+                : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
+            }`}
+          >
+            <span>Next</span>
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

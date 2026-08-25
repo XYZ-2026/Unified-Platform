@@ -31,6 +31,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const pathname = usePathname();
 
+  const isStudio = pathname === '/dashboard/essays/studio';
+
   useEffect(() => {
     const userKey = user?.uid || user?.email || userData?.email || 'default';
     const cached = getCachedUserDetails(userKey);
@@ -48,6 +50,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     return () => unsub();
   }, [user, userData]);
+
+  if (isStudio) {
+    return <>{children}</>;
+  }
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, href: '/dashboard' },

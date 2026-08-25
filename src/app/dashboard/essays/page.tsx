@@ -82,10 +82,13 @@ export default function MyEssaysPage() {
           <h2 className="text-[26px] font-bold text-[#111111] tracking-[-0.03em]">My Essays &amp; SOPs</h2>
           <p className="text-[13px] text-[#777777]">Every prompt from your college list, ready to write and evaluate with AI</p>
         </div>
-        <button className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs">
+        <Link
+          href="/dashboard/essays/studio?topic=Statement+of+Purpose&format=ieee"
+          className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs"
+        >
           <Plus size={16} />
-          <span>New Essay</span>
-        </button>
+          <span>New Essay Draft</span>
+        </Link>
       </div>
 
       {/* CONTROLS BAR */}
@@ -97,7 +100,7 @@ export default function MyEssaysPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search essays by prompt or school name..."
-            className="w-full h-[46px] pl-11 pr-4 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[13px] text-[#111] outline-none focus:border-[#690B1B]"
+            className="w-full h-[46px] pl-11 pr-4 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[13px] text-[#11] outline-none focus:border-[#690B1B]"
           />
         </div>
 
@@ -121,19 +124,22 @@ export default function MyEssaysPage() {
         </div>
       </div>
 
-      {/* ESSAYS GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* ESSAY CARDS GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredEssays.map((essay) => (
           <div
             key={essay.id}
-            className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs hover:border-[#690B1B] hover:-translate-y-1 transition-all flex flex-col justify-between group space-y-4"
+            className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs flex flex-col justify-between space-y-4 hover:border-[#690B1B]/40 transition-all group"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-[#690B1B] bg-[#F7F0F1] px-2.5 py-0.5 rounded-full">
+                <span className="text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-3 py-1 rounded-full uppercase tracking-wider">
                   {essay.school}
                 </span>
-                <span className="text-[11px] text-[#888] font-medium">{essay.words}</span>
+                <span className="text-[12px] text-[#888] font-medium flex items-center gap-1">
+                  <Clock size={13} />
+                  <span>{essay.words}</span>
+                </span>
               </div>
 
               {/* CARD PAPER GRAPHIC */}
@@ -152,10 +158,13 @@ export default function MyEssaysPage() {
               }`}>
                 {essay.status}
               </span>
-              <button className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-2xs">
+              <Link
+                href={`/dashboard/essays/studio?topic=${encodeURIComponent(essay.prompt)}&format=ieee&paperId=${encodeURIComponent(essay.id)}`}
+                className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-2xs"
+              >
                 <Edit3 size={13} />
                 <span>Write SOP</span>
-              </button>
+              </Link>
             </div>
           </div>
         ))}
