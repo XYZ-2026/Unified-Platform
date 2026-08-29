@@ -102,6 +102,17 @@ interface EvaluationResultData {
   comparativeInsight: string;
 }
 
+interface PastReviewItem {
+  id?: string;
+  school: string;
+  major: string;
+  odds: string;
+  tier: string;
+  date: string;
+  spiceLevel?: 'gentle' | 'candid' | 'roast';
+  fullResult?: EvaluationResultData | null;
+}
+
 export default function AIChanceMePage() {
   const { user, userData } = useAuth();
   const userKey = useMemo(() => {
@@ -127,21 +138,38 @@ export default function AIChanceMePage() {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [dreamSchoolLoaded, setDreamSchoolLoaded] = useState(false);
 
-  /* ─── Saved Reviews History State ─────────────────────────────────── */
-  const [pastReviews, setPastReviews] = useState<Array<{
-    school: string;
-    major: string;
-    odds: string;
-    tier: string;
-    date: string;
-  }>>([
-    { school: 'Stanford University', major: 'Computer Science', odds: '14%', tier: 'High Reach', date: 'Just now' },
-    { school: 'University of Michigan', major: 'Data Science', odds: '64%', tier: 'Target', date: 'Yesterday' }
-  ]);
+  /* ─── Saved Reviews History from Wix CMS ─────────────────────────── */
+  const [pastReviews, setPastReviews] = useState<PastReviewItem[]>([]);
+  const [loadingPastReviews, setLoadingPastReviews] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  /* ─── 0. Load past candidate evaluations from Wix CMS ─────────────── */
+  useEffect(() => {
+    let isMounted = true;
+    async function loadPastEvaluations() {
+      const uid = user?.uid;
+      const email = user?.email || userData?.email;
+      if (!uid && !email) return;
+
+      setLoadingPastReviews(true);
+      try {
+        const res = await fetch(`/api/wix/evaluations?userId=${encodeURIComponent(uid || '')}&userEmail=${encodeURIComponent(email || '')}`);
+        const json = await res.json();
+        if (isMounted && json.success && Array.isArray(json.data)) {
+          setPastReviews(json.data);
+        }
+      } catch (e) {
+        console.warn('Could not load past evaluations from Wix CMS:', e);
+      } finally {
+        if (isMounted) setLoadingPastReviews(false);
+      }
+    }
+    loadPastEvaluations();
+    return () => { isMounted = false; };
+  }, [user, userData]);
 
   /* ─── 1. Load dream school from user cache as default ─────────────── */
   useEffect(() => {
@@ -362,19 +390,59 @@ export default function AIChanceMePage() {
         };
 
         setEvaluationResult(resultObj);
-        setEvaluationProvider(json.provider || 'Gemini 2.5 Flash');
+        setEvaluationProvider(json.provider || 'Admissions AI Engine');
 
-        // Update past reviews history
-        setPastReviews(prev => [
-          {
+        // 1. Persist/Update to Wix CMS evaluations collection (upsert per student + university)
+        try {
+          const uid = user?.uid || 'guest-user';
+          const email = user?.email || userData?.email || '';
+          fetch('/api/wix/evaluations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: uid,
+              userEmail: email,
+              universityName: selectedSchool,
+              major: profile.targetMajor || profile.intendedMajor || 'General',
+              admitChance: chance,
+              admitTier: resultObj.admitTier,
+              spiceLevel,
+              verdictHeadline: resultObj.verdictHeadline,
+              verdict: resultObj.verdict,
+              recommendation: resultObj.recommendation,
+              resultData: resultObj
+            })
+          }).then(async (r) => {
+            const j = await r.json();
+            console.log('[Wix Evaluations] Upsert response:', j);
+          }).catch(err => {
+            console.warn('Wix evaluations sync warning:', err);
+          });
+        } catch (e) {
+          console.warn('Wix evaluation save error:', e);
+        }
+
+        // 2. Update past reviews history locally (upsert without creating duplicate card)
+        setPastReviews(prev => {
+          const normSchool = selectedSchool.trim().toLowerCase();
+          const existingIdx = prev.findIndex(p => p.school.trim().toLowerCase() === normSchool);
+          const newItem: PastReviewItem = {
             school: selectedSchool,
             major: profile.targetMajor || profile.intendedMajor || 'Major',
             odds: `${chance}%`,
             tier: resultObj.admitTier,
-            date: 'Just now'
-          },
-          ...prev.slice(0, 4)
-        ]);
+            date: 'Just now',
+            spiceLevel,
+            fullResult: resultObj
+          };
+
+          if (existingIdx >= 0) {
+            const updated = [...prev];
+            updated[existingIdx] = newItem;
+            return updated;
+          }
+          return [newItem, ...prev];
+        });
       } else {
         console.error('Chance-Me API error:', json.error);
       }
@@ -382,6 +450,32 @@ export default function AIChanceMePage() {
       console.error('Chance-Me network error:', err);
     } finally {
       setIsEvaluating(false);
+    }
+  };
+
+  /* ─── Select Past Evaluation ───────────────────────────────────────── */
+  const handleSelectPastReview = async (rev: PastReviewItem) => {
+    setSelectedSchool(rev.school);
+    if (rev.spiceLevel) setSpiceLevel(rev.spiceLevel);
+
+    if (rev.fullResult) {
+      setEvaluationResult(rev.fullResult);
+      setActiveTab('overview');
+      return;
+    }
+
+    // If fullResult is not cached in state, fetch directly from Wix CMS
+    try {
+      const uid = user?.uid || '';
+      const email = user?.email || userData?.email || '';
+      const res = await fetch(`/api/wix/evaluations?userId=${encodeURIComponent(uid)}&userEmail=${encodeURIComponent(email)}&universityName=${encodeURIComponent(rev.school)}`);
+      const json = await res.json();
+      if (json.success && json.data?.fullResult) {
+        setEvaluationResult(json.data.fullResult);
+        setActiveTab('overview');
+      }
+    } catch (e) {
+      console.warn('Could not load specific evaluation report:', e);
     }
   };
 
@@ -425,8 +519,12 @@ export default function AIChanceMePage() {
          ═══════════════════════════════════════════════════════════════ */}
       <div className="w-full xl:w-[300px] space-y-4 shrink-0">
         <button
-          onClick={() => setEvaluationResult(null)}
-          className="w-full py-3 px-4 rounded-[14px] bg-[#690B1B] hover:bg-[#7A1022] text-white text-[14px] font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
+          onClick={() => {
+            setEvaluationResult(null);
+            setSelectedSchool('');
+            setSearchQuery('');
+          }}
+          className="w-full py-3 px-4 rounded-[14px] bg-[#690B1B] hover:bg-[#7A1022] text-white text-[14px] font-bold transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
         >
           <Plus size={16} />
           <span>New School Evaluation</span>
@@ -440,29 +538,50 @@ export default function AIChanceMePage() {
           </div>
 
           <div className="space-y-2">
-            {pastReviews.map((rev, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  setSelectedSchool(rev.school);
-                  if (evaluationResult?.odds) handleRunEvaluation();
-                }}
-                className="w-full text-left p-3 rounded-[14px] bg-[#FDFCFB] border border-[#F0EBE6] hover:border-[#690B1B]/40 hover:bg-[#FBF8F6] transition-all group"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="text-[13px] font-bold text-[#111] group-hover:text-[#690B1B] transition-colors truncate">
-                    {rev.school}
+            {loadingPastReviews ? (
+              <div className="space-y-2">
+                {[1, 2].map((i) => (
+                  <div key={i} className="p-3 rounded-[14px] bg-[#FDFCFB] border border-[#F0EBE6] animate-pulse space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-2/3" />
+                    <div className="h-3 bg-gray-100 rounded w-1/2" />
                   </div>
-                  <span className="text-[11px] font-bold text-[#690B1B] shrink-0">{rev.odds}</span>
-                </div>
-                <div className="flex items-center justify-between mt-1 text-[11px] text-[#777]">
-                  <span className="truncate max-w-[130px]">{rev.major}</span>
-                  <span className={`px-1.5 py-0.2 rounded text-[10px] font-semibold border ${getTierBadgeStyle(rev.tier)}`}>
-                    {rev.tier}
-                  </span>
-                </div>
-              </button>
-            ))}
+                ))}
+              </div>
+            ) : pastReviews.length === 0 ? (
+              <div className="py-6 text-center text-[12px] text-[#999] leading-relaxed">
+                No past evaluations yet.<br />Select a university to begin.
+              </div>
+            ) : (
+              pastReviews.map((rev, idx) => {
+                const isSelected = selectedSchool.trim().toLowerCase() === rev.school.trim().toLowerCase() && evaluationResult !== null;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleSelectPastReview(rev)}
+                    className={`w-full text-left p-3 rounded-[14px] transition-all group cursor-pointer border ${
+                      isSelected
+                        ? 'bg-[#FDF6F7] border-[#690B1B] shadow-xs'
+                        : 'bg-[#FDFCFB] border-[#F0EBE6] hover:border-[#690B1B]/40 hover:bg-[#FBF8F6]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className={`text-[13px] font-bold transition-colors truncate ${
+                        isSelected ? 'text-[#690B1B]' : 'text-[#111] group-hover:text-[#690B1B]'
+                      }`}>
+                        {rev.school}
+                      </div>
+                      <span className="text-[11px] font-bold text-[#690B1B] shrink-0">{rev.odds}</span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1 text-[11px] text-[#777]">
+                      <span className="truncate max-w-[130px]">{rev.major}</span>
+                      <span className={`px-1.5 py-0.2 rounded text-[10px] font-semibold border ${getTierBadgeStyle(rev.tier)}`}>
+                        {rev.tier}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -487,13 +606,13 @@ export default function AIChanceMePage() {
           <div className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[24px] p-6 sm:p-8 text-white shadow-sm space-y-3 border border-white/10 relative overflow-hidden">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#C9A55D] text-[12px] font-bold backdrop-blur-xs">
               <Sparkles size={14} />
-              <span>AI Admissions Intelligence Engine</span>
+              <span>Admissions Intelligence Engine</span>
             </div>
             <h2 className="text-[26px] sm:text-[34px] font-bold leading-tight tracking-tight">
               Evaluate your <span className="text-[#C9A55D] italic">true admission odds</span>
             </h2>
             <p className="text-[13px] sm:text-[14px] text-white/80 max-w-[650px] leading-relaxed">
-              Powered by Google Gemini 2.5 Flash. Receive quantitative benchmarks, an admissions officer critique, rubric ratings, and an actionable 30-day roadmap.
+              Powered by our Admissions Intelligence Engine. Receive quantitative benchmarks, an admissions officer critique, rubric ratings, and an actionable 30-day roadmap.
             </p>
           </div>
         )}
@@ -640,11 +759,11 @@ export default function AIChanceMePage() {
                     {evaluationResult.benchmarks.map((bench, idx) => (
                       <div
                         key={idx}
-                        className="bg-white border border-[#E7E2DE] rounded-[18px] p-4.5 shadow-xs space-y-3 hover:border-[#690B1B]/30 transition-all"
+                        className="bg-white border border-[#E7E2DE] rounded-[18px] p-4.5 shadow-xs flex flex-col justify-between gap-3 hover:border-[#690B1B]/30 transition-all"
                       >
-                        <div className="flex items-center justify-between text-[11px] font-bold text-[#888] uppercase">
-                          <span>{bench.metric}</span>
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        <div className="flex items-start justify-between gap-2 text-[11px] font-bold text-[#888] uppercase min-w-0">
+                          <span className="truncate flex-1" title={bench.metric}>{bench.metric}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 whitespace-nowrap ${
                             bench.status === 'Exceptional' || bench.status === 'Competitive'
                               ? 'bg-emerald-50 text-emerald-700'
                               : bench.status === 'Below Median'
@@ -656,17 +775,17 @@ export default function AIChanceMePage() {
                         </div>
 
                         <div className="space-y-1">
-                          <div className="text-[20px] font-extrabold text-[#111]">{bench.userVal}</div>
-                          <div className="text-[11px] text-[#777] flex items-center justify-between">
+                          <div className="text-[20px] font-extrabold text-[#111] truncate">{bench.userVal}</div>
+                          <div className="text-[11px] text-[#777] flex items-center justify-between gap-2">
                             <span>Admitted Median:</span>
-                            <span className="font-semibold text-[#444]">{bench.medianVal}</span>
+                            <span className="font-semibold text-[#444] truncate">{bench.medianVal}</span>
                           </div>
                         </div>
 
                         {/* Percentile Pill */}
-                        <div className="pt-2 border-t border-[#F4EFEA] flex items-center justify-between text-[11px]">
+                        <div className="pt-2 border-t border-[#F4EFEA] flex items-center justify-between gap-2 text-[11px]">
                           <span className="text-[#999]">Percentile Band</span>
-                          <span className="font-bold text-[#690B1B] bg-[#F7F0F1] px-2 py-0.5 rounded">
+                          <span className="font-bold text-[#690B1B] bg-[#F7F0F1] px-2 py-0.5 rounded text-right shrink-0">
                             {bench.percentile}
                           </span>
                         </div>
@@ -682,7 +801,7 @@ export default function AIChanceMePage() {
                       <Layers size={18} className="text-[#690B1B]" />
                       <span>Category Rubric Ratings</span>
                     </h4>
-                    <span className="text-[12px] text-[#777]">Click any category for in-depth takeaways</span>
+                    <span className="text-[12px] text-[#777] hidden sm:inline">Click any category for in-depth takeaways</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -699,18 +818,18 @@ export default function AIChanceMePage() {
                             setSelectedDeepDiveKey(key);
                             setActiveTab('deepdive');
                           }}
-                          className="bg-white border border-[#E7E2DE] hover:border-[#690B1B] rounded-[18px] p-4 text-left shadow-xs transition-all group space-y-3"
+                          className="bg-white border border-[#E7E2DE] hover:border-[#690B1B] rounded-[18px] p-4.5 text-left shadow-xs transition-all group space-y-3 cursor-pointer"
                         >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
+                          <div className="flex items-center justify-between gap-3 min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
                               <div className="w-8 h-8 rounded-full bg-[#F7F0F1] flex items-center justify-center text-[#690B1B] shrink-0">
                                 <Icon size={16} />
                               </div>
-                              <span className="text-[13px] font-bold text-[#111] group-hover:text-[#690B1B] transition-colors truncate">
+                              <span className="text-[13px] font-bold text-[#111] group-hover:text-[#690B1B] transition-colors truncate" title={sec.title}>
                                 {sec.title}
                               </span>
                             </div>
-                            <span className="text-[18px] font-bold" style={{ color: scoreColor }}>
+                            <span className="text-[15px] sm:text-[16px] font-extrabold shrink-0 px-2 py-0.5 rounded-lg bg-[#FAF8F6] border border-[#EFE9E4]" style={{ color: scoreColor }}>
                               {sec.score}%
                             </span>
                           </div>
@@ -723,9 +842,9 @@ export default function AIChanceMePage() {
                             />
                           </div>
 
-                          <div className="flex items-center justify-between text-[11px]">
-                            <span className="font-semibold text-[#666]">{sec.assessment}</span>
-                            <span className="text-[#690B1B] font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                          <div className="flex items-center justify-between text-[11px] gap-2">
+                            <span className="font-semibold text-[#666] truncate">{sec.assessment}</span>
+                            <span className="text-[#690B1B] font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform shrink-0">
                               Analyze <ArrowRight size={11} />
                             </span>
                           </div>
@@ -988,9 +1107,9 @@ export default function AIChanceMePage() {
               </p>
             </div>
             <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#F7F5F3] border border-[#E7E2DE] text-[11px] text-[#666] font-semibold">
-              <span className="text-[#690B1B] font-bold">Google Gemini 2.5 Flash</span>
+              <span className="text-[#690B1B] font-bold">Admissions Intelligence Engine</span>
               <span>•</span>
-              <span>Multi-Model Admissions Engine</span>
+              <span>Multi-Factor Benchmark Analysis</span>
             </div>
           </div>
         ) : (

@@ -70,128 +70,14 @@ function formatAuthorForRef(authorName: string): string {
   return authorName;
 }
 
-/* ── Default sections with HTML content ─────────────────────────── */
-function getPaperContent(topic: string, author = "Author Name") {
-  const t = topic.toLowerCase();
-  const formattedAuthor = formatAuthorForRef(author);
-  
-  if (t.includes("federated") || t.includes("privacy")) {
-    return {
-      abstract: `<p>Privacy regulations pose constraints for training clinical models across multi-institutional pediatric databases. This paper details a federated learning architecture that allows training diagnostic models locally, aggregating model weights securely, and preserving patient privacy.</p>
-<p>Validated on multi-site clinical datasets, the proposed federated schema achieves a convergence AUROC of <strong>0.92</strong>, within 1.5% of a centrally trained model, verifying diagnostic validity while maintaining HIPAA compliance.</p>`,
-      intro: `<p>Data sharing in pediatric medicine is highly restricted due to ethical and legal constraints. Centralizing sensitive patient records introduces security risks, making traditional deep learning models difficult to scale across multiple institutions.</p>
-<p>Federated Learning (FL) provides a decentralized alternative where training occurs locally at each hospital site, and only model updates (gradients or weights) are shared with a central aggregator.</p>
-<p>However, securing FL against gradient inversion attacks and handling heterogeneous data distribution (non-IID) remain open challenges in clinical deployment.</p>`,
-      methods: `<h3>2.1 Secure Weight Aggregation</h3>
-<p>We deploy the Federated Averaging (FedAvg) algorithm combined with secure multi-party computation. The global model update at epoch <em>t+1</em> is computed as:</p>
-<blockquote><p>w<sub>t+1</sub> = &Sigma; (n<sub>k</sub> / n) &middot; w<sub>t+1</sub><sup>(k)</sup></p></blockquote>
-<p>where <em>n<sub>k</sub></em> is the number of local samples at node <em>k</em>, and <em>w<sup>(k)</sup></em> represents the local model weights. To ensure privacy, cryptographic noise is injected into updates via differential privacy protocols before aggregation.</p>`,
-      results: `<p>The federated framework was evaluated across three simulated hospital nodes using pediatric clinical cohorts. The global model achieved a convergence AUROC of <strong>0.92</strong>, demonstrating robust diagnostic generalizability. We observed minimal performance degradation compared to centralized training baselines, validating the efficacy of secure aggregation.</p>
-<h3>Table I: Federated Model Performance</h3>
-<table>
-  <tr><th>Node</th><th>Local Samples</th><th>Local AUROC</th><th>Federated AUROC</th></tr>
-  <tr><td>Hospital A</td><td>3,200</td><td>0.89</td><td><strong>0.92</strong></td></tr>
-  <tr><td>Hospital B</td><td>4,500</td><td>0.91</td><td><strong>0.92</strong></td></tr>
-  <tr><td>Hospital C</td><td>2,800</td><td>0.88</td><td><strong>0.92</strong></td></tr>
-</table>`,
-      conclusion: `<p>We demonstrated privacy-preserving federated training for pediatric diagnostics, showing that decentralized training can match centralized performance while preserving confidentiality. Future work will investigate differential privacy optimization and robust aggregation under adversarial conditions.</p>
-<ul>
-  <li>Prospective clinical validation of global aggregated parameters</li>
-  <li>Optimizing client communication efficiency in low-bandwidth networks</li>
-  <li>Investigating client-level differential privacy bounds</li>
-</ul>`,
-      references: `<ol>
-  <li>${formattedAuthor}, "Federated Learning Schemas in Privacy-Preserving Pediatric Diagnostics," <em>High School Journal of Computing and AI</em>, vol. 4, no. 2, pp. 112–120, 2024.</li>
-  <li>J. Doe and R. Smith, "Decentralized Deep Sequence Modeling for Real-Time Clinical Analysis," <em>IEEE Transactions on Biomedical Engineering</em>, vol. 52, no. 6, pp. 430–439, 2023.</li>
-</ol>`
-    };
-  } else {
-    return {
-      abstract: `<p>Early identification of pediatric sepsis in Intensive Care Units (ICUs) remains a significant clinical challenge due to the rapid progression of physiological deterioration. This paper introduces an optimized transformer-based neural architecture designed to analyze multi-modal clinical time-series data. By incorporating self-attention mechanisms across varying temporal scales, our approach models complex physiological correlations over extended windows.</p>
-<p>Validated on clinical datasets, the proposed architecture achieves a predictive AUROC of <strong>0.94</strong>, outperforming traditional recurrent networks and clinical scoring tools. These results highlight the potential of deep learning sequence modeling to augment real-time ICU diagnostic alert systems.</p>`,
-      intro: `<p>Sepsis is characterized by a life-threatening organ dysfunction caused by a dysregulated host response to infection. In pediatric populations, the pathophysiology of sepsis is uniquely dynamic, requiring prompt diagnostic intervention to mitigate risks of severe tissue hypoxia and shock <sup>[1]</sup>.</p>
-<p>Traditionally, clinical rule-based scores such as the Pediatric Sequential Organ Failure Assessment (pSOFA) have been used to identify early-stage organ failure. However, these scores often exhibit latency and fail to capture multi-variable temporal interactions.</p>
-<p>Recent machine learning advances offer promising directions, yet modeling heterogeneous, irregularly sampled physiological sequences remains a core constraint.</p>`,
-      methods: `<p>Our dataset consists of high-frequency physiological time-series extracted from pediatric ICU EHR systems. Variables include heart rate, systolic blood pressure, peripheral oxygen saturation, and body temperature.</p>
-<h3>2.1 Model Architecture</h3>
-<p>The proposed model utilizes a <strong>multi-head temporal self-attention block</strong>. Let <em>X ∈ ℝ<sup>T×D</sup></em> represent the clinical sequence. The Query, Key, and Value matrices are formulated as:</p>
-<blockquote><p><strong>Q</strong> = X · W<sub>Q</sub>,&nbsp;&nbsp;<strong>K</strong> = X · W<sub>K</sub>,&nbsp;&nbsp;<strong>V</strong> = X · W<sub>V</sub></p></blockquote>
-<p>The attention mechanism is calculated using a scaled dot-product format:</p>
-<blockquote><p>Attention(Q, K, V) = Softmax( (Q · K<sup>T</sup>) / √d<sub>k</sub> ) · V</p></blockquote>
-<p>This formulation allows the network to dynamically assign predictive weights to physiological changes observed several hours before overt clinical deterioration.</p>`,
-      results: `<p>The predictive transformer model was benchmarked against baseline recurrent neural architectures (LSTM, GRU) and classical regression models. The model achieved a peak sensitivity of <strong>91.2%</strong> and a specificity of <strong>87.5%</strong> with a lead time of 4 hours prior to sepsis onset.</p>
-<h3>Table I: Model Performance Metrics</h3>
-<table>
-  <tr><th>Metric</th><th>LSTM Base</th><th>GRU Model</th><th>Transformer</th></tr>
-  <tr><td>AUROC</td><td>0.82</td><td>0.84</td><td><strong>0.94</strong></td></tr>
-  <tr><td>Sensitivity</td><td>81.2%</td><td>83.0%</td><td><strong>91.2%</strong></td></tr>
-  <tr><td>F1-Score</td><td>0.78</td><td>0.81</td><td><strong>0.89</strong></td></tr>
-</table>
-<p>These findings suggest that modeling contextual long-term correlations is crucial for robust predictive diagnostics in pediatric care.</p>`,
-      conclusion: `<p>In this work, we developed and validated a temporal transformer architecture for the early detection of pediatric sepsis. By employing multi-head self-attention, the model effectively captures early physiological decline, outperforming standard recurrent neural networks.</p>
-<p>Future work will focus on:</p>
-<ul>
-  <li>Prospective clinical validation across multiple hospital sites</li>
-  <li>Testing federated learning schemas for privacy-preserving multi-site training</li>
-  <li>Investigating attention visualization for clinician-interpretable insights</li>
-</ul>`,
-      references: `<ol>
-  <li>${formattedAuthor}, "Transformer-Based Sepsis Prediction in Pediatric ICU Settings," <em>High School Journal of Engineering and Innovation</em>, vol. 4, no. 2, pp. 112–120, 2024.</li>
-  <li>J. Doe and R. Smith, "Deep Sequence Modeling for Real-Time Physiological Time-Series Analysis," <em>IEEE Transactions on Biomedical Engineering</em>, vol. 52, no. 6, pp. 430–439, 2023.</li>
-</ol>`
-    };
-  }
-}
-
-const buildDefaultSections = (topic: string, includeTitlePage: boolean, author = "Author Name", affiliation = "Independent Researcher"): SectionContent[] => {
-  const sections: SectionContent[] = [];
-  const content = getPaperContent(topic, author);
-  
-  if (includeTitlePage) {
-    sections.push({
-      id: "title",
-      title: "Title & Affiliations",
-      html: `<h1 style="text-align: center">${topic.toUpperCase()}</h1>
-<p style="text-align: center"><strong>${author}</strong><br>${affiliation}</p>
-<hr>
-<p><strong>Abstract</strong> — ${stripHTML(content.abstract).replace(/^Abstract\s*—\s*/i, "")}</p>`,
-    });
-  }
-
-  sections.push(
+const buildDefaultSections = (topic: string, includeTitlePage: boolean, author = "Author Name", affiliation = "University Candidate"): SectionContent[] => {
+  return [
     {
-      id: "abstract",
-      title: "Abstract",
-      html: content.abstract,
-    },
-    {
-      id: "intro",
-      title: "1. Introduction",
-      html: content.intro,
-    },
-    {
-      id: "methods",
-      title: "2. Methodology",
-      html: content.methods,
-    },
-    {
-      id: "results",
-      title: "3. Results & Discussion",
-      html: content.results,
-    },
-    {
-      id: "conclusion",
-      title: "4. Conclusion",
-      html: content.conclusion,
-    },
-    {
-      id: "references",
-      title: "References",
-      html: content.references,
+      id: "essay-body",
+      title: topic || "Statement of Purpose",
+      html: "<p></p>",
     }
-  );
-
-  return sections;
+  ];
 };
 
 /* ═══════════════════════════════════════════════════════════════════ */
@@ -202,7 +88,7 @@ function StudioContent() {
   const editorRef = useRef<any>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const rawTopic = searchParams?.get("topic") || "Early Sepsis Detection Using Transformer Architectures";
+  const rawTopic = searchParams?.get("topic") || "Statement of Purpose - Admissions Essay";
   const format = searchParams?.get("format") || "ieee";
   const doubleSpaced = searchParams?.get("doubleSpaced") === "true";
   const titlePage = searchParams?.get("titlePage") === "true";
@@ -242,230 +128,75 @@ function StudioContent() {
   useEffect(() => {
     const initPaper = async () => {
       try {
-        const currentAuthor = userData?.fullName || "Author Name";
-        const currentEmail = userData?.email || "author@example.com";
-        const currentAffiliation = userData?.institution || "Independent Researcher";
+        const currentAuthor = userData?.fullName || "Candidate";
+        const currentEmail = userData?.email || "";
+        const currentAffiliation = userData?.institution || "Target University";
+        const targetId = searchParams?.get("id") || essayId || paperId;
 
-        // Check if an essay from Wix CMS was requested
-        if (essayId) {
+        // 1. Try to load existing essay from Wix CMS user_essays collection
+        if (targetId) {
           try {
-            const essayRes = await fetch(`/api/wix/essays?id=${encodeURIComponent(essayId)}`);
-            const essayJson = await essayRes.json();
-            if (essayJson.success && essayJson.essay) {
-              const e = essayJson.essay;
-              const titleHtml = `<h1 style="text-align: center">${(e.title || rawTopic).toUpperCase()}</h1>
-<p style="text-align: center"><strong>${e.school || "University"}</strong> &bull; ${e.tag || "Admitted SOP"}</p>
-<hr>`;
-              const essaySections: SectionContent[] = [
-                {
-                  id: "title",
-                  title: "Title & Prompt",
-                  html: titleHtml
-                },
-                {
-                  id: "essay-body",
-                  title: "Statement of Purpose / Essay",
-                  html: sanitizeHtml(e.content || `<p>${e.previewText}</p>`)
-                }
-              ];
+            const essayRes = await fetch(`/api/wix/user-essays?id=${encodeURIComponent(targetId)}`);
+            if (essayRes.ok) {
+              const essayJson = await essayRes.json();
+              if (essayJson.success && essayJson.essay) {
+                const e = essayJson.essay;
+                const essaySections: SectionContent[] = [
+                  {
+                    id: "essay-body",
+                    title: e.title || rawTopic,
+                    html: sanitizeHtml(e.content || "<p></p>")
+                  }
+                ];
 
-              setSections(essaySections);
-              setPaperAuthor(e.author || currentAuthor);
-              setPaperAffiliation(e.school || currentAffiliation);
-              setDraftId(essayId);
-              setPaperStatus("Draft Ready");
-              setIsGenerating(false);
-              setLoading(false);
-              return;
+                setSections(essaySections);
+                setActiveSectionId("essay-body");
+                setPaperAuthor(e.userEmail || currentAuthor);
+                setPaperAffiliation(e.school || currentAffiliation);
+                setDraftId(e.id);
+                setPaperStatus(e.status || "In Progress");
+                if (e.aiScore !== undefined && e.aiScore !== null) {
+                  setAiScore(e.aiScore);
+                  setAiCheckStatus("done");
+                }
+                if (e.score !== undefined && e.score !== null) {
+                  setQualityScore(e.score);
+                  setQualityCheckStatus("done");
+                }
+                setIsGenerating(false);
+                setLoading(false);
+                return;
+              }
             }
           } catch (err) {
-            console.warn("Could not load specific essay from Wix CMS API:", err);
+            console.warn("Could not load essay from Wix CMS user_essays:", err);
           }
         }
 
-        const { getPapersList } = await import("@/lib/papersStore");
-        const stored = await getPapersList();
-        const paper = stored.find((p: any) => (paperId && p.id === paperId) || (!paperId && p.title === rawTopic));
-        if (paper) {
-          setPaperStatus(paper.status);
-          setPaperAssignmentStatus(paper.assignmentStatus || "");
-          setDraftId(paper.id);
-          if (paper.reviewerName) setCurrentReviewerName(paper.reviewerName);
-          if (paper.author) setPaperAuthor(paper.author);
-          if (paper.affiliation) setPaperAffiliation(paper.affiliation);
-          if (paper.aiScore !== undefined && paper.aiScore !== null) {
-            setAiScore(paper.aiScore);
-            setAiCheckStatus("done");
+        // 2. Initialize fresh blank canvas
+        const generatedId = targetId || `essay-${Date.now()}`;
+        setDraftId(generatedId);
+        setPaperAuthor(currentAuthor);
+        setPaperAffiliation(currentAffiliation);
+        const initialSections: SectionContent[] = [
+          {
+            id: "essay-body",
+            title: rawTopic || "Statement of Purpose",
+            html: "<p></p>"
           }
-          if (paper.score !== undefined && paper.score !== null) {
-            setQualityScore(paper.score);
-            setQualityCheckStatus("done");
-          }
-          if (paper.rubricRigor !== undefined && paper.rubricRigor !== null) {
-            setRubricRigor(paper.rubricRigor);
-          }
-          if (paper.rubricStyle !== undefined && paper.rubricStyle !== null) {
-            setRubricStyle(paper.rubricStyle);
-          }
-          if (paper.rubricNovelty !== undefined && paper.rubricNovelty !== null) {
-            setRubricNovelty(paper.rubricNovelty);
-          }
-          // If this is a PDF-uploaded manuscript, load PDF content and skip section loading
-          if (paper.uploadedPdfContent) {
-            setUploadedPdfContent(paper.uploadedPdfContent);
-            setUploadedPdfName(paper.uploadedPdfName || paper.title || "Manuscript PDF");
-            setSections([]);
-          } else if (paper.sections && Array.isArray(paper.sections) && paper.sections.length > 0) {
-            const sanitizedSections = paper.sections.map((s: any) => ({
-              ...s,
-              html: sanitizeHtml(s.html)
-            }));
-            setSections(sanitizedSections);
-          }
-          setIsGenerating(false);
-          setLoading(false);
-        } else {
-          setPaperAuthor(currentAuthor);
-          setPaperAffiliation(currentAffiliation);
-          const generatedId = paperId || `draft-${Math.floor(Math.random() * 100000)}`;
-          setDraftId(generatedId);
-          if (!role) {
-            setIsGenerating(true);
-            setLoading(false);
-            setGenerationStep(1);
-            
-            const step2Timer = setTimeout(() => setGenerationStep(2), 4000);
-            const step3Timer = setTimeout(() => setGenerationStep(3), 12000);
-            
-            try {
-              const res = await fetch(`${API_BASE_URL}/generate-paper`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  topic: rawTopic,
-                  format: format,
-                  include_title_page: titlePage,
-                }),
-              });
-              
-              clearTimeout(step2Timer);
-              clearTimeout(step3Timer);
-              
-              if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.detail || `API returned status ${res.status}`);
-              }
-              
-              const data = await res.json();
-              let generatedSections = data.sections.map((s: any) => ({
-                ...s,
-                html: sanitizeHtml(s.html)
-              }));
-              
-              if (titlePage) {
-                const abstractHtml = generatedSections.find((s: any) => s.id === "abstract")?.html || "";
-                const titleHtml = `<h1 style="text-align: center">${rawTopic.toUpperCase()}</h1>
-<p style="text-align: center"><strong>${currentAuthor}</strong><br>${currentAffiliation}</p>
-<hr>
-<p><strong>Abstract</strong> &mdash; ${stripHTML(abstractHtml).replace(/^Abstract\s*(?:—|&mdash;)\s*/i, "")}</p>`;
-                generatedSections = [
-                  { id: "title", title: "Title & Affiliations", html: titleHtml },
-                  ...generatedSections
-                ];
-              }
-              
-              const wordCountVal = generatedSections.reduce(
-                (sum: number, s: any) => sum + stripHTML(s.html).split(/\s+/).filter(Boolean).length,
-                0
-              );
-              const pageCountVal = Math.max(1, Math.ceil(wordCountVal / 380));
-              
-              const newDraft = {
-                id: generatedId,
-                title: rawTopic,
-                author: currentAuthor,
-                authorEmail: currentEmail,
-                affiliation: currentAffiliation,
-                format: format,
-                wordCount: wordCountVal.toString(),
-                pageCount: pageCountVal.toString(),
-                score: qualityScore !== null ? qualityScore : 85,
-                rubricRigor: rubricRigor !== null ? rubricRigor : 8.5,
-                rubricStyle: rubricStyle !== null ? rubricStyle : 8.5,
-                rubricNovelty: rubricNovelty !== null ? rubricNovelty : 8.5,
-                status: "In Progress",
-                submittedAt: new Date().toISOString(),
-                assignmentStatus: null,
-                pref1: "",
-                pref2: "",
-                pref3: "",
-                currentReviewerId: "",
-                dueDate: null,
-                doi: "N/A",
-                sections: generatedSections,
-              };
-              
-              const { updatePaperInStore } = await import("@/lib/papersStore");
-              await updatePaperInStore(newDraft as any);
-              setSections(generatedSections);
-            } catch (error: any) {
-              console.error("AI Research Paper generator offline/error, using fallback:", error);
-              toast.error(`AI Paper generation failed: ${error.message || error}. Reverting to offline template.`);
-              const initialSections = buildDefaultSections(rawTopic, titlePage, currentAuthor, currentAffiliation).map((s) => ({
-                ...s,
-                html: sanitizeHtml(s.html)
-              }));
-              const initialWords = initialSections.reduce(
-                (sum, s) => sum + stripHTML(s.html).split(/\s+/).filter(Boolean).length,
-                0
-              );
-              const initialPages = Math.max(1, Math.ceil(initialWords / 380));
-              const newDraft = {
-                id: generatedId,
-                title: rawTopic,
-                author: currentAuthor,
-                authorEmail: currentEmail,
-                affiliation: currentAffiliation,
-                format: format,
-                wordCount: initialWords.toString(),
-                pageCount: initialPages.toString(),
-                score: qualityScore !== null ? qualityScore : 85,
-                rubricRigor: rubricRigor !== null ? rubricRigor : 8.5,
-                rubricStyle: rubricStyle !== null ? rubricStyle : 8.5,
-                rubricNovelty: rubricNovelty !== null ? rubricNovelty : 8.5,
-                status: "In Progress",
-                submittedAt: new Date().toISOString(),
-                assignmentStatus: null,
-                pref1: "",
-                pref2: "",
-                pref3: "",
-                currentReviewerId: "",
-                dueDate: null,
-                doi: "N/A",
-                sections: initialSections,
-              };
-              const { updatePaperInStore } = await import("@/lib/papersStore");
-              await updatePaperInStore(newDraft as any);
-              setSections(initialSections);
-            } finally {
-              setIsGenerating(false);
-              setGenerationStep(0);
-              setLoading(false);
-            }
-          } else {
-            setLoading(false);
-          }
-        }
+        ];
+        setSections(initialSections);
+        setActiveSectionId("essay-body");
+        setIsGenerating(false);
+        setLoading(false);
       } catch (e) {
-        console.error(e);
+        console.error("Init paper error:", e);
         setIsGenerating(false);
         setLoading(false);
       }
     };
     initPaper();
-  }, [paperId, rawTopic, role, userData]);
+  }, [paperId, essayId, rawTopic, role, userData, searchParams]);
 
 
 
@@ -569,22 +300,27 @@ function StudioContent() {
   /* ── Section state ──────────────────────────────────────────────── */
   const [sections, setSections] = useState<SectionContent[]>([]);
 
-  const [activeSectionId, setActiveSectionId] = useState<string>(() =>
-    titlePage ? "title" : "abstract"
-  );
+  const [activeSectionId, setActiveSectionId] = useState<string>("essay-body");
 
   /* ── Active section's HTML content for the editor ───────────────── */
-  const activeContent = sections.find((s) => s.id === activeSectionId)?.html || "";
+  const activeContent = sections.find((s) => s.id === activeSectionId)?.html || sections[0]?.html || "";
 
   /* ── Handle editor content updates ──────────────────────────────── */
   const handleEditorUpdate = useCallback(
     (html: string) => {
-      setSections((prev) =>
-        prev.map((s) => (s.id === activeSectionId ? { ...s, html } : s))
-      );
+      setSections((prev) => {
+        if (prev.length === 0) {
+          return [{ id: "essay-body", title: rawTopic || "Statement of Purpose", html }];
+        }
+        const hasMatch = prev.some((s) => s.id === activeSectionId);
+        if (!hasMatch) {
+          return prev.map((s, idx) => (idx === 0 ? { ...s, id: "essay-body", html } : s));
+        }
+        return prev.map((s) => (s.id === activeSectionId ? { ...s, html } : s));
+      });
       setIsSaving(true);
     },
-    [activeSectionId]
+    [activeSectionId, rawTopic]
   );
 
   /* ── AI chat state ──────────────────────────────────────────────── */
@@ -592,9 +328,7 @@ function StudioContent() {
     {
       sender: "ai",
       text:
-        "Welcome to the Paper Studio! I have pre-formatted your workspace under the " +
-        format.toUpperCase() +
-        " style. How can I assist you with your paper draft today?",
+        "Welcome to the SOP & Essay Studio! How can I assist you with your admissions draft today?",
     },
   ]);
   const [promptInput, setPromptInput] = useState("");
@@ -620,12 +354,12 @@ function StudioContent() {
   const qualityAbortRef = useRef<AbortController | null>(null);
 
   /* ── Real Auto-save & Parameter Persistence ───────────────────────── */
-  // Append url search params with paperId if it isn't there, so that page reload does not regenerate
+  // Append url search params with id if it isn't there, so that page reload preserves the draft
   useEffect(() => {
     if (draftId && typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("paperId") !== draftId) {
-        params.set("paperId", draftId);
+      if (params.get("id") !== draftId && params.get("paperId") !== draftId) {
+        params.set("id", draftId);
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.replaceState(null, "", newUrl);
       }
@@ -635,65 +369,65 @@ function StudioContent() {
   const savePaperDraft = useCallback(async () => {
     if (!draftId || isGenerating) return;
     try {
-      const { getPapersList, updatePaperInStore } = await import("@/lib/papersStore");
-      const stored = await getPapersList();
-      let paper = stored.find((p: any) => p.id === draftId);
-      
-      const wordCountVal = uploadedPdfContent 
-        ? stripHTML(uploadedPdfContent).split(/\s+/).filter(Boolean).length
-        : sections.reduce(
-            (sum, s) => sum + stripHTML(s.html).split(/\s+/).filter(Boolean).length,
-            0
-          );
+      const uId = userData?.uid || (typeof window !== "undefined" ? localStorage.getItem("abroad_current_uid") : "") || "guest-user";
+      const uEmail = userData?.email || (typeof window !== "undefined" ? localStorage.getItem("abroad_current_email") : "") || "";
+
+      // Ensure we extract the latest typed content
+      const activeSec = sections.find((s) => s.id === activeSectionId) || sections[0];
+      const htmlContent = activeSec?.html || editorRef.current?.getHTML?.() || "<p></p>";
+      const plainText = stripHTML(htmlContent);
+      const wordCountVal = plainText.split(/\s+/).filter(Boolean).length;
       const pageCountVal = Math.max(1, Math.ceil(wordCountVal / 380));
 
-      const updatedPaper = {
-        ...(paper || {}),
-        id: draftId,
-        title: rawTopic,
-        author: paperAuthor || userData?.fullName || "Author Name",
-        authorEmail: userData?.email || "author@example.com",
-        affiliation: paperAffiliation || userData?.institution || "Independent Researcher",
-        format: format,
-        wordCount: wordCountVal.toString(),
-        pageCount: pageCountVal.toString(),
-        score: qualityScore !== null ? qualityScore : (paper?.score || 85),
-        rubricRigor: rubricRigor !== null ? rubricRigor : (paper?.rubricRigor || 8.5),
-        rubricStyle: rubricStyle !== null ? rubricStyle : (paper?.rubricStyle || 8.5),
-        rubricNovelty: rubricNovelty !== null ? rubricNovelty : (paper?.rubricNovelty || 8.5),
-        status: paperStatus || (paper?.status || "In Progress"),
-        assignmentStatus: paperAssignmentStatus || (paper?.assignmentStatus || null),
-        reviewerName: currentReviewerName || (paper?.reviewerName || "Dr. Elizabeth Vance"),
-        sections: sections,
-        aiScore: aiScore !== null ? aiScore : (paper?.aiScore || null),
-        uploadedPdfContent: uploadedPdfContent || (paper?.uploadedPdfContent || null),
-        uploadedPdfName: uploadedPdfName || (paper?.uploadedPdfName || null),
-      };
-      
-      await updatePaperInStore(updatedPaper as any);
+      const res = await fetch("/api/wix/user-essays", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: draftId,
+          userId: uId,
+          userEmail: uEmail,
+          title: rawTopic || "Statement of Purpose",
+          school: paperAffiliation || "Target University",
+          content: htmlContent,
+          plainText: plainText,
+          wordCount: wordCountVal,
+          pageCount: pageCountVal,
+          status: paperStatus || "In Progress",
+          aiScore: aiScore,
+          score: qualityScore || 88,
+          format: format
+        })
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.id && json.id !== draftId) {
+          setDraftId(json.id);
+        }
+      }
     } catch (e) {
-      console.error("Auto-save failed:", e);
+      console.error("Auto-save to Wix CMS failed:", e);
     }
   }, [
     draftId,
     isGenerating,
     sections,
-    uploadedPdfContent,
-    uploadedPdfName,
+    activeSectionId,
     rawTopic,
-    paperAuthor,
-    userData,
     paperAffiliation,
-    format,
-    qualityScore,
-    rubricRigor,
-    rubricStyle,
-    rubricNovelty,
+    userData,
     paperStatus,
-    paperAssignmentStatus,
-    currentReviewerName,
-    aiScore
+    aiScore,
+    qualityScore,
+    format
   ]);
+
+  const handleSaveDraft = async () => {
+    setIsSaving(true);
+    await savePaperDraft();
+    setIsSaving(false);
+    toast.success("Essay draft saved to cloud!");
+  };
 
   useEffect(() => {
     if (!draftId || isGenerating) return;
@@ -701,18 +435,13 @@ function StudioContent() {
     const delayDebounceFn = setTimeout(async () => {
       await savePaperDraft();
       setIsSaving(false);
-    }, 1000); // 1 second debounce
+    }, 1000); // 1 second real-time debounce
 
     return () => clearTimeout(delayDebounceFn);
   }, [
     sections,
-    uploadedPdfContent,
-    uploadedPdfName,
     aiScore,
     qualityScore,
-    rubricRigor,
-    rubricStyle,
-    rubricNovelty,
     paperAuthor,
     paperAffiliation,
     savePaperDraft,
@@ -1844,77 +1573,7 @@ function StudioContent() {
     }
   };
 
-  /* ── Save Draft handler ─────────────────────────────────────────── */
-  const handleSaveDraft = async () => {
-    try {
-      const { getPapersList, updatePaperInStore } = await import("@/lib/papersStore");
-      const stored = await getPapersList();
-      const existingIndex = stored.findIndex((p: any) => 
-        (paperId && p.id === paperId) || (draftId && p.id === draftId) || (!paperId && !draftId && p.title === rawTopic)
-      );
-      const targetId = draftId.trim() || paperId || `draft-${Math.floor(Math.random() * 100000)}`;
-      
-      let paper = existingIndex > -1 ? stored[existingIndex] : null;
-      if (paper) {
-        let newStatus = paper.status;
-        if (newStatus === "Rejected") {
-          newStatus = "Rejected Draft";
-        }
-        paper.wordCount = wordCount.toString();
-        paper.pageCount = pageCount.toString();
-        paper.sections = sections;
-        paper.submittedAt = new Date().toISOString();
-        paper.status = newStatus;
-        paper.aiScore = aiScore;
-        if (qualityScore !== null) {
-          paper.score = qualityScore;
-          paper.rubricRigor = rubricRigor;
-          paper.rubricStyle = rubricStyle;
-          paper.rubricNovelty = rubricNovelty;
-        }
-      } else {
-        paper = {
-          id: targetId,
-          title: rawTopic,
-          author: paperAuthor || userData?.fullName || "Author Name",
-          authorEmail: userData?.email || "author@example.com",
-          affiliation: paperAffiliation || userData?.institution || "Independent Researcher",
-          format: format,
-          wordCount: wordCount.toString(),
-          pageCount: pageCount.toString(),
-          score: qualityScore !== null ? qualityScore : 85,
-          rubricRigor: rubricRigor !== null ? rubricRigor : 8.5,
-          rubricStyle: rubricStyle !== null ? rubricStyle : 8.5,
-          rubricNovelty: rubricNovelty !== null ? rubricNovelty : 8.5,
-          status: "In Progress",
-          submittedAt: new Date().toISOString(),
-          assignmentStatus: null,
-          pref1: "",
-          pref2: "",
-          pref3: "",
-          currentReviewerId: "",
-          dueDate: null,
-          doi: "N/A",
-          sections: sections,
-          aiScore: aiScore,
-        } as any;
-      }
-      
-      await updatePaperInStore(paper!);
-      
-      const newUrl = `/studio?topic=${encodeURIComponent(rawTopic)}&format=${format}&paperId=${encodeURIComponent(targetId)}`;
-      window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
 
-      setSuccessNotification(`Draft successfully saved! ID: ${targetId}`);
-      setTimeout(() => {
-        setSuccessNotification("");
-        router.push("/dashboard");
-      }, 2000);
-    } catch (e) {
-      console.error("Failed to save draft:", e);
-      toast.error("Failed to save draft.");
-    }
-  };
 
   /* ── PDF Re-upload handler (for reverted PDF papers) ────────────── */
   const handlePdfReupload = async () => {
@@ -2040,14 +1699,14 @@ function StudioContent() {
 
   if (isHumanising) {
     const stepMessages = [
-      "Connecting to secure document processing servers...",
-      "Analyzing paper structure and calculating baseline word count parameters...",
-      "Humanising Section 1/5: Abstract (optimizing tone & maintaining word count)...",
-      "Humanising Section 2/5: Introduction (enriching academic prose & parameters)...",
-      "Humanising Section 3/5: Methodology (re-validating math formulations & equations)...",
-      "Humanising Section 4/5: Results & Discussion (preserving tabular data & findings)...",
-      "Humanising Section 5/5: Conclusion (integrating future directions & bibliography)...",
-      "Verifying structural integrity and checking final word count constraints..."
+      "Connecting to essay intelligence server...",
+      "Analyzing narrative arc and sentence variety...",
+      "Humanising Hook & Motivation (refining personal tone)...",
+      "Humanising Academic Foundation (optimizing impact)...",
+      "Humanising Practical Experience & Spike (strengthening voice)...",
+      "Humanising Why This University (aligning institutional fit)...",
+      "Humanising Career Goals & Vision (polishing future trajectory)...",
+      "Verifying authentic voice and finalizing human-crafted draft..."
     ];
     // Map steps to approximate percentage
     const progressPercent = Math.min(100, Math.round((humaniseStep / 7) * 100));
@@ -2058,10 +1717,10 @@ function StudioContent() {
           
           <div className="space-y-3">
             <span className="text-[11px] font-extrabold uppercase tracking-[0.25em] text-[#C9A55D]">
-              Academic Humanisation Studio
+              Admissions Essay Humaniser
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#3A000C] font-serif leading-snug">
-              Humanising Paper Draft
+              Humanising Essay Draft
             </h1>
             <p className="text-[#6B6B6B] text-[14px] font-medium italic">
               "{rawTopic}"
@@ -2072,7 +1731,7 @@ function StudioContent() {
           
           <div className="space-y-4 w-full">
             <div className="flex justify-between text-[12px] font-bold text-[#690B1B]">
-              <span className="text-left max-w-[80%]">{stepMessages[humaniseStep] || "Processing manuscript..."}</span>
+              <span className="text-left max-w-[80%]">{stepMessages[humaniseStep] || "Processing essay..."}</span>
               <span>{progressPercent}%</span>
             </div>
             <div className="w-full h-2 bg-[#F6F4F2] rounded-full overflow-hidden border border-[#EDE8E4]">
@@ -2084,7 +1743,7 @@ function StudioContent() {
           </div>
           
           <p className="text-xs text-[#A5A5A5] leading-relaxed max-w-md">
-            This processes your entire manuscript sequentially to humanise the language. It rewrites the text to sound completely natural and peer-reviewed while strictly preserving your exact tables, math LaTeX structures, and citations. To ensure highest quality synthesis, this process takes about 60-70 seconds.
+            This processes your draft sequentially to humanise the language. It elevates the text to sound authentic, articulate, and compelling while preserving your genuine achievements, background, and personal voice.
           </p>
         </div>
       </div>
@@ -2162,10 +1821,10 @@ function StudioContent() {
                   </button>
                   <button
                     onClick={() => handleReviewAction("Reject")}
-                    className="h-[42px] px-3.5 sm:px-5 rounded-xl bg-[#9C1C1C] text-white text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-[#851818] active:scale-[0.98] transition-all cursor-pointer"
-                    title={role === "reviewer" ? "Revert Paper" : "Reject Paper"}
+                    className="h-[42px] px-3.5 sm:px-5 rounded-xl border border-[#EDE8E4] bg-white text-[#9C1C1C] text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-[#9C1C1C]/5 active:scale-[0.98] transition-all cursor-pointer"
+                    title="Reject & Revert Draft"
                   >
-                    <span>{role === "reviewer" ? "Revert" : "Reject"}</span>
+                    <span>Reject</span>
                   </button>
                   <button
                     onClick={() => handleReviewAction("Comment")}
@@ -2185,11 +1844,10 @@ function StudioContent() {
                     onClick={handleHumanisePaper}
                     className="h-[42px] px-3.5 sm:px-5 rounded-xl text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-sm hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                     style={{ background: "linear-gradient(135deg, #690B1B 0%, #9E1B32 100%)" }}
-                    title="Humanise Paper Draft"
+                    title="Humanise Essay Draft"
                   >
                     <IconSparkles size={16} className="text-[#C9A55D] animate-pulse" />
-                    <span className="hidden sm:inline">Humanise Paper</span>
-                    <span className="sm:hidden">Humanise</span>
+                    <span>Humanise</span>
                   </button>
                 </>
               )}
@@ -2268,327 +1926,48 @@ function StudioContent() {
         </div>
       </header>
 
-      {/* ──── THREE PANE LAYOUT ──────────────────────────────────────── */}
+      {/* ──── TWO PANE LAYOUT (Editor + AI Co-Writer) ─────────────── */}
       <div className="flex-grow flex items-stretch overflow-hidden">
-        {/* ── LEFT: Outline Navigator ─────────────────────────────────── */}
-        <aside className={`flex-col w-full md:w-[260px] lg:w-[280px] bg-white border-r border-[#E7E2DE] shrink-0 overflow-y-auto p-6 space-y-6 ${mobileTab === "outline" ? "flex" : "hidden md:flex"}`}>
-          <div className="text-[10px] text-[#B0A08A] uppercase tracking-[0.2em] font-extrabold">
-            Paper Structure
-          </div>
-
-          <div className="space-y-1 relative pl-3 border-l-2 border-[#ECE6E2]">
-            {uploadedPdfContent ? (
-              /* PDF Manuscript — single item in outline */
-              <div className="group relative flex items-center justify-between">
-                <div className="absolute -left-[17px] w-2 h-2 rounded-full border bg-[#690B1B] border-[#690B1B] scale-125 shadow-sm" />
-                <div className="flex-grow text-left py-2 px-3.5 rounded-lg text-[13.5px] font-bold tracking-tight bg-[#690B1B]/[0.05] text-[#690B1B]">
-                  📄 Manuscript PDF
-                </div>
-              </div>
-            ) : (
-              sections.map((section) => {
-                const isActive = activeSectionId === section.id;
-                const isCompleting = completingSectionId === section.id;
-                return (
-                  <div key={section.id} className="group relative flex items-center justify-between">
-                    {/* Indicator Dot */}
-                    <div
-                      className={`absolute -left-[17px] w-2 h-2 rounded-full border transition-all ${isActive
-                          ? "bg-[#690B1B] border-[#690B1B] scale-125 shadow-sm"
-                          : "bg-white border-[#C9A55D]/60 group-hover:bg-[#C9A55D]/40"
-                        }`}
-                    />
-
-                    <button
-                      onClick={() => setActiveSectionId(section.id)}
-                      className={`flex-grow text-left py-2 px-3.5 rounded-lg text-[13.5px] font-medium tracking-tight transition-all duration-300 cursor-pointer ${isActive
-                          ? "bg-[#690B1B]/[0.05] text-[#690B1B] font-bold"
-                          : "text-[#5F5F5F] hover:bg-neutral-50 hover:text-[#111]"
-                        }`}
-                    >
-                      {section.title}
-                    </button>
-
-                    {!role && (
-                      <button
-                        onClick={() => triggerAIAutocomplete(section.id)}
-                        disabled={isCompleting}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-[#C9A55D] hover:text-[#690B1B] transition-all absolute right-2 bg-white rounded-md shadow-sm border border-neutral-100 cursor-pointer"
-                        title="AI Autocomplete Section"
-                      >
-                        <IconSparkles size={13} className={isCompleting ? "animate-spin" : ""} />
-                      </button>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-
-
-          {/* ── AI Content Detector Card ──────────────────────────── */}
-          {true && (
-            <div className="pt-2 pb-4">
-              <div
-                className="rounded-2xl overflow-hidden border"
-                style={{
-                  background:
-                    aiCheckStatus === "checking"
-                      ? "linear-gradient(135deg, #fefce8 0%, #fef9ee 100%)"
-                      : aiScore === null
-                      ? "linear-gradient(135deg, #f8f7f5 0%, #f3f1ef 100%)"
-                      : aiScore <= 30
-                      ? "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)"
-                      : aiScore <= 60
-                      ? "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)"
-                      : "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
-                  borderColor:
-                    aiCheckStatus === "checking"
-                      ? "rgba(201,165,93,0.3)"
-                      : aiScore === null
-                      ? "rgba(0,0,0,0.07)"
-                      : aiScore <= 30
-                      ? "rgba(15,138,67,0.25)"
-                      : aiScore <= 60
-                      ? "rgba(201,165,93,0.4)"
-                      : "rgba(156,28,28,0.25)",
-                }}
-              >
-                {/* Card Header */}
-                <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                  <div className="flex items-center gap-1.5">
-                    <IconSparkles
-                      size={13}
-                      style={{
-                        color:
-                          aiCheckStatus === "checking" ? "#C9A55D" :
-                          aiScore === null ? "#A5A5A5" :
-                          aiScore <= 30 ? "#0F8A43" :
-                          aiScore <= 60 ? "#B07B00" : "#9C1C1C",
-                      }}
-                      className={aiCheckStatus === "checking" ? "animate-pulse" : ""}
-                    />
-                    <span
-                      className="text-[9px] font-extrabold uppercase tracking-[0.2em]"
-                      style={{
-                        color:
-                          aiCheckStatus === "checking" ? "#C9A55D" :
-                          aiScore === null ? "#A5A5A5" :
-                          aiScore <= 30 ? "#0F8A43" :
-                          aiScore <= 60 ? "#B07B00" : "#9C1C1C",
-                      }}
-                    >
-                      AI Content Detector
-                    </span>
-                  </div>
-                  {/* Live pulse dot */}
-                  {aiCheckStatus === "checking" && (
-                    <span className="flex items-center gap-1 text-[9px] font-bold text-[#C9A55D]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C9A55D] animate-ping" />
-                      Live
-                    </span>
-                  )}
-                  {aiCheckStatus === "done" && aiLastChecked && (
-                    <span className="text-[8.5px] text-[#A5A5A5] font-medium">
-                      {aiLastChecked.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  )}
-                </div>
-
-                {/* Arc Gauge */}
-                <div className="flex flex-col items-center pb-1 pt-2">
-                  <div className="relative" style={{ width: 140, height: 88 }}>
-                    <svg width="140" height="96" viewBox="0 0 140 96">
-                      {/* Track arc */}
-                      <path
-                        d="M 14 76 A 56 56 0 0 1 126 76"
-                        fill="none"
-                        stroke="rgba(0,0,0,0.08)"
-                        strokeWidth="10"
-                        strokeLinecap="round"
-                      />
-                      {/* Value arc */}
-                      {aiCheckStatus === "checking" ? (
-                        <path
-                          d="M 14 76 A 56 56 0 0 1 126 76"
-                          fill="none"
-                          stroke="#C9A55D"
-                          strokeWidth="10"
-                          strokeLinecap="round"
-                          strokeDasharray="175.9"
-                          strokeDashoffset="88"
-                          className="animate-pulse"
-                          opacity="0.6"
-                        />
-                      ) : aiScore !== null ? (
-                        <path
-                          d="M 14 76 A 56 56 0 0 1 126 76"
-                          fill="none"
-                          stroke={
-                            aiScore <= 30 ? "#0F8A43" :
-                            aiScore <= 60 ? "#C9A55D" : "#9C1C1C"
-                          }
-                          strokeWidth="10"
-                          strokeLinecap="round"
-                          strokeDasharray="175.9"
-                          strokeDashoffset={175.9 - (aiScore / 100) * 175.9}
-                          style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1), stroke 0.6s ease" }}
-                        />
-                      ) : null}
-
-                      {/* Center number */}
-                      {aiCheckStatus === "checking" ? (
-                        <text x="70" y="72" textAnchor="middle" fontSize="22" fontWeight="800" fill="#C9A55D" fontFamily="system-ui">
-                          …
-                        </text>
-                      ) : aiScore !== null ? (
-                        <text
-                          x="70" y="68"
-                          textAnchor="middle"
-                          fontSize="26"
-                          fontWeight="900"
-                          fill={aiScore <= 30 ? "#0F8A43" : aiScore <= 60 ? "#B07B00" : "#9C1C1C"}
-                          fontFamily="system-ui"
-                          style={{ transition: "fill 0.6s ease" }}
-                        >
-                          {aiScore}%
-                        </text>
-                      ) : (
-                        <text x="70" y="68" textAnchor="middle" fontSize="14" fontWeight="700" fill="#C0BAB5" fontFamily="system-ui">
-                          —
-                        </text>
-                      )}
-
-                      {/* Scale labels */}
-                      <text x="8" y="92" textAnchor="middle" fontSize="8" fill="#A5A5A5" fontFamily="system-ui">0</text>
-                      <text x="132" y="92" textAnchor="middle" fontSize="8" fill="#A5A5A5" fontFamily="system-ui">100</text>
-                    </svg>
-                  </div>
-
-                  {/* Classification label */}
-                  <div className="mt-[-6px] mb-3 text-center">
-                    {aiCheckStatus === "checking" ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#C9A55D]/10 text-[#B07B00]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#C9A55D] animate-bounce" />
-                        Analyzing...
-                      </span>
-                    ) : aiCheckStatus === "error" ? (
-                      <button
-                        onClick={() => runAiDetection(sections)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-orange-100 text-orange-700 hover:bg-orange-200 cursor-pointer transition-colors border border-orange-200"
-                      >
-                        ↻ Retry Detection
-                      </button>
-                    ) : aiScore !== null ? (
-                      <span
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold"
-                        style={{
-                          background:
-                            aiScore <= 30 ? "rgba(15,138,67,0.12)" :
-                            aiScore <= 60 ? "rgba(201,165,93,0.18)" : "rgba(156,28,28,0.12)",
-                          color: aiScore <= 30 ? "#0F8A43" : aiScore <= 60 ? "#B07B00" : "#9C1C1C",
-                        }}
-                      >
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ background: aiScore <= 30 ? "#0F8A43" : aiScore <= 60 ? "#C9A55D" : "#9C1C1C" }}
-                        />
-                        {aiScore <= 30 ? "Likely Human" : aiScore <= 60 ? "Mixed Content" : "Likely AI"}
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-[#A5A5A5] font-medium">Warming up...</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Reasoning + bands */}
-                {aiScore !== null && aiCheckStatus === "done" && (
-                  <div className="px-4 pb-4 space-y-3">
-                    {/* Scale bands */}
-                    <div className="flex gap-1">
-                      {[
-                        { label: "Human", range: "0-30", color: "#0F8A43", active: aiScore <= 30 },
-                        { label: "Mixed", range: "31-60", color: "#C9A55D", active: aiScore > 30 && aiScore <= 60 },
-                        { label: "AI", range: "61+", color: "#9C1C1C", active: aiScore > 60 },
-                      ].map((band) => (
-                        <div
-                          key={band.label}
-                          className="flex-1 rounded-lg py-1.5 text-center transition-all"
-                          style={{
-                            background: band.active ? `${band.color}18` : "rgba(0,0,0,0.04)",
-                            borderBottom: band.active ? `2px solid ${band.color}` : "2px solid transparent",
-                          }}
-                        >
-                          <div className="text-[9px] font-extrabold" style={{ color: band.active ? band.color : "#B5B0AB" }}>
-                            {band.label}
-                          </div>
-                          <div className="text-[8px] font-medium" style={{ color: band.active ? band.color : "#C8C3BE" }}>
-                            {band.range}%
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Reasoning */}
-                    {aiReasoning && (
-                      <p className="text-[10.5px] text-[#727272] leading-relaxed italic border-t border-black/5 pt-2.5">
-                        {aiReasoning}
-                      </p>
-                    )}
-
-                    {/* Confidence + re-check */}
-                    <div className="flex items-center justify-between">
-                      <span
-                        className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
-                        style={{
-                          background:
-                            aiConfidence === "high" ? "rgba(15,138,67,0.1)" :
-                            aiConfidence === "medium" ? "rgba(201,165,93,0.12)" : "rgba(0,0,0,0.05)",
-                          color:
-                            aiConfidence === "high" ? "#0F8A43" :
-                            aiConfidence === "medium" ? "#B07B00" : "#A5A5A5",
-                        }}
-                      >
-                        {aiConfidence} confidence
-                      </span>
-                      <button
-                        onClick={() => runAiDetection(sections)}
-                        className="text-[9px] font-bold text-[#A5A5A5] hover:text-[#690B1B] transition-colors cursor-pointer"
-                      >
-                        ↻ Re-check
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Loading shimmer bar at bottom */}
-                {aiCheckStatus === "checking" && (
-                  <div className="h-1 w-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-transparent via-[#C9A55D] to-transparent"
-                      style={{ animation: "shimmer 1.5s infinite", backgroundSize: "200% 100%" }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </aside>
-
         {/* ── CENTER: Editor ──────────────────────────────────────────── */}
-        <main className={`flex-grow flex-col bg-[#F6F4F2] overflow-hidden p-4 lg:p-8 min-w-0 ${mobileTab === "write" ? "flex" : mobileTab === "outline" ? "hidden md:flex" : "hidden lg:flex"}`}>
+        <main className={`flex-grow flex-col bg-[#F6F4F2] overflow-hidden p-4 lg:p-8 min-w-0 ${mobileTab === "write" ? "flex" : "hidden lg:flex"}`}>
           <div className="max-w-4xl mx-auto w-full flex-grow flex flex-col min-h-0">
             {/* Section header above editor */}
-            <div className="bg-white border border-[#E7E2DE] border-b-0 rounded-t-2xl px-6 py-4 shrink-0">
-              <span className="text-[9.5px] uppercase tracking-[0.2em] font-extrabold text-[#C9A55D]">
-                {uploadedPdfContent ? "Uploaded Manuscript" : "Active Segment"}
-              </span>
-              <h2 className="text-[#3A000C] text-[20px] font-bold tracking-tight mt-1">
-                {uploadedPdfContent
-                  ? (uploadedPdfName || "Manuscript PDF")
-                  : sections.find((s) => s.id === activeSectionId)?.title}
-              </h2>
+            <div className="bg-white border border-[#E7E2DE] border-b-0 rounded-t-2xl px-6 py-4 shrink-0 flex items-center justify-between">
+              <div>
+                <span className="text-[9.5px] uppercase tracking-[0.2em] font-extrabold text-[#C9A55D]">
+                  Statement of Purpose &bull; Admissions Draft
+                </span>
+                <h2 className="text-[#3A000C] text-[18px] sm:text-[20px] font-bold tracking-tight mt-0.5 truncate max-w-[500px]">
+                  {uploadedPdfContent ? (uploadedPdfName || "Manuscript PDF") : rawTopic}
+                </h2>
+              </div>
+              <div className="flex items-center gap-3">
+                {aiScore !== null && (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="px-3 py-1 rounded-full text-[11px] font-bold border"
+                      style={{
+                        background:
+                          aiScore <= 30 ? "rgba(15,138,67,0.08)" :
+                          aiScore <= 60 ? "rgba(201,165,93,0.12)" : "rgba(156,28,28,0.08)",
+                        borderColor:
+                          aiScore <= 30 ? "rgba(15,138,67,0.2)" :
+                          aiScore <= 60 ? "rgba(201,165,93,0.3)" : "rgba(156,28,28,0.2)",
+                        color: aiScore <= 30 ? "#0F8A43" : aiScore <= 60 ? "#B07B00" : "#9C1C1C",
+                      }}
+                    >
+                      AI: {aiScore}% ({aiScore <= 30 ? "Likely Human" : aiScore <= 60 ? "Mixed" : "Likely AI"})
+                    </span>
+                    <button
+                      onClick={() => runAiDetection(sections)}
+                      className="text-[11px] font-bold text-[#A5A5A5] hover:text-[#690B1B] transition-colors cursor-pointer"
+                      title="Re-check AI Score"
+                    >
+                      ↻ Re-scan
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Rich Text Editor or PDF Viewer */}
@@ -2607,7 +1986,7 @@ function StudioContent() {
                   content={activeContent}
                   onUpdate={handleEditorUpdate}
                   doubleSpaced={doubleSpaced}
-                  placeholder="Start crafting your academic masterpiece..."
+                  placeholder="Start typing your statement of purpose or admissions essay..."
                   readOnly={!!role}
                 />
               )}
@@ -2774,38 +2153,6 @@ function StudioContent() {
                   )}
                 </div>
 
-                {/* Quick Citation Inserter */}
-                <div className="border-t border-[#E7E2DE] p-4 bg-[#FAF9F7] shrink-0">
-                  <div className="text-[10px] text-[#B0A08A] uppercase tracking-[0.16em] font-extrabold mb-3 flex items-center gap-1">
-                    <IconBook size={14} /> Citations Inserter ({format.toUpperCase()})
-                  </div>
-                  <div className="space-y-2">
-                    {[
-                      {
-                        id: "cit1",
-                        label: `${paperAuthor ? formatAuthorForRef(paperAuthor).replace(/^[A-Z]\.\s+/, "") : "Doe"} (Nature 2024)`,
-                        val: format === "ieee" ? "[1]" : `(${paperAuthor ? formatAuthorForRef(paperAuthor).replace(/^[A-Z]\.\s+/, "") : "Doe"}, 2024)`,
-                      },
-                      {
-                        id: "cit2",
-                        label: "Doe & Smith (IEEE 2023)",
-                        val: format === "ieee" ? "[2]" : "(Doe & Smith, 2023)",
-                      },
-                    ].map((cit) => (
-                      <button
-                        key={cit.id}
-                        onClick={() => handleInsertCitation(cit.val)}
-                        className="w-full bg-white border border-[#EDE8E4] hover:border-[#690B1B]/40 px-3.5 py-2 rounded-xl text-[12px] font-bold text-[#111] flex items-center justify-between hover:shadow-sm transition cursor-pointer"
-                      >
-                        <span className="truncate">{cit.label}</span>
-                        <span className="text-[#690B1B] bg-[#690B1B]/[0.06] px-2 py-0.5 rounded font-mono text-[10px]">
-                          {cit.val}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Prompt Panel */}
                 <form
                   onSubmit={handleSendPrompt}
@@ -2834,23 +2181,13 @@ function StudioContent() {
       {/* ──── MOBILE/TABLET BOTTOM TAB BAR ─────────────────────────────────── */}
       <div className="lg:hidden h-[64px] bg-white border-t border-[#E7E2DE] px-4 flex items-center justify-around shrink-0 z-40">
         <button
-          onClick={() => setMobileTab("outline")}
-          className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 cursor-pointer transition-colors duration-200 ${
-            mobileTab === "outline" ? "text-[#690B1B]" : "text-[#8E8E8E]"
-          }`}
-        >
-          <IconBook size={20} stroke={2} />
-          <span className="text-[10px] font-bold">Outline</span>
-        </button>
-        
-        <button
           onClick={() => setMobileTab("write")}
           className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 cursor-pointer transition-colors duration-200 ${
             mobileTab === "write" ? "text-[#690B1B]" : "text-[#8E8E8E]"
           }`}
         >
           <IconSparkles size={20} stroke={2} className={mobileTab === "write" ? "animate-pulse" : ""} />
-          <span className="text-[10px] font-bold">Write</span>
+          <span className="text-[10px] font-bold">Editor</span>
         </button>
         
         <button

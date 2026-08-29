@@ -132,7 +132,7 @@ export default function UniversityFinderPage() {
         <div className="flex items-center justify-between flex-wrap gap-4 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#C9A55D] text-[12px] font-bold">
             <Sparkles size={14} />
-            <span>Wix CMS Live • University Database</span>
+            <span>Verified University Database</span>
           </div>
 
           <button
@@ -140,7 +140,7 @@ export default function UniversityFinderPage() {
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/90 text-[12px] font-semibold transition-all cursor-pointer shadow-2xs"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-            <span>Refresh CMS</span>
+            <span>Refresh Catalog</span>
           </button>
         </div>
 
@@ -188,7 +188,7 @@ export default function UniversityFinderPage() {
             <span className="w-2 h-2 rounded-full bg-[#16a34a]" />
             <span>
               {loading
-                ? 'Loading universities from Wix CMS...'
+                ? 'Loading universities...'
                 : `${totalCount.toLocaleString()} universities found`}
             </span>
           </span>

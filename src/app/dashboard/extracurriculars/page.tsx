@@ -396,7 +396,7 @@ export default function ExtracurricularsPage() {
               {saveStatus && (
                 <span className="text-[11px] font-bold bg-[#16a34a]/10 text-[#16a34a] px-3 py-1 rounded-full flex items-center gap-1">
                   <Check size={13} />
-                  <span>Synced to Wix CMS</span>
+                  <span>Profile Synced</span>
                 </span>
               )}
             </div>
@@ -412,7 +412,7 @@ export default function ExtracurricularsPage() {
               className="px-4 py-2.5 rounded-full border border-[#E7E2DE] text-[#555] text-[13px] font-bold hover:bg-[#F7F5F3] transition-all flex items-center gap-2 cursor-pointer"
             >
               <Save size={15} />
-              <span>{savingCms ? 'Saving...' : 'Sync Wix CMS'}</span>
+              <span>{savingCms ? 'Saving...' : 'Save & Sync'}</span>
             </button>
             <button
               onClick={handleOpenAddModal}
@@ -718,7 +718,7 @@ export default function ExtracurricularsPage() {
                   <div className="space-y-2">
                     <h3 className="text-[19px] font-bold text-[#111]">Admissions Officer Analysis</h3>
                     <p className="text-[13px] text-[#777] max-w-[340px] mx-auto leading-relaxed">
-                      AI reads your entire activity list at once, exactly the way an admissions committee member does. Powered by Groq, Gemini, and OpenRouter fallback intelligence.
+                      AI reads your entire activity list at once, exactly the way an elite admissions committee member does. Evaluated with institutional-grade intelligence.
                     </p>
                   </div>
 
@@ -758,7 +758,7 @@ export default function ExtracurricularsPage() {
                   <div className="space-y-1.5">
                     <h4 className="text-[17px] font-bold text-[#111]">Evaluating Activity Portfolio...</h4>
                     <p className="text-[12px] text-[#777] max-w-[280px] mx-auto">
-                      Executing multi-model admissions review via Groq with Gemini &amp; OpenRouter fallback engine.
+                      Evaluating holistic profile, leadership impact, and category spikes across admissions benchmarks...
                     </p>
                   </div>
                   <div className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-[#690B1B] bg-[#F7F0F1] px-3 py-1 rounded-full w-fit mx-auto">

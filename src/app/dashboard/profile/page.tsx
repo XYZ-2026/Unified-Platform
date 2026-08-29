@@ -206,7 +206,7 @@ export default function StudentProfilePage() {
                 </h1>
                 <span className="text-[11px] font-bold bg-[#16a34a]/10 text-[#16a34a] px-3 py-1 rounded-full flex items-center gap-1">
                   <CheckCircle2 size={13} />
-                  <span>Instant Cached &amp; Wix Synced</span>
+                  <span>Cloud Synced &amp; Up to Date</span>
                 </span>
               </div>
               <p className="text-[14px] text-[#777]">
@@ -424,7 +424,7 @@ export default function StudentProfilePage() {
               </Link>
             </div>
             <p className="text-[13px] text-[#666]">
-              Your extracurricular activities entered on the Extracurriculars page are automatically cached and synchronized to the same Wix CMS user-details collection.
+              Your extracurricular activities entered on the Extracurriculars page are automatically saved and synchronized with your unified student profile.
             </p>
           </div>
         </div>
@@ -436,10 +436,10 @@ export default function StudentProfilePage() {
               <Sparkles size={24} />
             </div>
             <div className="space-y-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#C9A55D]">INSTANT CACHE &amp; CLOUD SYNC</span>
-              <h4 className="text-[20px] font-bold leading-tight">Save &amp; Overwrite Details</h4>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#C9A55D]">INSTANT CLOUD SYNC</span>
+              <h4 className="text-[20px] font-bold leading-tight">Save &amp; Update Profile</h4>
               <p className="text-[13px] text-white/80 leading-relaxed">
-                Your modifications are cached locally for immediate access across reloads and synchronized to the Wix CMS database.
+                Your modifications are saved in real-time for immediate access across reloads and synchronized with your admissions profile.
               </p>
             </div>
 

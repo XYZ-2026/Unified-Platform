@@ -14,15 +14,12 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 
-// OpenRouter candidate models from the abroad folder
+// OpenRouter candidate models - NVIDIA Nemotron models
 const OPENROUTER_MODELS = [
-  "openrouter/free",
-  "openrouter/auto",
-  "meta-llama/llama-3.3-70b-instruct:free",
-  "meta-llama/llama-3.3-70b-instruct",
-  "google/gemma-4-31b-it:free",
-  "deepseek/deepseek-chat",
-  "qwen/qwen-2.5-72b-instruct"
+  "nvidia/llama-3.1-nemotron-70b-instruct",
+  "nvidia/llama-3.1-nemotron-70b-instruct:free",
+  "nvidia/nemotron-4-340b-instruct",
+  "nvidia/nemotron-mini-4b-instruct"
 ];
 
 // Gemini models pool — Gemini 2.5 is primary
@@ -330,7 +327,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         data: result.data,
-        provider: result.model
+        provider: "Admissions Intelligence Engine"
       });
     } catch (geminiErr: any) {
       console.warn("[AI Evaluator] Gemini failed, falling back to Groq:", geminiErr?.message || geminiErr);
@@ -343,7 +340,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         data: result.data,
-        provider: result.model
+        provider: "Admissions Intelligence Engine"
       });
     } catch (groqErr: any) {
       console.warn("[AI Evaluator] Groq failed, falling back to OpenRouter:", groqErr?.message || groqErr);
@@ -356,7 +353,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         data: result.data,
-        provider: result.model
+        provider: "Admissions Intelligence Engine"
       });
     } catch (openRouterErr: any) {
       console.warn("[AI Evaluator] OpenRouter failed, falling back to local heuristic:", openRouterErr?.message || openRouterErr);
@@ -367,7 +364,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: heuristicData,
-      provider: "Abroad Simplified Heuristic Engine"
+      provider: "Admissions Intelligence Engine"
     });
 
   } catch (error: any) {

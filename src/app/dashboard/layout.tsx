@@ -72,6 +72,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const resourceItems = [
     { id: 'admits', label: 'Admitted Profiles', icon: BookOpen, href: '/dashboard/past-admits' },
     { id: 'exemplars', label: 'SOP Examples', icon: Award, href: '/dashboard/exemplar-essays' },
+    { id: 'settings', label: 'Settings', icon: Settings, href: '/dashboard/settings' },
   ];
 
   return (
@@ -81,15 +82,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
          ═══════════════════════════════════════════════════════════════ */}
       <aside
         className={`fixed md:sticky top-0 z-40 h-screen bg-white border-r border-[#E7E2DE] transition-all duration-300 flex flex-col justify-between shadow-xs ${
-          sidebarCollapsed ? 'w-[80px]' : 'w-[260px]'
+          sidebarCollapsed ? 'w-[80px]' : 'w-[270px]'
         } ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         {/* SIDEBAR HEADER */}
         <div>
-          <div className="h-[76px] px-5 flex items-center justify-between border-b border-[#F0EBE6]">
-            <Link href="/" className="flex items-center gap-3 overflow-hidden">
+          <div className="h-[76px] px-4.5 flex items-center justify-between border-b border-[#F0EBE6]">
+            <Link href="/" className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
               <div className="relative shrink-0">
-                <div className="w-[42px] h-[42px] rounded-[13px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shadow-[0_6px_20px_rgba(105,11,27,0.2)] border border-white/10">
+                <div className="w-[40px] h-[40px] rounded-[12px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shadow-[0_6px_20px_rgba(105,11,27,0.2)] border border-white/10">
                   <svg viewBox="0 0 24 24" fill="none" className="w-[18px] h-[18px]">
                     <path d="M12 3L4 9V21H20V9L12 3Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M9 21V12H15V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -98,12 +99,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
               {!sidebarCollapsed && (
                 <div className="min-w-0 flex-1">
-                  <div className="text-[16px] font-bold tracking-[-0.03em] leading-none text-[#111] whitespace-nowrap">
+                  <div className="text-[15px] font-bold tracking-[-0.02em] leading-tight text-[#111] truncate">
                     Abroad Simplified
                   </div>
                   <div className="mt-1 flex items-center gap-1.5 whitespace-nowrap">
                     <span className="w-[4px] h-[4px] rounded-full bg-[#C9A55D] shrink-0" />
-                    <span className="text-[9px] uppercase tracking-[0.2em] font-semibold text-[#A3A3A3]">
+                    <span className="text-[9px] uppercase tracking-[0.18em] font-semibold text-[#A3A3A3]">
                       Admissions Hub
                     </span>
                   </div>
@@ -113,15 +114,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden md:flex p-1.5 text-[#999999] hover:text-[#690B1B] hover:bg-[#F7F0F1] rounded-lg transition-colors"
+              className="hidden md:flex p-1.5 text-[#999999] hover:text-[#690B1B] hover:bg-[#F7F0F1] rounded-lg transition-colors shrink-0"
               title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               <Menu size={18} />
             </button>
+
+            {/* Mobile close button */}
+            <button
+              onClick={() => setMobileSidebarOpen(false)}
+              className="md:hidden p-1.5 text-[#999999] hover:text-[#690B1B] hover:bg-[#F7F0F1] rounded-lg transition-colors shrink-0"
+              title="Close sidebar"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
           </div>
 
           {/* SIDEBAR NAVIGATION ITEMS */}
-          <div className="px-3 py-4 space-y-6 overflow-y-auto max-h-[calc(100vh-160px)] custom-scrollbar">
+          <div className="px-3 py-4 space-y-6 overflow-y-auto max-h-[calc(100vh-170px)] custom-scrollbar">
             {/* MAIN NAVIGATION */}
             <div className="space-y-1">
               {navItems.map((item) => {
@@ -218,40 +230,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
 
-        {/* SIDEBAR FOOTER */}
-        <div className="p-3 border-t border-[#F0EBE6] space-y-2">
+        {/* SIDEBAR FOOTER — ONLY MAROON CTA */}
+        <div className="p-3 pb-8 md:pb-5 border-t border-[#F0EBE6] bg-white">
           <Link
             href="/dashboard"
             className={`w-full flex items-center justify-between p-3 rounded-[14px] bg-gradient-to-r from-[#690B1B] to-[#8A1226] text-white shadow-sm hover:opacity-95 transition-all ${
               sidebarCollapsed ? 'justify-center' : ''
             }`}
           >
-            <div className="flex items-center gap-2.5">
-              <Zap size={18} className="text-[#C9A55D] fill-[#C9A55D]" />
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Zap size={18} className="text-[#C9A55D] fill-[#C9A55D] shrink-0" />
               {!sidebarCollapsed && (
-                <div className="text-left leading-tight">
+                <div className="text-left leading-tight truncate">
                   <div className="text-[13px] font-bold">Upgrade Pro</div>
-                  <div className="text-[10px] text-[#E0C080]">Get Unlimited AI SOP Reviews</div>
+                  <div className="text-[10px] text-[#E0C080] truncate">Unlimited SOP Reviews</div>
                 </div>
               )}
             </div>
             {!sidebarCollapsed && (
-              <span className="text-[10px] font-bold bg-[#C9A55D] text-black px-2 py-0.5 rounded-full uppercase">
+              <span className="text-[10px] font-bold bg-[#C9A55D] text-black px-2 py-0.5 rounded-full uppercase shrink-0">
                 30% OFF
               </span>
             )}
-          </Link>
-
-          <Link
-            href="/dashboard/settings"
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-[14px] font-medium transition-all ${
-              pathname === '/dashboard/settings'
-                ? 'bg-[#F7F0F1] text-[#690B1B] font-bold'
-                : 'text-[#777777] hover:bg-[#F9F7F5] hover:text-[#111]'
-            }`}
-          >
-            <Settings size={18} />
-            {!sidebarCollapsed && <span>Settings</span>}
           </Link>
         </div>
       </aside>

@@ -1,90 +1,97 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   FileText,
   Plus,
   Search,
-  BookOpen,
-  Filter,
-  Sparkles,
-  ArrowRight,
   Clock,
-  Edit3
+  Edit3,
+  Sparkles,
+  BookOpen
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+
+interface EssayDraftItem {
+  id: string;
+  title: string;
+  school: string;
+  words: string;
+  status: string;
+  tag?: string;
+  updatedAt?: string;
+}
 
 export default function MyEssaysPage() {
+  const { userData } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterMode, setFilterMode] = useState<'all' | 'school'>('all');
+  const [filterMode, setFilterMode] = useState<'all' | 'in-progress' | 'ready'>('all');
+  const [essayDrafts, setEssayDrafts] = useState<EssayDraftItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const essayCards = [
-    {
-      id: 'essay-1',
-      prompt: 'After a challenging experience, how do you rejuvenate and reflect?',
-      tag: 'Common App Personal Statement',
-      words: '650 max',
-      status: 'In Progress',
-      school: 'Common App'
-    },
-    {
-      id: 'essay-2',
-      prompt: 'How will you explore your intellectual and academic interests at Penn?',
-      tag: 'University of Pennsylvania',
-      words: '500 max',
-      status: 'Not Started',
-      school: 'UPenn'
-    },
-    {
-      id: 'essay-3',
-      prompt: 'Our behavior is often shaped by our values. Tell us about a core value you hold.',
-      tag: 'Supplemental Essay',
-      words: '250 max',
-      status: 'Draft Ready',
-      school: 'UPenn'
-    },
-    {
-      id: 'essay-4',
-      prompt: 'Tell us about a time when your perspective was challenged by someone else.',
-      tag: 'Stanford Supplemental',
-      words: '250 max',
-      status: 'Not Started',
-      school: 'Stanford'
-    },
-    {
-      id: 'essay-5',
-      prompt: 'What compliment are you most proud of receiving and who gave it to you?',
-      tag: 'Short Answer',
-      words: '150 max',
-      status: 'Not Started',
-      school: 'Harvard'
-    },
-    {
-      id: 'essay-6',
-      prompt: 'Describe how your background and experiences will shape your contribution to our community.',
-      tag: 'Community Essay',
-      words: '300 max',
-      status: 'In Progress',
-      school: 'MIT'
-    }
-  ];
+  useEffect(() => {
+    const loadUserDrafts = async () => {
+      setLoading(true);
+      try {
+        const uId = userData?.uid || (typeof window !== 'undefined' ? localStorage.getItem('abroad_current_uid') : '') || 'guest-user';
+        const uEmail = userData?.email || (typeof window !== 'undefined' ? localStorage.getItem('abroad_current_email') : '') || '';
 
-  const filteredEssays = essayCards.filter((e) =>
-    e.prompt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    e.school.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+        const params = new URLSearchParams();
+        if (uId) params.set('userId', uId);
+        if (uEmail) params.set('userEmail', uEmail);
+
+        const res = await fetch(`/api/wix/user-essays?${params.toString()}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.essays)) {
+            const parsed = json.essays.map((p: any) => ({
+              id: p.id,
+              title: p.title || 'Statement of Purpose',
+              school: p.school || 'Target University',
+              words: p.wordCount && p.wordCount !== '0' ? `${p.wordCount} words` : 'Blank draft',
+              status: p.status || 'In Progress',
+              tag: p.format?.toUpperCase() || 'SOP',
+              updatedAt: p.updatedAt || new Date().toISOString()
+            }));
+            setEssayDrafts(parsed);
+            return;
+          }
+        }
+        setEssayDrafts([]);
+      } catch (err) {
+        console.warn('Could not load user essay drafts from Wix CMS:', err);
+        setEssayDrafts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserDrafts();
+  }, [userData]);
+
+  const filteredEssays = essayDrafts.filter((e) => {
+    const matchesSearch =
+      e.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      e.school.toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (!matchesSearch) return false;
+    if (filterMode === 'in-progress') return e.status === 'In Progress';
+    if (filterMode === 'ready') return e.status === 'Draft Ready' || e.status === 'Accepted';
+    return true;
+  });
 
   return (
-    <div className="p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
+    <div className="p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6 font-sans">
       {/* HEADER & NEW ESSAY BUTTON */}
       <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-[26px] font-bold text-[#111111] tracking-[-0.03em]">My Essays &amp; SOPs</h2>
-          <p className="text-[13px] text-[#777777]">Every prompt from your college list, ready to write and evaluate with AI</p>
+          <p className="text-[13px] text-[#777777]">Write, polish, humanise, and evaluate your admissions drafts with AI</p>
         </div>
         <Link
-          href="/dashboard/essays/studio?topic=Statement+of+Purpose&format=ieee"
-          className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs"
+          href="/dashboard/essays/studio?topic=Statement+of+Purpose"
+          className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs shrink-0 cursor-pointer"
         >
           <Plus size={16} />
           <span>New Essay Draft</span>
@@ -99,76 +106,114 @@ export default function MyEssaysPage() {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search essays by prompt or school name..."
-            className="w-full h-[46px] pl-11 pr-4 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[13px] text-[#11] outline-none focus:border-[#690B1B]"
+            placeholder="Search your essays by title or university..."
+            className="w-full h-[46px] pl-11 pr-4 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[13px] text-[#111] outline-none focus:border-[#690B1B] transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => setFilterMode('all')}
-            className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all ${
-              filterMode === 'all' ? 'bg-[#690B1B] text-white' : 'bg-[#F7F5F3] text-[#555]'
+            className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all cursor-pointer ${
+              filterMode === 'all' ? 'bg-[#690B1B] text-white' : 'bg-[#F7F5F3] text-[#555] hover:bg-[#EFEBE7]'
             }`}
           >
-            All Prompts
+            All ({essayDrafts.length})
           </button>
           <button
-            onClick={() => setFilterMode('school')}
-            className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all ${
-              filterMode === 'school' ? 'bg-[#690B1B] text-white' : 'bg-[#F7F5F3] text-[#555]'
+            onClick={() => setFilterMode('in-progress')}
+            className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all cursor-pointer ${
+              filterMode === 'in-progress' ? 'bg-[#690B1B] text-white' : 'bg-[#F7F5F3] text-[#555] hover:bg-[#EFEBE7]'
             }`}
           >
-            By School
+            In Progress
+          </button>
+          <button
+            onClick={() => setFilterMode('ready')}
+            className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all cursor-pointer ${
+              filterMode === 'ready' ? 'bg-[#690B1B] text-white' : 'bg-[#F7F5F3] text-[#555] hover:bg-[#EFEBE7]'
+            }`}
+          >
+            Ready
           </button>
         </div>
       </div>
 
-      {/* ESSAY CARDS GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredEssays.map((essay) => (
-          <div
-            key={essay.id}
-            className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs flex flex-col justify-between space-y-4 hover:border-[#690B1B]/40 transition-all group"
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-3 py-1 rounded-full uppercase tracking-wider">
-                  {essay.school}
-                </span>
-                <span className="text-[12px] text-[#888] font-medium flex items-center gap-1">
-                  <Clock size={13} />
-                  <span>{essay.words}</span>
-                </span>
-              </div>
-
-              {/* CARD PAPER GRAPHIC */}
-              <div className="h-[100px] bg-[#FDFCFB] border border-[#F0EBE6] rounded-[14px] p-4 flex items-center justify-center text-center">
-                <FileText size={32} className="text-[#C9A55D] opacity-60" />
-              </div>
-
-              <h3 className="text-[15px] font-bold text-[#111] leading-snug line-clamp-3">
-                &ldquo;{essay.prompt}&rdquo;
-              </h3>
+      {/* ESSAY CARDS GRID OR EMPTY STATE */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs animate-pulse space-y-4">
+              <div className="h-5 bg-gray-200 rounded w-1/3" />
+              <div className="h-24 bg-gray-100 rounded-xl" />
+              <div className="h-4 bg-gray-200 rounded w-2/3" />
             </div>
-
-            <div className="pt-3 border-t border-[#F0EBE6] flex items-center justify-between">
-              <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-                essay.status === 'In Progress' ? 'bg-[#FFF8EB] text-[#9E731A]' : 'bg-[#F7F5F3] text-[#777]'
-              }`}>
-                {essay.status}
-              </span>
-              <Link
-                href={`/dashboard/essays/studio?topic=${encodeURIComponent(essay.prompt)}&format=ieee&paperId=${encodeURIComponent(essay.id)}`}
-                className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-2xs"
-              >
-                <Edit3 size={13} />
-                <span>Write SOP</span>
-              </Link>
-            </div>
+          ))}
+        </div>
+      ) : filteredEssays.length === 0 ? (
+        <div className="bg-white border border-[#E7E2DE] rounded-[24px] p-12 text-center shadow-xs flex flex-col items-center justify-center space-y-4 max-w-2xl mx-auto my-8">
+          <div className="w-16 h-16 rounded-2xl bg-[#F7F0F1] flex items-center justify-center text-[#690B1B]">
+            <FileText size={32} />
           </div>
-        ))}
-      </div>
+          <div className="space-y-1">
+            <h3 className="text-[18px] font-bold text-[#111]">No essay drafts yet</h3>
+            <p className="text-[13px] text-[#777] max-w-md mx-auto leading-relaxed">
+              Create your first Statement of Purpose or admissions essay to write with AI assistance, run AI detection checks, and polish your narrative.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/essays/studio?topic=Statement+of+Purpose"
+            className="px-6 py-3 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs cursor-pointer"
+          >
+            <Plus size={16} />
+            <span>Create First Essay Draft</span>
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredEssays.map((essay) => (
+            <div
+              key={essay.id}
+              className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs flex flex-col justify-between space-y-4 hover:border-[#690B1B]/40 transition-all group"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-3 py-1 rounded-full uppercase tracking-wider">
+                    {essay.school}
+                  </span>
+                  <span className="text-[12px] text-[#888] font-medium flex items-center gap-1">
+                    <Clock size={13} />
+                    <span>{essay.words}</span>
+                  </span>
+                </div>
+
+                <div className="h-[90px] bg-[#FDFCFB] border border-[#F0EBE6] rounded-[14px] p-4 flex items-center justify-center text-center">
+                  <FileText size={30} className="text-[#C9A55D] opacity-60" />
+                </div>
+
+                <h3 className="text-[15px] font-bold text-[#111] leading-snug line-clamp-2">
+                  &ldquo;{essay.title}&rdquo;
+                </h3>
+              </div>
+
+              <div className="pt-3 border-t border-[#F0EBE6] flex items-center justify-between">
+                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                  essay.status === 'In Progress' ? 'bg-[#FFF8EB] text-[#9E731A]' : 'bg-[#F0FDF4] text-[#16A34A]'
+                }`}>
+                  {essay.status}
+                </span>
+                <Link
+                  href={`/dashboard/essays/studio?topic=${encodeURIComponent(essay.title)}&paperId=${encodeURIComponent(essay.id)}`}
+                  className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                >
+                  <Edit3 size={13} />
+                  <span>Open Studio</span>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

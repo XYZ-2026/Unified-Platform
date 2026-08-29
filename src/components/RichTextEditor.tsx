@@ -501,6 +501,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
         horizontalRule: false,
+        underline: false as any,
       }),
       Underline,
       TextAlign.configure({ types: ["heading", "paragraph"] }),

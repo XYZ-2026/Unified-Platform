@@ -107,7 +107,7 @@ export default function ExemplarEssaysPage() {
         <div className="flex items-center justify-between flex-wrap gap-4 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#C9A55D] text-[12px] font-bold">
             <Sparkles size={14} />
-            <span>Wix CMS Live • SOP Examples &amp; Essays</span>
+            <span>Verified SOP Library • Accepted Profiles</span>
           </div>
 
           <button
@@ -115,7 +115,7 @@ export default function ExemplarEssaysPage() {
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/90 text-[12px] font-semibold transition-all cursor-pointer shadow-2xs"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-            <span>Refresh CMS</span>
+            <span>Refresh Essays</span>
           </button>
         </div>
 
@@ -123,7 +123,7 @@ export default function ExemplarEssaysPage() {
           Statement of Purpose (SOP) &amp; Essay Bank
         </h2>
         <p className="text-[14px] text-white/80 max-w-[700px] relative z-10 leading-relaxed">
-          Dynamic database of accepted SOPs and essays synced directly from Wix CMS. Click <strong>View Essay</strong> on any card to read and review the full text.
+          Comprehensive database of admitted SOPs and personal statements. Click <strong>View Essay</strong> on any card to read and review the full text.
         </p>
       </div>
 
@@ -161,7 +161,7 @@ export default function ExemplarEssaysPage() {
         <div className="flex items-center justify-between border-t border-[#F0EBE6] pt-3 text-[13px]">
           <span className="text-[12px] text-[#888] font-medium flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[#16a34a]" />
-            <span>{filteredEssays.length} essays loaded from Wix CMS</span>
+            <span>{filteredEssays.length} exemplar essays available</span>
           </span>
         </div>
       </div>
@@ -187,12 +187,12 @@ export default function ExemplarEssaysPage() {
             <FileText size={28} />
           </div>
           <h3 className="text-[20px] font-bold text-[#111]">
-            {searchTerm ? `No essays found for "${searchTerm}"` : 'No essays found in Wix CMS'}
+            {searchTerm ? `No essays found for "${searchTerm}"` : 'No exemplar essays found'}
           </h3>
           <p className="text-[14px] text-[#777] max-w-[460px] mx-auto leading-relaxed">
             {searchTerm
               ? 'Try changing your search terms or clearing your filters.'
-              : 'Make sure your Wix CMS collection is published and contains items in the "essays" collection.'}
+              : 'No published essays found matching your criteria.'}
           </p>
           <div className="flex items-center justify-center gap-3 pt-2">
             {searchTerm && (

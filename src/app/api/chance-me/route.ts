@@ -30,10 +30,10 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 
 const OPENROUTER_MODELS = [
-  "google/gemini-2.5-flash-preview",
-  "google/gemini-2.0-flash-001",
-  "openrouter/auto",
-  "meta-llama/llama-3.3-70b-instruct:free",
+  "nvidia/llama-3.1-nemotron-70b-instruct",
+  "nvidia/llama-3.1-nemotron-70b-instruct:free",
+  "nvidia/nemotron-4-340b-instruct",
+  "nvidia/nemotron-mini-4b-instruct"
 ];
 
 /* ─── Spice Personas ─────────────────────────────────────────────────── */
@@ -516,7 +516,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         data: result.data,
-        provider: result.model
+        provider: "Admissions Intelligence Engine"
       });
     } catch (geminiErr: any) {
       console.warn("[Chance-Me] Gemini 2.5 failed, falling back to OpenRouter:", geminiErr?.message || geminiErr);
@@ -529,7 +529,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         data: result.data,
-        provider: result.model
+        provider: "Admissions Intelligence Engine"
       });
     } catch (openRouterErr: any) {
       console.warn("[Chance-Me] OpenRouter failed, falling back to local heuristic:", openRouterErr?.message || openRouterErr);
@@ -540,7 +540,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: heuristicData,
-      provider: "Abroad Simplified Heuristic Engine"
+      provider: "Admissions Intelligence Engine"
     });
 
   } catch (error: any) {
