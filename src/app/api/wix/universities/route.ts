@@ -97,6 +97,12 @@ export async function GET(request: Request) {
         popularMajors: majorsArray.slice(0, 8), // Cap at 8 tags for UI
         allMajors: majorsArray,
         slug,
+        // New detailed fields
+        avgGpa: d.avgGpa ?? null,
+        satScore: d.satScore || '',
+        avgNeedBasedGrant: d.avgNeedBasedGrant || '',
+        requiredEssayPromptsDetails: d.requiredEssayPromptsDetails || '',
+        writingRequirements: d.writingRequirements || '',
       };
     });
 
