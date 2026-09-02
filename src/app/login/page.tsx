@@ -28,6 +28,36 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
+  const formatAuthError = (err: any, fallback: string) => {
+    if (!err) return fallback;
+    const code = err.code || '';
+    if (code === 'auth/invalid-credential' || code === 'auth/user-not-found' || code === 'auth/wrong-password') {
+      return 'Invalid email or password. Please check your credentials.';
+    }
+    if (code === 'auth/email-already-in-use') {
+      return 'An account with this email already exists. Please sign in.';
+    }
+    if (code === 'auth/weak-password') {
+      return 'Password is too weak. Please use at least 6 characters.';
+    }
+    if (code === 'auth/invalid-email') {
+      return 'Please enter a valid email address.';
+    }
+    if (code === 'auth/unauthorized-domain') {
+      return 'This domain is not authorized in Firebase Console. Please add your domain to Firebase Auth > Settings > Authorized Domains.';
+    }
+    if (code === 'auth/popup-blocked') {
+      return 'Sign-in pop-up was blocked by your browser. Please allow pop-ups for this site.';
+    }
+    if (code === 'auth/popup-closed-by-user') {
+      return 'Google sign-in pop-up was closed before completing.';
+    }
+    if (code === 'auth/network-request-failed') {
+      return 'Network connection issue. Please check your connection and try again.';
+    }
+    return err.message || fallback;
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -38,11 +68,7 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Invalid email or password. Please check your credentials.');
-      } else {
-        setError(err.message || 'Failed to sign in. Please try again.');
-      }
+      setError(formatAuthError(err, 'Failed to sign in. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -56,13 +82,17 @@ export default function LoginPage() {
       setError('Passwords do not match');
       return;
     }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
     setLoading(true);
     try {
       await signup(name, email, password);
       router.push('/onboarding');
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Failed to register account.');
+      setError(formatAuthError(err, 'Failed to register account.'));
     } finally {
       setLoading(false);
     }
@@ -76,7 +106,7 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Google sign-in failed.');
+      setError(formatAuthError(err, 'Google sign-in failed. Please try again.'));
     } finally {
       setLoading(false);
     }

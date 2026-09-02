@@ -55,29 +55,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
+        // Provide immediate fallback userData so the app is instantly responsive
+        const initialData: UserData = {
+          uid: currentUser.uid,
+          name: currentUser.displayName || currentUser.email?.split('@')[0] || 'Student',
+          fullName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Student',
+          email: currentUser.email || '',
+          role: 'student',
+          photoURL: currentUser.photoURL || undefined
+        };
+        setUserData(initialData);
+
+        // Asynchronously attempt to fetch document from Firestore with a 3-second timeout
         try {
           const userRef = doc(db, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            setUserData({ uid: currentUser.uid, ...userSnap.data() } as UserData);
-          } else {
-            setUserData({
-              uid: currentUser.uid,
-              name: currentUser.displayName || 'Student',
-              fullName: currentUser.displayName || 'Student',
-              email: currentUser.email || '',
-              role: 'student'
-            });
+          const fetchPromise = getDoc(userRef);
+          const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+          const userSnap = await Promise.race([fetchPromise, timeoutPromise]);
+          if (userSnap && 'exists' in userSnap && userSnap.exists()) {
+            setUserData({ ...initialData, ...userSnap.data() } as UserData);
           }
         } catch (e) {
-          console.error('Error fetching user profile:', e);
-          setUserData({
-            uid: currentUser.uid,
-            name: currentUser.displayName || 'Student',
-            fullName: currentUser.displayName || 'Student',
-            email: currentUser.email || '',
-            role: 'student'
-          });
+          console.warn('Firestore user profile fetch notice (offline/delayed):', e);
         }
       } else {
         setUserData(null);
@@ -94,29 +93,82 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signup = async (name: string, email: string, pass: string) => {
     const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim();
     const res = await createUserWithEmailAndPassword(auth, cleanEmail, pass);
-    await setDoc(doc(db, 'users', res.user.uid), {
-      name: name.trim(),
-      fullName: name.trim(),
+    
+    // Set immediate user data
+    setUserData({
+      uid: res.user.uid,
+      name: cleanName,
+      fullName: cleanName,
       email: cleanEmail,
-      role: 'student',
-      createdAt: serverTimestamp()
+      role: 'student'
     });
+
+    // Attempt to persist profile to Firestore safely without failing the signup
+    try {
+      const userRef = doc(db, 'users', res.user.uid);
+      const writePromise = setDoc(userRef, {
+        name: cleanName,
+        fullName: cleanName,
+        email: cleanEmail,
+        role: 'student',
+        createdAt: serverTimestamp()
+      }, { merge: true });
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+      await Promise.race([writePromise, timeoutPromise]);
+    } catch (firestoreErr) {
+      console.warn('Firestore profile save notice (offline or rules not deployed):', firestoreErr);
+    }
   };
 
   const googleSignIn = async () => {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     const res = await signInWithPopup(auth, provider);
-    const userRef = doc(db, 'users', res.user.uid);
-    const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) {
-      await setDoc(userRef, {
-        name: res.user.displayName || 'Student',
-        fullName: res.user.displayName || 'Student',
-        email: res.user.email || '',
-        role: 'student',
-        createdAt: serverTimestamp()
-      });
+    
+    const displayName = res.user.displayName || res.user.email?.split('@')[0] || 'Student';
+    const email = res.user.email || '';
+
+    setUserData({
+      uid: res.user.uid,
+      name: displayName,
+      fullName: displayName,
+      email: email,
+      role: 'student',
+      photoURL: res.user.photoURL || undefined
+    });
+
+    // Safe background Firestore sync
+    try {
+      const userRef = doc(db, 'users', res.user.uid);
+      const fetchPromise = getDoc(userRef);
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+      const userSnap = await Promise.race([fetchPromise, timeoutPromise]);
+      
+      if (userSnap && 'exists' in userSnap && userSnap.exists()) {
+        setUserData({
+          uid: res.user.uid,
+          name: displayName,
+          fullName: displayName,
+          email: email,
+          role: 'student',
+          photoURL: res.user.photoURL || undefined,
+          ...userSnap.data()
+        } as UserData);
+      } else {
+        const writePromise = setDoc(userRef, {
+          name: displayName,
+          fullName: displayName,
+          email: email,
+          role: 'student',
+          photoURL: res.user.photoURL || '',
+          createdAt: serverTimestamp()
+        }, { merge: true });
+        await Promise.race([writePromise, timeoutPromise]);
+      }
+    } catch (firestoreErr) {
+      console.warn('Firestore Google sign-in profile notice:', firestoreErr);
     }
   };
 

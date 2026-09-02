@@ -348,6 +348,7 @@ docker cp abroad-admin-backend:/app/data ~/backups/abroad-admin/backup-$(date +%
 
 | Symptom | Cause | Solution |
 | :--- | :--- | :--- |
+| **Firebase Offline / Auth Error** | Missing credentials or Firebase Authorized Domains | 1. Ensure `admit.abroadsimplified.com` (and VPS IP) is added in Firebase Console → Authentication → Settings → Authorized Domains.<br>2. Ensure Cloud Firestore database is created in Firebase Console.<br>3. Ensure `.env` on VPS contains the latest `NEXT_PUBLIC_FIREBASE_*` variables and rebuild with `./deploy.sh`. |
 | **Port Conflict on Deploy** | Port 3002 or 8002 is busy | Run `sudo ss -tulpn`. Adjust `FRONTEND_PORT` or `BACKEND_PORT` in `.env` and `/etc/nginx/sites-available/admit.abroadsimplified.com`. |
 | **502 Bad Gateway** | Container is stopped or port mismatch in Nginx | Run `docker compose ps` to check if `abroad-admin-frontend` is Up. Ensure proxy port in Nginx matches `FRONTEND_PORT`. |
 | **Nginx reload fails** | Syntax error in Nginx config | Run `sudo nginx -t` to find the exact line with the issue. |
