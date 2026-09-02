@@ -44,38 +44,38 @@ export default function DashboardHomePage() {
   const firstName = displayName ? displayName.split(' ')[0] : (userData?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'Student');
 
   return (
-    <main className="p-5 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <main className="p-4 sm:p-5 md:p-8 space-y-5 sm:space-y-6 max-w-7xl mx-auto w-full">
       {/* PROMOTIONAL TOP BANNER */}
-      <div className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[18px] p-4 sm:p-5 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm border border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-            <Sparkles size={20} className="text-[#C9A55D]" />
+      <div className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[16px] sm:rounded-[18px] p-4 sm:p-5 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shadow-sm border border-white/10">
+        <div className="flex items-start sm:items-center gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+            <Sparkles size={18} className="text-[#C9A55D]" />
           </div>
           <div>
-            <div className="text-[15px] font-bold">Fall 2026 Admissions Special Offer</div>
-            <div className="text-[12px] text-white/80">
+            <div className="text-[14px] sm:text-[15px] font-bold">Fall 2026 Admissions Special Offer</div>
+            <div className="text-[12px] text-white/80 leading-relaxed">
               Get unlimited AI SOP reviews, 500+ admitted student profiles &amp; Chance-Me predictions.
             </div>
           </div>
         </div>
-        <button className="shrink-0 px-5 py-2.5 rounded-full bg-[#C9A55D] hover:bg-[#b8924b] text-black font-bold text-[13px] transition-all flex items-center gap-1.5 shadow-xs">
+        <button className="shrink-0 self-end sm:self-auto px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#C9A55D] hover:bg-[#b8924b] text-black font-bold text-[12px] sm:text-[13px] transition-all flex items-center gap-1.5 shadow-xs">
           <span>Claim 30% Off</span>
-          <ArrowRight size={14} />
+          <ArrowRight size={13} />
         </button>
       </div>
 
       {/* GREETING HEADER & TOUR */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h2 className="text-[26px] md:text-[30px] font-bold text-[#111111] tracking-[-0.03em]">
+          <h2 className="text-[22px] sm:text-[26px] md:text-[30px] font-bold text-[#111111] tracking-[-0.03em]">
             Good day, {firstName} 👋
           </h2>
-          <p className="text-[14px] text-[#777777]">
+          <p className="text-[13px] sm:text-[14px] text-[#777777]">
             Here is your admissions dashboard and action plan for today.
           </p>
         </div>
-        <button className="px-4 py-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] text-[13px] font-semibold flex items-center gap-2 hover:bg-[#F7F0F1] transition-all shadow-2xs">
-          <HelpCircle size={15} />
+        <button className="px-4 py-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] text-[12px] sm:text-[13px] font-semibold flex items-center gap-2 hover:bg-[#F7F0F1] transition-all shadow-2xs shrink-0">
+          <HelpCircle size={14} />
           <span>Take the tour</span>
         </button>
       </div>
@@ -85,11 +85,11 @@ export default function DashboardHomePage() {
         {/* LEFT 2 COLUMNS: HERO CARDS & TIMELINE */}
         <div className="lg:col-span-2 space-y-6">
           {/* HERO FEATURE CARD: AI CHANCE ME */}
-          <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 md:p-8 shadow-xs relative overflow-hidden">
+          <div className="bg-white border border-[#E7E2DE] rounded-[18px] sm:rounded-[20px] p-5 sm:p-6 md:p-8 shadow-xs relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-[#690B1B]/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 relative z-10">
-              <div className="w-20 h-20 rounded-[20px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shrink-0 shadow-md border border-white/20 text-white">
-                <BarChart3 size={38} className="text-[#C9A55D]" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 relative z-10">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[16px] sm:rounded-[20px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shrink-0 shadow-md border border-white/20 text-white">
+                <BarChart3 size={32} className="text-[#C9A55D]" />
               </div>
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F7F0F1] text-[#690B1B] text-[11px] font-bold uppercase tracking-wider">
@@ -212,9 +212,9 @@ export default function DashboardHomePage() {
       </div>
 
       {/* RECOMMENDED FOR YOU GRID (4 ACTION CARDS) */}
-      <div className="pt-4">
-        <h3 className="text-[18px] font-bold text-[#111111] mb-4">Recommended Actions for You</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="pt-2 sm:pt-4">
+        <h3 className="text-[16px] sm:text-[18px] font-bold text-[#111111] mb-3 sm:mb-4">Recommended Actions for You</h3>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[
             {
               title: "See your real admission chances",

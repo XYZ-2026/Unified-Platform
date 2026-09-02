@@ -269,8 +269,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
          ═══════════════════════════════════════════════════════════════ */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* TOP HEADER BAR */}
-        <header className="h-[76px] px-5 md:px-8 bg-white border-b border-[#E7E2DE] flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-4">
+        <header className="h-[64px] sm:h-[76px] px-4 sm:px-5 md:px-8 bg-white border-b border-[#E7E2DE] flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileSidebarOpen(true)}
               className="md:hidden p-2 text-[#555555] hover:text-[#111111]"
@@ -278,13 +278,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Menu size={22} />
             </button>
             <div className="hidden sm:block">
-              <h1 className="text-[18px] font-bold text-[#111111]">Abroad Simplified Student Portal</h1>
-              <p className="text-[12px] text-[#888888]">Fall 2026 Admissions Cycle</p>
+              <h1 className="text-[15px] sm:text-[18px] font-bold text-[#111111]">Abroad Simplified Student Portal</h1>
+              <p className="text-[11px] sm:text-[12px] text-[#888888]">Fall 2026 Admissions Cycle</p>
             </div>
           </div>
 
           {/* HEADER RIGHT ACTIONS */}
-          <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex items-center gap-2 md:gap-3 md:gap-4">
             {/* INVITE FRIENDS / REWARDS BUTTON */}
             <button className="hidden xl:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EBF4FB] border border-[#0088CB]/20 text-[#0088CB] text-[12px] font-bold hover:bg-[#0088CB]/10 transition-all">
               <span>Invite Friends</span>
@@ -294,8 +294,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </button>
 
             {/* PROMO OFFER BADGE */}
-            <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F7F0F1] border border-[#690B1B]/15 text-[#690B1B] text-[12px] font-semibold">
-              <span className="w-2 h-2 rounded-full bg-[#690B1B] animate-pulse" />
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F7F0F1] border border-[#690B1B]/15 text-[#690B1B] text-[11px] sm:text-[12px] font-semibold">
+              <span className="w-2 h-2 rounded-full bg-[#690B1B] animate-pulse shrink-0" />
               <span>Get 30% Off</span>
               <span className="font-bold text-[#C9A55D] bg-[#111] px-2 py-0.5 rounded-full text-[10px]">
                 0d 23h 11m
@@ -303,20 +303,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             {/* AI CREDITS COUNTER */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFF8EB] border border-[#F4D080] text-[#9E731A] text-[13px] font-bold">
-              <Zap size={15} className="fill-[#F4B400] text-[#F4B400]" />
-              <span>25 Credits</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#FFF8EB] border border-[#F4D080] text-[#9E731A] text-[12px] sm:text-[13px] font-bold">
+              <Zap size={14} className="fill-[#F4B400] text-[#F4B400] shrink-0" />
+              <span className="hidden xs:inline sm:inline">25 Credits</span>
+              <span className="xs:hidden sm:hidden">25</span>
             </div>
 
             {/* NOTIFICATIONS */}
-            <button className="relative p-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] hover:border-[#690B1B]/30 transition-all">
-              <Bell size={18} />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#690B1B] border-2 border-white" />
+            <button className="relative p-1.5 sm:p-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] hover:border-[#690B1B]/30 transition-all">
+              <Bell size={17} />
+              <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#690B1B] border-2 border-white" />
             </button>
 
             {/* USER AVATAR LINK TO SETTINGS */}
-            <Link href="/dashboard/settings" className="flex items-center gap-2.5 pl-2 border-l border-[#E7E2DE]">
-              <div className="w-[38px] h-[38px] rounded-full bg-[#690B1B] text-white flex items-center justify-center font-bold text-[14px] shadow-xs">
+            <Link href="/dashboard/settings" className="flex items-center gap-2 pl-2 border-l border-[#E7E2DE]">
+              <div className="w-[34px] h-[34px] sm:w-[38px] sm:h-[38px] rounded-full bg-[#690B1B] text-white flex items-center justify-center font-bold text-[13px] sm:text-[14px] shadow-xs">
                 {initial}
               </div>
             </Link>

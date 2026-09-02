@@ -5,6 +5,29 @@
   --foreground: #111111;
 }
 
+/* ─────── Global Reset & Mobile Base ─────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img, video, svg {
+  max-width: 100%;
+  display: block;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
