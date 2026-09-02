@@ -61,17 +61,23 @@ else
     exit 1
 fi
 
-# 2. Check for .env.production
-if [ ! -f ".env.production" ]; then
-    log_warning ".env.production not found in $(pwd)!"
-    if [ -f ".env.production.example" ]; then
-        log_info "Creating .env.production from template..."
-        cp .env.production.example .env.production
-        log_warning "Please edit .env.production with your actual production keys before continuing:"
-        echo "  nano $(pwd)/.env.production"
+# 2. Check for .env
+if [ ! -f ".env" ]; then
+    log_warning ".env not found in $(pwd)!"
+    if [ -f ".env.example" ]; then
+        log_info "Creating .env from template .env.example..."
+        cp .env.example .env
+        log_warning "Please edit .env with your actual production keys before continuing:"
+        echo "  nano $(pwd)/.env"
+        exit 1
+    elif [ -f ".env.production.example" ]; then
+        log_info "Creating .env from template .env.production.example..."
+        cp .env.production.example .env
+        log_warning "Please edit .env with your actual production keys before continuing:"
+        echo "  nano $(pwd)/.env"
         exit 1
     else
-        log_error "Missing .env.production file. Please create it before deploying."
+        log_error "Missing .env file. Please create it before deploying."
         exit 1
     fi
 fi
