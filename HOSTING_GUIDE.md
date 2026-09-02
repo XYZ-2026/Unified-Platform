@@ -2,14 +2,14 @@
 ### Multi-Project VPS Deployment & Configuration
 
 > **Target Domain:** `admit.abroadsimplified.com`  
-> **Stack:** Next.js 16 (Frontend) + FastAPI (Backend) + Nginx + SSL  
-> **Environment Note:** This guide is custom-configured for your VPS with the exact active port mappings below.
+> **Stack:** Next.js 16 (Frontend) + FastAPI (Backend) + Host Nginx + Host Certbot  
+> **Architecture Note:** Docker is used **only for Frontend & Backend containers**. Ports 80 & 443 and SSL certificates are handled globally by your **Host Nginx** and **Host Certbot**.
 
 ---
 
 ## 📌 Multi-Project VPS Architecture Overview
 
-Your VPS currently hosts 3 existing applications. All projects are reverse-proxied by **Host Nginx** (listening on ports `80` and `443`), which routes incoming requests to the appropriate container based on the domain name (`server_name`).
+Your VPS already runs 3 active projects. All incoming traffic on ports `80` and `443` hits your **Host Nginx**, which forwards domain traffic based on `server_name`:
 
 ```
                               Internet (HTTP/HTTPS)
@@ -35,33 +35,21 @@ Your VPS currently hosts 3 existing applications. All projects are reverse-proxi
 
 ## Table of Contents
 
-1. [Prerequisites & Multi-App Checklist](#1-prerequisites--multi-app-checklist)
-2. [Existing VPS Port Map & New Port Allocation](#2-existing-vps-port-map--new-port-allocation)
-3. [VPS Swap Memory Setup (Prevent OOM Crashes)](#3-vps-swap-memory-setup-prevent-oom-crashes)
-4. [DNS Configuration](#4-dns-configuration)
-5. [Deploying Abroad Simplified Admin](#5-deploying-abroad-simplified-admin)
-6. [Host Nginx Reverse Proxy Setup](#6-host-nginx-reverse-proxy-setup)
-7. [SSL Certificate Configuration (Host Certbot)](#7-ssl-certificate-configuration-host-certbot)
-8. [Automated Deployment with `deploy.sh`](#8-automated-deployment-with-deploysh)
-9. [Safe Multi-App VPS Maintenance](#9-safe-multi-app-vps-maintenance)
-10. [Troubleshooting & Health Checks](#10-troubleshooting--health-checks)
+1. [Existing VPS Port Map & New Port Allocation](#1-existing-vps-port-map--new-port-allocation)
+2. [VPS Swap Memory Setup (Prevent OOM Crashes)](#2-vps-swap-memory-setup-prevent-oom-crashes)
+3. [DNS Configuration](#3-dns-configuration)
+4. [Deploying Frontend & Backend Containers](#4-deploying-frontend--backend-containers)
+5. [Host Nginx Reverse Proxy Setup](#5-host-nginx-reverse-proxy-setup)
+6. [SSL Certificate Configuration (Host Certbot)](#6-ssl-certificate-configuration-host-certbot)
+7. [Automated Deployment with `deploy.sh`](#7-automated-deployment-with-deploysh)
+8. [Safe Multi-App VPS Maintenance](#8-safe-multi-app-vps-maintenance)
+9. [Troubleshooting & Health Checks](#9-troubleshooting--health-checks)
 
 ---
 
-## 1. Prerequisites & Multi-App Checklist
+## 1. Existing VPS Port Map & New Port Allocation
 
-Before deploying, ensure you have:
-- Access to your VPS via SSH (`ssh deploy@YOUR_VPS_IP` or `ssh root@YOUR_VPS_IP`).
-- DNS A-record for `admit.abroadsimplified.com` pointing to the VPS IP.
-- The `.env` file ready with all your production API keys.
-- Docker and Docker Compose installed on the VPS.
-- **Host Nginx** installed on the VPS managing the existing 3 projects.
-
----
-
-## 2. Existing VPS Port Map & New Port Allocation
-
-### 2.1 Currently Running Projects on VPS
+### 1.1 Currently Running Projects on VPS
 
 | Project / Container Name | Image / Role | Host Port Occupied |
 | :--- | :--- | :--- |
@@ -74,22 +62,22 @@ Before deploying, ensure you have:
 
 ---
 
-### 2.2 Dedicated Port Allocation for Abroad Simplified Admin
+### 1.2 Dedicated Port Allocation for Abroad Simplified Admin
 
-To completely avoid collision with any existing containers, Abroad Simplified Admin uses **Port `3002`** and **Port `8002`**:
+Docker Compose only manages the **2 application containers** for this project on free ports:
 
 | Service | Container Name | Host Port | Internal Container Port |
 | :--- | :--- | :--- | :--- |
 | **Next.js Frontend** | `abroad-admin-frontend` | **`3002`** | `3000` |
 | **FastAPI Backend** | `abroad-admin-backend` | **`8002`** | `8000` |
 
-*Note: Container names are explicitly prefixed with `abroad-admin-` to eliminate any confusion with the research tool's `abroad_frontend`/`abroad_backend` or prep's `abroad-simplified`.*
+*Note: Container names are prefixed with `abroad-admin-` so they will never clash with `abroad_frontend`/`abroad_backend` or `abroad-simplified`.*
 
 ---
 
-## 3. VPS Swap Memory Setup (Prevent OOM Crashes)
+## 2. VPS Swap Memory Setup (Prevent OOM Crashes)
 
-Running 4 full-stack applications simultaneously can cause memory spikes during Next.js builds or high traffic. To protect existing projects from being killed by the Linux Out-Of-Memory (OOM) killer, ensure a **4 GB Swap File** is active:
+Running 4 full-stack applications simultaneously can cause memory spikes during Next.js builds. Ensure a **4 GB Swap File** is active:
 
 ```bash
 # Check current swap status
@@ -116,7 +104,7 @@ echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
 
 ---
 
-## 4. DNS Configuration
+## 3. DNS Configuration
 
 In your DNS dashboard (Hostinger DNS, Cloudflare, GoDaddy, etc.), create an **A Record** pointing `admit.abroadsimplified.com` to your VPS IP:
 
@@ -131,20 +119,11 @@ dig admit.abroadsimplified.com +short
 
 ---
 
-## 5. Deploying Abroad Simplified Admin
+## 4. Deploying Frontend & Backend Containers
 
-### 5.1 Clone Repository in Isolated Directory
+### 4.1 Create `.env`
 
-```bash
-mkdir -p ~/apps
-cd ~/apps
-
-# Clone repository
-git clone https://github.com/YOUR_USERNAME/abroad-simplified-landing.git
-cd abroad-simplified-landing
-```
-
-### 5.2 Create `.env`
+In your project root (e.g. `/root/Unified-Platform` or `~/apps/abroad-simplified-landing`):
 
 ```bash
 cp .env.example .env
@@ -184,10 +163,10 @@ BACKEND_PORT=8002
 
 Save and exit (`Ctrl + O`, `Enter`, `Ctrl + X`).
 
-### 5.3 Build and Start Containers
+### 4.2 Start Containers
 
 ```bash
-docker compose up -d --build frontend backend
+docker compose up -d --build
 ```
 
 Check container status:
@@ -196,10 +175,10 @@ docker compose ps
 ```
 
 You will see:
-- `abroad-admin-frontend` on `0.0.0.0:3002->3000/tcp`
-- `abroad-admin-backend` on `0.0.0.0:8002->8000/tcp`
+- `abroad-admin-frontend` running on `0.0.0.0:3002->3000/tcp`
+- `abroad-admin-backend` running on `0.0.0.0:8002->8000/tcp`
 
-Test local container responses:
+Test that both containers respond locally:
 ```bash
 curl -I http://127.0.0.1:3002
 curl -I http://127.0.0.1:8002/docs
@@ -207,11 +186,11 @@ curl -I http://127.0.0.1:8002/docs
 
 ---
 
-## 6. Host Nginx Reverse Proxy Setup
+## 5. Host Nginx Reverse Proxy Setup
 
-We will configure Host Nginx to route requests for `admit.abroadsimplified.com` to ports `3002` (Frontend) and `8002` (FastAPI backend).
+Configure your existing **Host Nginx** to route `admit.abroadsimplified.com` to ports `3002` (Frontend) and `8002` (Backend API).
 
-### 6.1 Create Nginx Site Configuration
+### 5.1 Create Nginx Site Configuration
 
 ```bash
 sudo nano /etc/nginx/sites-available/admit.abroadsimplified.com
@@ -275,13 +254,13 @@ server {
 }
 ```
 
-### 6.2 Enable Site and Reload Nginx
+### 5.2 Enable Site and Reload Nginx
 
 ```bash
 # Enable the site
 sudo ln -s /etc/nginx/sites-available/admit.abroadsimplified.com /etc/nginx/sites-enabled/
 
-# Test Nginx configuration (Crucial to protect existing sites!)
+# Test Nginx configuration (Crucial so you don't break existing sites!)
 sudo nginx -t
 
 # If syntax is OK, reload Nginx
@@ -290,9 +269,9 @@ sudo systemctl reload nginx
 
 ---
 
-## 7. SSL Certificate Configuration (Host Certbot)
+## 6. SSL Certificate Configuration (Host Certbot)
 
-Issue an SSL certificate for `admit.abroadsimplified.com`. This runs independently and **does not modify or disrupt certificates of your other 3 sites**:
+Use your existing **Host Certbot** to issue an SSL certificate for `admit.abroadsimplified.com`. This runs independently and **does not touch existing certificates**:
 
 ```bash
 sudo certbot --nginx -d admit.abroadsimplified.com
@@ -308,39 +287,34 @@ sudo certbot renew --dry-run
 
 ---
 
-## 8. Automated Deployment with `deploy.sh`
+## 7. Automated Deployment with `deploy.sh`
 
-A dedicated script `deploy.sh` is provided in the repository root for safe updates.
-
-### 8.1 Make Script Executable & Run
+A dedicated script `deploy.sh` is provided for one-command updates:
 
 ```bash
-cd ~/apps/abroad-simplified-landing
 chmod +x deploy.sh
 ./deploy.sh
 ```
 
 ### What `deploy.sh` Does:
 1. Validates `.env` and system dependencies.
-2. Pulls the latest commits from your active Git branch.
+2. Pulls the latest commits from your Git branch.
 3. Rebuilds and restarts `abroad-admin-frontend` and `abroad-admin-backend`.
 4. Runs safe dangling image cleanup (`docker image prune -f`) without touching images or volumes from the other 3 projects.
 5. Prints the health status of active containers.
 
 ---
 
-## 9. Safe Multi-App VPS Maintenance
+## 8. Safe Multi-App VPS Maintenance
 
 > ⚠️ **CRITICAL RULES FOR MULTI-APP VPS:**  
 > 1. **NEVER run `docker system prune -a` or `docker volume prune`!**  
 >    It will wipe container images and persistent database volumes (`abroad_db`, etc.) belonging to the other 3 projects.  
 > 2. Always use `docker compose logs` inside the project folder so logs don't mix.
 
-### 9.1 View Logs for Abroad Simplified Admin
+### 8.1 View Logs
 
 ```bash
-cd ~/apps/abroad-simplified-landing
-
 # Frontend logs
 docker compose logs -f frontend
 
@@ -351,11 +325,9 @@ docker compose logs -f backend
 sudo tail -f /var/log/nginx/error.log
 ```
 
-### 9.2 Restarting Services
+### 8.2 Restarting Services
 
 ```bash
-cd ~/apps/abroad-simplified-landing
-
 # Restart both frontend and backend
 docker compose restart
 
@@ -363,38 +335,33 @@ docker compose restart
 docker compose restart frontend
 ```
 
-### 9.3 Isolated Database Backup
+### 8.3 Isolated Database Backup
 
 ```bash
 mkdir -p ~/backups/abroad-admin
 docker cp abroad-admin-backend:/app/data ~/backups/abroad-admin/backup-$(date +%F)
 ```
 
-Automatic daily backup in crontab (`crontab -e`):
-```bash
-0 3 * * * docker cp abroad-admin-backend:/app/data /home/deploy/backups/abroad-admin/backup-$(date +\%F)
-```
-
 ---
 
-## 10. Troubleshooting & Health Checks
+## 9. Troubleshooting & Health Checks
 
 | Symptom | Cause | Solution |
 | :--- | :--- | :--- |
 | **Port Conflict on Deploy** | Port 3002 or 8002 is busy | Run `sudo ss -tulpn`. Adjust `FRONTEND_PORT` or `BACKEND_PORT` in `.env` and `/etc/nginx/sites-available/admit.abroadsimplified.com`. |
 | **502 Bad Gateway** | Container is stopped or port mismatch in Nginx | Run `docker compose ps` to check if `abroad-admin-frontend` is Up. Ensure proxy port in Nginx matches `FRONTEND_PORT`. |
 | **Nginx reload fails** | Syntax error in Nginx config | Run `sudo nginx -t` to find the exact line with the issue. |
-| **Out of Memory Spikes** | All 4 apps consuming RAM | Check with `htop` or `free -h`. Ensure 4GB Swap is active ([Section 3](#3-vps-swap-memory-setup-prevent-oom-crashes)). |
+| **Out of Memory Spikes** | All 4 apps consuming RAM | Check with `htop` or `free -h`. Ensure 4GB Swap is active ([Section 2](#2-vps-swap-memory-setup-prevent-oom-crashes)). |
 | **SSL Handshake Error** | DNS not resolved | Check DNS with `dig admit.abroadsimplified.com +short` and reissue with `sudo certbot --nginx -d admit.abroadsimplified.com`. |
 
 ### Summary of Quick Commands
 
 ```bash
 # Update and deploy
-cd ~/apps/abroad-simplified-landing && ./deploy.sh
+./deploy.sh
 
 # Check active containers
-docker ps
+docker compose ps
 
 # Check VPS resource usage
 htop

@@ -42,43 +42,9 @@ services:
     networks:
       - abroad-network
 
-  # ─────────────────────────────────────────────
-  # Nginx Reverse Proxy + SSL
-  # ─────────────────────────────────────────────
-  nginx:
-    image: nginx:alpine
-    container_name: abroad-admin-nginx
-    restart: unless-stopped
-    ports:
-      - "${HTTP_PORT:-80}:80"
-      - "${HTTPS_PORT:-443}:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - certbot-webroot:/var/www/certbot:ro
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - abroad-network
-
-  # ─────────────────────────────────────────────
-  # Certbot (Let's Encrypt SSL auto-renewal)
-  # ─────────────────────────────────────────────
-  certbot:
-    image: certbot/certbot
-    container_name: abroad-admin-certbot
-    volumes:
-      - ./nginx/ssl:/etc/letsencrypt
-      - certbot-webroot:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    networks:
-      - abroad-network
-
 networks:
   abroad-network:
     driver: bridge
 
 volumes:
   backend-data:
-  certbot-webroot:
