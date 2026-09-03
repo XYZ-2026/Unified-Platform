@@ -40,6 +40,31 @@ body {
   font-family: var(--font-poppins), 'Poppins', sans-serif;
 }
 
+/* ─────── Custom Scrollbar ─────── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #E7E2DE;
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #C9A55D;
+}
+
+/* ─────── Safe Area for Mobile Bottom Nav ─────── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 /* ─────── Essay Viewer Content Styling ─────── */
 .essay-viewer-content {
   font-family: Georgia, 'Times New Roman', serif;

@@ -44,23 +44,23 @@ export default function DashboardHomePage() {
   const firstName = displayName ? displayName.split(' ')[0] : (userData?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'Student');
 
   return (
-    <main className="p-4 sm:p-5 md:p-8 space-y-5 sm:space-y-6 max-w-7xl mx-auto w-full">
+    <main className="p-3.5 sm:p-5 md:p-8 space-y-4 sm:space-y-5 md:space-y-6 max-w-7xl mx-auto w-full">
       {/* PROMOTIONAL TOP BANNER */}
-      <div className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[16px] sm:rounded-[18px] p-4 sm:p-5 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shadow-sm border border-white/10">
-        <div className="flex items-start sm:items-center gap-3">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-            <Sparkles size={18} className="text-[#C9A55D]" />
+      <div className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[14px] sm:rounded-[18px] p-3.5 sm:p-5 text-white flex items-center justify-between gap-3 shadow-sm border border-white/10">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+            <Sparkles size={16} className="text-[#C9A55D]" />
           </div>
-          <div>
-            <div className="text-[14px] sm:text-[15px] font-bold">Fall 2026 Admissions Special Offer</div>
-            <div className="text-[12px] text-white/80 leading-relaxed">
+          <div className="min-w-0">
+            <div className="text-[13px] sm:text-[15px] font-bold truncate">Fall 2026 Admissions Special Offer</div>
+            <div className="text-[11px] sm:text-[12px] text-white/75 leading-relaxed hidden sm:block">
               Get unlimited AI SOP reviews, 500+ admitted student profiles &amp; Chance-Me predictions.
             </div>
           </div>
         </div>
-        <button className="shrink-0 self-end sm:self-auto px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#C9A55D] hover:bg-[#b8924b] text-black font-bold text-[12px] sm:text-[13px] transition-all flex items-center gap-1.5 shadow-xs">
-          <span>Claim 30% Off</span>
-          <ArrowRight size={13} />
+        <button className="shrink-0 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full bg-[#C9A55D] hover:bg-[#b8924b] text-black font-bold text-[11px] sm:text-[13px] transition-all flex items-center gap-1.5 shadow-xs whitespace-nowrap">
+          <span>30% Off</span>
+          <ArrowRight size={12} />
         </button>
       </div>
 
@@ -81,31 +81,32 @@ export default function DashboardHomePage() {
       </div>
 
       {/* TWO-COLUMN LAYOUT: MAIN WIDGETS + RIGHT SIDEBAR */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         {/* LEFT 2 COLUMNS: HERO CARDS & TIMELINE */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="md:col-span-2 space-y-4 sm:space-y-5 md:space-y-6">
           {/* HERO FEATURE CARD: AI CHANCE ME */}
-          <div className="bg-white border border-[#E7E2DE] rounded-[18px] sm:rounded-[20px] p-5 sm:p-6 md:p-8 shadow-xs relative overflow-hidden">
+          <div className="bg-white border border-[#E7E2DE] rounded-[16px] sm:rounded-[20px] p-4 sm:p-6 md:p-8 shadow-xs relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-[#690B1B]/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 relative z-10">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[16px] sm:rounded-[20px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shrink-0 shadow-md border border-white/20 text-white">
-                <BarChart3 size={32} className="text-[#C9A55D]" />
+            <div className="flex items-center gap-3 sm:gap-6 relative z-10">
+              <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-[14px] sm:rounded-[20px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shrink-0 shadow-md border border-white/20 text-white">
+                <BarChart3 size={22} className="text-[#C9A55D] sm:hidden" />
+                <BarChart3 size={32} className="text-[#C9A55D] hidden sm:block" />
               </div>
-              <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F7F0F1] text-[#690B1B] text-[11px] font-bold uppercase tracking-wider">
-                  <Sparkles size={12} />
+              <div className="space-y-1.5 sm:space-y-2 min-w-0">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#F7F0F1] text-[#690B1B] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
+                  <Sparkles size={10} />
                   <span>AI Admission Evaluator</span>
                 </div>
-                <h3 className="text-[20px] md:text-[22px] font-bold text-[#111111]">
+                <h3 className="text-[17px] sm:text-[20px] md:text-[22px] font-bold text-[#111111] leading-snug">
                   See your real admission chances
                 </h3>
-                <p className="text-[14px] text-[#666666] leading-relaxed max-w-[500px]">
-                  Get a full read on your profile school-by-school, compared against thousands of verified admitted students with target gaps highlighted.
+                <p className="text-[12px] sm:text-[14px] text-[#666666] leading-relaxed hidden sm:block max-w-[500px]">
+                  Get a full read on your profile school-by-school, compared against thousands of verified admitted students.
                 </p>
-                <div className="pt-2">
-                  <Link href="/dashboard/chance-me" className="px-6 py-3 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[14px] font-bold transition-all inline-flex items-center gap-2 shadow-xs hover:scale-[1.01]">
+                <div className="pt-1 sm:pt-2">
+                  <Link href="/dashboard/chance-me" className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] sm:text-[14px] font-bold transition-all inline-flex items-center gap-2 shadow-xs hover:scale-[1.01]">
                     <span>Run AI Chance-Me</span>
-                    <ArrowRight size={16} />
+                    <ArrowRight size={14} />
                   </Link>
                 </div>
               </div>
@@ -113,18 +114,18 @@ export default function DashboardHomePage() {
           </div>
 
           {/* APPLICATION DEADLINE TIMELINE CARD */}
-          <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#F0EBE6]">
+          <div className="bg-white border border-[#E7E2DE] rounded-[16px] sm:rounded-[20px] p-4 sm:p-6 shadow-xs">
+            <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-[#F0EBE6]">
               <div>
-                <h3 className="text-[17px] font-bold text-[#111111] flex items-center gap-2">
-                  <Clock size={18} className="text-[#690B1B]" />
+                <h3 className="text-[15px] sm:text-[17px] font-bold text-[#111111] flex items-center gap-2">
+                  <Clock size={16} className="text-[#690B1B]" />
                   <span>Fall 2026 Milestone Timeline</span>
                 </h3>
-                <p className="text-[12px] text-[#888888]">Key deadlines &amp; application checkpoints</p>
+                <p className="text-[11px] sm:text-[12px] text-[#888888]">Key deadlines &amp; application checkpoints</p>
               </div>
-              <Link href="/dashboard/tracker" className="text-[13px] font-bold text-[#690B1B] hover:underline flex items-center gap-1">
+              <Link href="/dashboard/tracker" className="text-[12px] sm:text-[13px] font-bold text-[#690B1B] hover:underline flex items-center gap-1">
                 <span>View all</span>
-                <ChevronRight size={14} />
+                <ChevronRight size={13} />
               </Link>
             </div>
 
@@ -137,7 +138,7 @@ export default function DashboardHomePage() {
                 <span>OCT 15</span>
               </div>
 
-              <div className="space-y-3 pt-2">
+              <div className="space-y-2.5 sm:space-y-3 pt-2">
                 {[
                   { title: "Draft Common App & Personal SOP", status: "Completed", date: "Sep 05", done: true },
                   { title: "Request Teacher Recommendation Letters", status: "In Progress", date: "Sep 18", done: false },
@@ -145,20 +146,20 @@ export default function DashboardHomePage() {
                 ].map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-3.5 rounded-[14px] bg-[#FDFCFB] border border-[#F0EBE6] hover:border-[#690B1B]/20 transition-all"
+                    className="flex items-center justify-between p-3 sm:p-3.5 rounded-[12px] sm:rounded-[14px] bg-[#FDFCFB] border border-[#F0EBE6] hover:border-[#690B1B]/20 transition-all gap-2"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center ${item.done ? 'bg-[#16a34a]/10 text-[#16a34a]' : 'bg-[#690B1B]/10 text-[#690B1B]'}`}>
-                        {item.done ? <CheckCircle2 size={16} /> : <Clock size={16} />}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${item.done ? 'bg-[#16a34a]/10 text-[#16a34a]' : 'bg-[#690B1B]/10 text-[#690B1B]'}`}>
+                        {item.done ? <CheckCircle2 size={15} /> : <Clock size={15} />}
                       </div>
-                      <div>
-                        <div className={`text-[14px] font-bold ${item.done ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
+                      <div className="min-w-0">
+                        <div className={`text-[12px] sm:text-[14px] font-bold truncate ${item.done ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
                           {item.title}
                         </div>
-                        <div className="text-[11px] text-[#888888]">Deadline: {item.date}</div>
+                        <div className="text-[10px] sm:text-[11px] text-[#888888]">Deadline: {item.date}</div>
                       </div>
                     </div>
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${item.done ? 'bg-[#16a34a]/10 text-[#16a34a]' : 'bg-[#C9A55D]/15 text-[#9E731A]'}`}>
+                    <span className={`text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-1 rounded-full shrink-0 ${item.done ? 'bg-[#16a34a]/10 text-[#16a34a]' : 'bg-[#C9A55D]/15 text-[#9E731A]'}`}>
                       {item.status}
                     </span>
                   </div>
@@ -169,42 +170,42 @@ export default function DashboardHomePage() {
         </div>
 
         {/* RIGHT COLUMN: REWARDS & UPGRADE WIDGETS */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-5 md:space-y-6">
           {/* REWARDS CARD */}
-          <div className="bg-gradient-to-br from-[#EBF4FB] to-white border border-[#D0E2F3] rounded-[20px] p-6 shadow-xs relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#EBF4FB] to-white border border-[#D0E2F3] rounded-[16px] sm:rounded-[20px] p-4 sm:p-6 shadow-xs relative overflow-hidden">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-full bg-[#0088CB]/10 text-[#0088CB] flex items-center justify-center">
-                <Gift size={22} />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0088CB]/10 text-[#0088CB] flex items-center justify-center">
+                <Gift size={20} />
               </div>
-              <span className="text-[11px] font-bold text-[#0088CB] bg-[#0088CB]/10 px-2.5 py-0.5 rounded-full">
+              <span className="text-[10px] sm:text-[11px] font-bold text-[#0088CB] bg-[#0088CB]/10 px-2.5 py-0.5 rounded-full">
                 FREE REWARDS
               </span>
             </div>
-            <h4 className="text-[18px] font-bold text-[#111111] mb-1">Earn Free AI Credits!</h4>
-            <p className="text-[13px] text-[#555555] leading-relaxed mb-4">
+            <h4 className="text-[16px] sm:text-[18px] font-bold text-[#111111] mb-1">Earn Free AI Credits!</h4>
+            <p className="text-[12px] sm:text-[13px] text-[#555555] leading-relaxed mb-3 sm:mb-4">
               Earn <strong className="text-[#0088CB]">30 free credits</strong> by inviting your friends &amp; classmates.
             </p>
-            <button className="w-full py-2.5 px-4 rounded-[12px] bg-[#0088CB] hover:bg-[#0074AE] text-white text-[13px] font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
-              <Share2 size={15} />
+            <button className="w-full py-2 sm:py-2.5 px-4 rounded-[12px] bg-[#0088CB] hover:bg-[#0074AE] text-white text-[12px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
+              <Share2 size={14} />
               <span>Invite Friends →</span>
             </button>
           </div>
 
           {/* UNLIMITED ENERGY / UPGRADE WIDGET */}
-          <div className="bg-gradient-to-br from-[#FFF9EE] to-white border border-[#F5E5C4] rounded-[20px] p-6 shadow-xs relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#FFF9EE] to-white border border-[#F5E5C4] rounded-[16px] sm:rounded-[20px] p-4 sm:p-6 shadow-xs relative overflow-hidden">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-full bg-[#C9A55D]/15 text-[#9E731A] flex items-center justify-center">
-                <Zap size={22} className="fill-[#C9A55D]" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#C9A55D]/15 text-[#9E731A] flex items-center justify-center">
+                <Zap size={20} className="fill-[#C9A55D]" />
               </div>
-              <span className="text-[11px] font-bold text-[#9E731A] bg-[#C9A55D]/20 px-2.5 py-0.5 rounded-full">
+              <span className="text-[10px] sm:text-[11px] font-bold text-[#9E731A] bg-[#C9A55D]/20 px-2.5 py-0.5 rounded-full">
                 PRO ACCESS
               </span>
             </div>
-            <h4 className="text-[18px] font-bold text-[#111111] mb-1">Unlimited AI Energy</h4>
-            <p className="text-[13px] text-[#666666] leading-relaxed mb-4">
+            <h4 className="text-[16px] sm:text-[18px] font-bold text-[#111111] mb-1">Unlimited AI Energy</h4>
+            <p className="text-[12px] sm:text-[13px] text-[#666666] leading-relaxed mb-3 sm:mb-4">
               Get infinite SOP reviews, priority AI Chance-Me, and full access to 500+ exemplar admit essays.
             </p>
-            <button className="w-full py-2.5 px-4 rounded-[12px] bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
+            <button className="w-full py-2 sm:py-2.5 px-4 rounded-[12px] bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
               <span>View Upgrade Plans →</span>
             </button>
           </div>
@@ -212,9 +213,9 @@ export default function DashboardHomePage() {
       </div>
 
       {/* RECOMMENDED FOR YOU GRID (4 ACTION CARDS) */}
-      <div className="pt-2 sm:pt-4">
-        <h3 className="text-[16px] sm:text-[18px] font-bold text-[#111111] mb-3 sm:mb-4">Recommended Actions for You</h3>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="pt-1 sm:pt-2 md:pt-4">
+        <h3 className="text-[15px] sm:text-[18px] font-bold text-[#111111] mb-3 sm:mb-4">Recommended Actions for You</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           {[
             {
               title: "See your real admission chances",
@@ -236,7 +237,7 @@ export default function DashboardHomePage() {
             },
             {
               title: "Complete your profile",
-              desc: "Add GPA, test scores & extracurriculars for tailored guidance.",
+              desc: "Add GPA, test scores & extracurriculars.",
               action: "Finish →",
               href: "/dashboard/profile",
               btnBg: "bg-[#C9A55D] text-black",
@@ -245,7 +246,7 @@ export default function DashboardHomePage() {
             },
             {
               title: "Write your SOP",
-              desc: "Get instant real-time AI feedback on your college essays.",
+              desc: "Get instant real-time AI feedback on your essays.",
               action: "Write →",
               href: "/dashboard/essays",
               btnBg: "bg-[#690B1B] text-white",
@@ -257,25 +258,25 @@ export default function DashboardHomePage() {
             return (
               <div
                 key={idx}
-                className="bg-white border border-[#E7E2DE] rounded-[18px] p-5 shadow-2xs hover:border-[#690B1B]/40 hover:-translate-y-1 transition-all flex flex-col justify-between"
+                className="bg-white border border-[#E7E2DE] rounded-[14px] sm:rounded-[18px] p-3.5 sm:p-5 shadow-2xs hover:border-[#690B1B]/40 hover:-translate-y-1 transition-all flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-9 h-9 rounded-full bg-[#F7F0F1] text-[#690B1B] flex items-center justify-center">
-                      <IconComponent size={18} />
+                  <div className="flex items-center justify-between mb-2.5 sm:mb-3">
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#F7F0F1] text-[#690B1B] flex items-center justify-center">
+                      <IconComponent size={16} />
                     </div>
-                    <span className="text-[9px] font-bold text-[#690B1B] bg-[#F7F0F1] px-2 py-0.5 rounded-full">
+                    <span className="text-[8px] sm:text-[9px] font-bold text-[#690B1B] bg-[#F7F0F1] px-1.5 sm:px-2 py-0.5 rounded-full truncate ml-1">
                       {card.badge}
                     </span>
                   </div>
-                  <h4 className="text-[15px] font-bold text-[#111111] mb-1.5 leading-snug">
+                  <h4 className="text-[13px] sm:text-[15px] font-bold text-[#111111] mb-1 sm:mb-1.5 leading-snug">
                     {card.title}
                   </h4>
-                  <p className="text-[12px] text-[#777777] leading-relaxed mb-4">
+                  <p className="text-[11px] sm:text-[12px] text-[#777777] leading-relaxed mb-3 sm:mb-4 hidden sm:block">
                     {card.desc}
                   </p>
                 </div>
-                <Link href={card.href} className={`w-full py-2 px-4 rounded-[10px] text-[12px] font-bold transition-all text-center block ${card.btnBg}`}>
+                <Link href={card.href} className={`w-full py-1.5 sm:py-2 px-3 sm:px-4 rounded-[8px] sm:rounded-[10px] text-[11px] sm:text-[12px] font-bold transition-all text-center block ${card.btnBg}`}>
                   {card.action}
                 </Link>
               </div>

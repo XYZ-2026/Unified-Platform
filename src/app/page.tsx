@@ -136,18 +136,47 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
+        {/* Mobile Slide-down Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-[#F6F4F2] border-b border-[#E7E2DE] px-6 py-4 flex flex-col gap-3">
-            <a href="#universities" className="py-2 text-[#111] font-medium border-b border-[#E7E2DE]" onClick={() => setMobileMenuOpen(false)}>Universities</a>
-            <a href="#chance-me" className="py-2 text-[#111] font-medium border-b border-[#E7E2DE]" onClick={() => setMobileMenuOpen(false)}>AI Chance-Me</a>
-            <a href="#features" className="py-2 text-[#111] font-medium border-b border-[#E7E2DE]" onClick={() => setMobileMenuOpen(false)}>SOP Builder</a>
-            <a href="#features" className="py-2 text-[#111] font-medium border-b border-[#E7E2DE]" onClick={() => setMobileMenuOpen(false)}>Scholarships</a>
-            {user ? (
-              <Link href="/dashboard" className="py-2 text-[#690B1B] font-bold" onClick={() => setMobileMenuOpen(false)}>Go to Dashboard →</Link>
-            ) : (
-              <Link href="/login" className="py-2 text-[#690B1B] font-bold" onClick={() => setMobileMenuOpen(false)}>Sign In →</Link>
-            )}
+          <div className="lg:hidden bg-white border-b border-[#E7E2DE] shadow-lg">
+            <div className="px-5 py-5 space-y-1">
+              {[
+                { label: "Universities", href: "#universities", emoji: "🎓" },
+                { label: "AI Chance-Me", href: "#chance-me", emoji: "📊" },
+                { label: "SOP Builder", href: "#features", emoji: "✍️" },
+                { label: "Scholarships", href: "#features", emoji: "🏆" },
+                { label: "Visa Help", href: "#features", emoji: "🌍" },
+              ].map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center gap-3 py-3 px-3 rounded-[12px] text-[15px] font-medium text-[#333] hover:bg-[#F7F0F1] hover:text-[#690B1B] transition-all"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="text-[18px]">{item.emoji}</span>
+                  {item.label}
+                </a>
+              ))}
+              <div className="pt-3 border-t border-[#F0EBE6] mt-2">
+                {user ? (
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center justify-center w-full py-3 rounded-[12px] bg-[#690B1B] text-white font-bold text-[15px]"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Go to Dashboard →
+                  </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="flex items-center justify-center w-full py-3 rounded-[12px] bg-[#690B1B] text-white font-bold text-[15px]"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Get Started Free →
+                  </Link>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </nav>
@@ -322,7 +351,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto mt-12 sm:mt-20 relative">
           <div className="hidden lg:block absolute top-5 left-[9%] w-[82%] h-px bg-[#EAD9DD]" />
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-10 relative z-10">
+          <div className="flex flex-wrap justify-center gap-6 sm:gap-10 relative z-10">
             {[
               { num: "01", title: "Discovery", desc: "Find target, reach & safety schools", active: true },
               { num: "02", title: "Profile Evaluation", desc: "AI Chance-Me & stats comparison", active: false },
@@ -330,7 +359,7 @@ export default function Home() {
               { num: "04", title: "Scholarships", desc: "Match funding & grant opportunities", active: false },
               { num: "05", title: "Visa & Admit", desc: "Document check & mock interview", active: false },
             ].map((step) => (
-              <div key={step.num} className="flex flex-col items-center">
+              <div key={step.num} className="flex flex-col items-center w-[calc(50%-12px)] sm:w-[calc(33.333%-27px)] lg:w-[160px]">
                 <div
                   className={`w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] rounded-full flex items-center justify-center text-[14px] sm:text-[16px] font-bold ${
                     step.active
@@ -343,7 +372,7 @@ export default function Home() {
                 <h3 className="mt-4 sm:mt-6 text-[16px] sm:text-[20px] font-bold text-[#111]">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-[12px] sm:text-[14px] text-[#888888] max-w-[160px] sm:max-w-[200px]">
+                <p className="mt-2 text-[12px] sm:text-[14px] text-[#888888] max-w-[160px] sm:max-w-[200px] text-center">
                   {step.desc}
                 </p>
               </div>
