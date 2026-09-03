@@ -340,7 +340,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
          THE ADMISSIONS JOURNEY — Step process matching Research AS
          ═══════════════════════════════════════════════════════════════ */}
-      <section className="bg-[#F7F5F3] px-4 sm:px-5 md:px-8 py-12 sm:py-20 lg:py-24 text-center">
+      <section className="bg-[#F7F5F3] px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 text-center">
         <div className="text-[#C9A55D] text-[12px] tracking-[0.22em] font-bold uppercase mb-4">
           THE ADMISSIONS JOURNEY
         </div>
@@ -348,7 +348,7 @@ export default function Home() {
           From target list to acceptance letter
         </h2>
 
-        <div className="max-w-7xl mx-auto mt-12 sm:mt-20 relative">
+        <div className="max-w-7xl mx-auto mt-8 sm:mt-12 relative">
           <div className="hidden lg:block absolute top-5 left-[9%] w-[82%] h-px bg-[#EAD9DD]" />
 
           <div className="flex flex-wrap justify-center gap-6 sm:gap-10 relative z-10">
@@ -384,7 +384,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
          TOP STUDY DESTINATIONS — Grid layout
          ═══════════════════════════════════════════════════════════════ */}
-      <section id="universities" className="px-4 sm:px-5 md:px-8 py-12 sm:py-20 lg:py-24 bg-[#F6F4F2]">
+      <section id="universities" className="px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 bg-[#F6F4F2]">
         <div className="max-w-7xl mx-auto">
           <div className="text-[#C9A55D] text-[12px] tracking-[0.2em] font-bold uppercase mb-3">
             GLOBAL REACH
@@ -426,7 +426,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
          PLATFORM FEATURES — Grid matching Research AS
          ═══════════════════════════════════════════════════════════════ */}
-      <section id="features" className="px-4 sm:px-5 md:px-8 py-12 sm:py-20 lg:py-24 bg-[#F7F5F3]">
+      <section id="features" className="px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 bg-[#F7F5F3]">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between gap-8 border-b border-[#E7E1DE] pb-10">
           <div>
             <div className="text-[#C9A55D] text-[12px] tracking-[0.2em] font-bold uppercase mb-4">
