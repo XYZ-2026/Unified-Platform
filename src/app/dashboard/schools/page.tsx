@@ -166,18 +166,26 @@ export default function UniversityFinderPage() {
             />
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            {['ALL', 'US', 'UK', 'CA', 'DE', 'AU'].map((c) => (
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {[
+              { code: 'ALL', label: 'All Countries', flag: '🌍' },
+              { code: 'US', label: 'United States', flag: '🇺🇸' },
+              { code: 'UK', label: 'United Kingdom', flag: '🇬🇧' },
+              { code: 'CA', label: 'Canada', flag: '🇨🇦' },
+              { code: 'DE', label: 'Germany', flag: '🇩🇪' },
+              { code: 'AU', label: 'Australia', flag: '🇦🇺' },
+            ].map((item) => (
               <button
-                key={c}
-                onClick={() => setSelectedCountry(c)}
-                className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  selectedCountry === c
+                key={item.code}
+                onClick={() => setSelectedCountry(item.code)}
+                className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                  selectedCountry === item.code
                     ? 'bg-[#690B1B] text-white shadow-xs'
                     : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
                 }`}
               >
-                {c === 'ALL' ? 'All Countries' : c}
+                <span>{item.flag}</span>
+                <span>{item.label}</span>
               </button>
             ))}
           </div>
@@ -325,7 +333,7 @@ export default function UniversityFinderPage() {
                   href={`/dashboard/schools/${u.slug}`}
                   className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer group-hover:scale-[1.02]"
                 >
-                  <span>View School</span>
+                  <span>View University</span>
                   <ArrowRight size={13} />
                 </Link>
               </div>

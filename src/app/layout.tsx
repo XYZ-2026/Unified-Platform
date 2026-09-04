@@ -14,6 +14,16 @@ export const metadata: Metadata = {
   title: 'Abroad Simplified — Study Abroad & University Finder',
   description:
     'Discover top global universities, match scholarships, receive AI SOP & visa assistance, and take career psychometric assessments.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    shortcut: ['/favicon.ico'],
+    apple: [
+      { url: '/apple-icon.png' },
+    ],
+  },
 };
 
 export default function RootLayout({

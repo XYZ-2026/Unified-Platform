@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [name, setName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -78,6 +79,10 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setMessage('');
+    if (!agreedToTerms) {
+      setError('You must agree to the Terms & Conditions to create an account.');
+      return;
+    }
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -88,7 +93,7 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      await signup(name, email, password);
+      await signup(name, email, password, agreedToTerms);
       router.push('/onboarding');
     } catch (err: any) {
       console.error(err);
@@ -102,7 +107,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await googleSignIn();
+      await googleSignIn(agreedToTerms);
       router.push('/dashboard');
     } catch (err: any) {
       console.error(err);
@@ -130,13 +135,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#F6F4F2] flex flex-col justify-center items-center p-5 selection:bg-[#690B1B] selection:text-white">
-      {/* BRAND LOGO HEADER */}
-      <Link href="/" className="flex items-center gap-3 mb-8 hover:opacity-90 transition-opacity">
-        <div className="w-[48px] h-[48px] rounded-[15px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shadow-[0_8px_24px_rgba(105,11,27,0.25)] border border-white/10">
-          <svg viewBox="0 0 24 24" fill="none" className="w-[20px] h-[20px]">
-            <path d="M12 3L4 9V21H20V9L12 3Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M9 21V12H15V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+      {/* BRAND LOGO & NAME HEADER */}
+      <Link href="/" className="flex items-center gap-3.5 mb-8 hover:opacity-90 transition-opacity">
+        <div className="w-[52px] h-[52px] rounded-[16px] shadow-[0_8px_24px_rgba(105,11,27,0.22)] overflow-hidden shrink-0">
+          <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
         </div>
         <div>
           <div className="text-[22px] font-bold text-[#111111] tracking-[-0.04em] leading-none">
@@ -245,12 +247,47 @@ export default function LoginPage() {
               <div className="flex-1 h-px bg-[#E7E2DE]" />
             </div>
 
+            {/* T&C for Google sign-in */}
+            <div className="flex items-start gap-2.5">
+              <div
+                role="checkbox"
+                aria-checked={agreedToTerms}
+                id="login-terms-checkbox"
+                tabIndex={0}
+                onClick={() => setAgreedToTerms(!agreedToTerms)}
+                onKeyDown={(e) => e.key === ' ' && setAgreedToTerms(!agreedToTerms)}
+                className={`mt-0.5 w-[18px] h-[18px] rounded-[5px] border-2 flex items-center justify-center shrink-0 cursor-pointer transition-all ${
+                  agreedToTerms
+                    ? 'bg-[#690B1B] border-[#690B1B]'
+                    : 'bg-white border-[#D1CBC4] hover:border-[#690B1B]'
+                }`}
+              >
+                {agreedToTerms && (
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+              <label htmlFor="login-terms-checkbox" className="text-[12px] text-[#555] leading-relaxed cursor-pointer select-none">
+                I agree to the{' '}
+                <Link href="/terms" target="_blank" className="text-[#690B1B] font-bold hover:underline">
+                  Terms &amp; Conditions
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" target="_blank" className="text-[#690B1B] font-bold hover:underline">
+                  Privacy Policy
+                </Link>{' '}
+                of Abroad Simplified
+              </label>
+            </div>
+
             {/* GOOGLE SIGN IN BUTTON */}
             <button
               type="button"
               onClick={handleGoogle}
-              disabled={loading}
-              className="w-full h-[48px] rounded-full border border-[#E7E2DE] bg-white text-[#333] font-bold text-[14px] hover:bg-[#F9F7F5] transition-all flex items-center justify-center gap-3 shadow-2xs"
+              disabled={loading || !agreedToTerms}
+              title={!agreedToTerms ? 'Please agree to the Terms & Conditions first' : ''}
+              className="w-full h-[48px] rounded-full border border-[#E7E2DE] bg-white text-[#333] font-bold text-[14px] hover:bg-[#F9F7F5] transition-all flex items-center justify-center gap-3 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -314,10 +351,45 @@ export default function LoginPage() {
               />
             </div>
 
+            {/* T&C CHECKBOX */}
+            <div className="flex items-start gap-2.5 py-1">
+              <div
+                role="checkbox"
+                aria-checked={agreedToTerms}
+                id="register-terms-checkbox"
+                tabIndex={0}
+                onClick={() => setAgreedToTerms(!agreedToTerms)}
+                onKeyDown={(e) => e.key === ' ' && setAgreedToTerms(!agreedToTerms)}
+                className={`mt-0.5 w-[18px] h-[18px] rounded-[5px] border-2 flex items-center justify-center shrink-0 cursor-pointer transition-all ${
+                  agreedToTerms
+                    ? 'bg-[#690B1B] border-[#690B1B]'
+                    : 'bg-white border-[#D1CBC4] hover:border-[#690B1B]'
+                }`}
+              >
+                {agreedToTerms && (
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+              <label htmlFor="register-terms-checkbox" className="text-[12px] text-[#555] leading-relaxed cursor-pointer select-none">
+                I have read and agree to the{' '}
+                <Link href="/terms" target="_blank" className="text-[#690B1B] font-bold hover:underline">
+                  Terms &amp; Conditions
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" target="_blank" className="text-[#690B1B] font-bold hover:underline">
+                  Privacy Policy
+                </Link>{' '}
+                of Abroad Simplified.
+              </label>
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
-              className="w-full h-[48px] rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white font-bold text-[14px] transition-all flex items-center justify-center gap-2 shadow-xs disabled:opacity-50"
+              disabled={loading || !agreedToTerms}
+              title={!agreedToTerms ? 'Please agree to the Terms & Conditions to continue' : ''}
+              className="w-full h-[48px] rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white font-bold text-[14px] transition-all flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span>{loading ? 'Creating Account...' : 'Create Account →'}</span>
             </button>

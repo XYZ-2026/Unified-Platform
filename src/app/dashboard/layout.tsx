@@ -99,20 +99,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div>
           <div className="h-[76px] px-4 flex items-center justify-between border-b border-[#F0EBE6]">
             <Link href="/" className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
-              <div className="relative shrink-0">
-                <div className="w-[40px] h-[40px] rounded-[12px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shadow-[0_6px_20px_rgba(105,11,27,0.2)] border border-white/10">
-                  <svg viewBox="0 0 24 24" fill="none" className="w-[18px] h-[18px]">
-                    <path d="M12 3L4 9V21H20V9L12 3Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M9 21V12H15V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
+              <div className="w-[40px] h-[40px] rounded-[12px] shadow-[0_4px_16px_rgba(105,11,27,0.2)] overflow-hidden shrink-0">
+                <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
               </div>
               {!sidebarCollapsed && (
                 <div className="min-w-0 flex-1">
                   <div className="text-[15px] font-bold tracking-[-0.02em] leading-tight text-[#111] truncate">
                     Abroad Simplified
                   </div>
-                  <div className="mt-1 flex items-center gap-1.5 whitespace-nowrap">
+                  <div className="mt-0.5 flex items-center gap-1.5 whitespace-nowrap">
                     <span className="w-[4px] h-[4px] rounded-full bg-[#C9A55D] shrink-0" />
                     <span className="text-[9px] uppercase tracking-[0.18em] font-semibold text-[#A3A3A3]">
                       Admissions Hub
@@ -290,15 +285,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <Menu size={22} />
             </button>
-            {/* Mobile: Logo mark */}
-            <Link href="/dashboard" className="md:hidden flex items-center gap-2">
-              <div className="w-[32px] h-[32px] rounded-[9px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shadow-[0_4px_12px_rgba(105,11,27,0.2)]">
-                <svg viewBox="0 0 24 24" fill="none" className="w-[14px] h-[14px]">
-                  <path d="M12 3L4 9V21H20V9L12 3Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M9 21V12H15V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+            {/* Mobile: Logo mark & Website Name */}
+            <Link href="/dashboard" className="md:hidden flex items-center gap-2.5">
+              <div className="w-[34px] h-[34px] rounded-[10px] shadow-[0_4px_12px_rgba(105,11,27,0.2)] overflow-hidden shrink-0">
+                <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
               </div>
-              <span className="text-[14px] font-bold text-[#111] tracking-tight">Abroad Simplified</span>
+              <span className="text-[15px] font-bold text-[#111] tracking-tight">Abroad Simplified</span>
             </Link>
             <div className="hidden sm:block">
               <h1 className="text-[15px] sm:text-[18px] font-bold text-[#111111]">Abroad Simplified Student Portal</h1>

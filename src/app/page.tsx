@@ -17,39 +17,18 @@ export default function Home() {
          ═══════════════════════════════════════════════════════════════ */}
       <nav className="sticky top-0 z-50 w-full bg-[#F6F4F2]/92 backdrop-blur-xl border-b border-[#E7E2DE]">
         <div className="w-full h-[68px] sm:h-[84px] md:h-[92px] px-4 sm:px-5 md:px-8 lg:px-12 flex items-center justify-between">
-          {/* LEFT - Logo */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-4 cursor-pointer hover:opacity-90 transition-opacity">
-            <div className="relative">
-              {/* GLOW */}
-              <div className="absolute inset-0 bg-[#690B1B]/10 blur-xl rounded-full" />
-              {/* BOX */}
-              <div className="relative w-[38px] h-[38px] sm:w-[52px] sm:h-[52px] rounded-[12px] sm:rounded-[16px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shadow-[0_10px_30px_rgba(105,11,27,0.22)] border border-white/10">
-                <svg viewBox="0 0 24 24" fill="none" className="w-[22px] h-[22px]">
-                  <path
-                    d="M12 3L4 9V21H20V9L12 3Z"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M9 21V12H15V21"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+          {/* LEFT - Logo & Website Name */}
+          <Link href="/" className="flex items-center gap-3 sm:gap-4 cursor-pointer hover:opacity-90 transition-opacity">
+            <div className="relative w-[44px] h-[44px] sm:w-[54px] sm:h-[54px] rounded-[14px] sm:rounded-[16px] shadow-[0_6px_20px_rgba(105,11,27,0.22)] overflow-hidden shrink-0">
+              <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
             </div>
-            {/* TEXT */}
             <div>
-              <div className="text-[16px] sm:text-[20px] md:text-[21px] font-bold tracking-[-0.04em] leading-none text-[#111111]">
+              <div className="text-[17px] sm:text-[20px] md:text-[22px] font-bold tracking-[-0.03em] leading-none text-[#111111]">
                 Abroad Simplified
               </div>
-              <div className="hidden sm:flex mt-[6px] items-center gap-2">
-                <span className="w-[5px] h-[5px] rounded-full bg-[#C9A55D]" />
-                <span className="text-[10px] uppercase tracking-[0.22em] text-[#A3A3A3]">
+              <div className="hidden sm:flex mt-[5px] items-center gap-1.5">
+                <span className="w-[4px] h-[4px] rounded-full bg-[#C9A55D]" />
+                <span className="text-[9.5px] uppercase tracking-[0.2em] font-semibold text-[#A3A3A3]">
                   AI Admissions Platform
                 </span>
               </div>
@@ -78,10 +57,10 @@ export default function Home() {
           </div>
 
           {/* RIGHT - Auth and CTA */}
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-[#111] focus:outline-none"
+              className="lg:hidden p-2 text-[#111] focus:outline-none shrink-0"
               aria-label="Toggle Menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,16 +76,16 @@ export default function Home() {
               <>
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-1.5 sm:gap-2 text-[13px] sm:text-[15px] font-bold text-[#690B1B] hover:underline"
+                  className="flex items-center gap-1.5 sm:gap-2 text-[13px] sm:text-[15px] font-bold text-[#690B1B] hover:underline whitespace-nowrap shrink-0"
                 >
                   <span className="w-7 h-7 rounded-full bg-[#690B1B] text-white flex items-center justify-center text-[12px] shrink-0">
                     {userData?.name?.charAt(0) || user.email?.charAt(0)?.toUpperCase() || 'U'}
                   </span>
-                  <span className="hidden sm:inline">Dashboard</span>
+                  <span className="hidden sm:inline whitespace-nowrap">Dashboard</span>
                 </Link>
                 <button
                   onClick={() => logout()}
-                  className="hidden sm:flex text-[14px] font-medium text-[#777] hover:text-[#690B1B] transition-colors"
+                  className="hidden sm:flex text-[14px] font-medium text-[#777] hover:text-[#690B1B] transition-colors whitespace-nowrap"
                 >
                   Sign Out
                 </button>
@@ -115,18 +94,18 @@ export default function Home() {
               <>
                 <Link
                   href="/login"
-                  className="hidden sm:flex text-[15px] font-medium text-[#5B5B5B] hover:text-[#690B1B] transition-colors"
+                  className="hidden sm:flex text-[15px] font-medium text-[#5B5B5B] hover:text-[#690B1B] transition-colors whitespace-nowrap"
                 >
                   Sign in
                 </Link>
 
                 <Link
                   href="/login"
-                  className="group relative h-[40px] sm:h-[50px] px-4 sm:px-7 rounded-full overflow-hidden bg-[#690B1B] text-white text-[13px] sm:text-[15px] font-bold shadow-[0_10px_25px_rgba(105,11,27,0.22)] hover:scale-[1.02] transition-all flex items-center justify-center"
+                  className="group relative h-[38px] sm:h-[46px] md:h-[50px] px-3.5 sm:px-6 rounded-full overflow-hidden bg-[#690B1B] text-white text-[12px] sm:text-[14px] md:text-[15px] font-bold shadow-[0_10px_25px_rgba(105,11,27,0.22)] hover:scale-[1.02] transition-all flex items-center justify-center whitespace-nowrap shrink-0"
                 >
                   {/* SHINE */}
                   <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000" />
-                  <span className="relative flex items-center gap-1.5 sm:gap-2">
+                  <span className="relative flex items-center gap-1 sm:gap-2 whitespace-nowrap">
                     Start Free
                     <span className="transition-transform group-hover:translate-x-1">→</span>
                   </span>
@@ -138,30 +117,74 @@ export default function Home() {
 
         {/* Mobile Slide-down Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-[#E7E2DE] shadow-lg">
-            <div className="px-5 py-5 space-y-1">
+          <div className="lg:hidden bg-white/98 backdrop-blur-xl border-b border-[#E7E2DE] shadow-[0_16px_36px_rgba(0,0,0,0.08)]">
+            <div className="px-5 py-5 space-y-1.5">
+              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#A3A3A3] mb-3 px-1">Platform Navigation</div>
               {[
-                { label: "Universities", href: "#universities", emoji: "🎓" },
-                { label: "AI Chance-Me", href: "#chance-me", emoji: "📊" },
-                { label: "SOP Builder", href: "#features", emoji: "✍️" },
-                { label: "Scholarships", href: "#features", emoji: "🏆" },
-                { label: "Visa Help", href: "#features", emoji: "🌍" },
+                {
+                  label: "Universities",
+                  href: "#universities",
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-5.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: "AI Chance-Me",
+                  href: "#chance-me",
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: "SOP Builder",
+                  href: "#features",
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: "Scholarships",
+                  href: "#features",
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4a5 5 0 005 5h4a5 5 0 005-5V3M5 3h14M5 3H3v2a4 4 0 004 4h1M19 3h2v2a4 4 0 01-4 4h-1M12 12v6m-4 3h8" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: "Visa Help",
+                  href: "#features",
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                  ),
+                },
               ].map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="flex items-center gap-3 py-3 px-3 rounded-[12px] text-[15px] font-medium text-[#333] hover:bg-[#F7F0F1] hover:text-[#690B1B] transition-all"
+                  className="flex items-center gap-3.5 py-2.5 px-3 rounded-[14px] text-[15px] font-semibold text-[#111111] hover:bg-[#F7F0F1] hover:text-[#690B1B] transition-all group"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <span className="text-[18px]">{item.emoji}</span>
-                  {item.label}
+                  <div className="w-9 h-9 rounded-xl bg-[#F7F0F1] border border-[#E8C4CC] text-[#690B1B] flex items-center justify-center shrink-0 group-hover:bg-[#690B1B] group-hover:text-white transition-colors">
+                    {item.icon}
+                  </div>
+                  <span>{item.label}</span>
                 </a>
               ))}
-              <div className="pt-3 border-t border-[#F0EBE6] mt-2">
+              <div className="pt-4 border-t border-[#F0EBE6] mt-3">
                 {user ? (
                   <Link
                     href="/dashboard"
-                    className="flex items-center justify-center w-full py-3 rounded-[12px] bg-[#690B1B] text-white font-bold text-[15px]"
+                    className="flex items-center justify-center w-full py-3.5 rounded-[14px] bg-[#690B1B] text-white font-bold text-[15px] shadow-[0_6px_20px_rgba(105,11,27,0.22)] hover:bg-[#7A1022] transition-all"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Go to Dashboard →
@@ -169,7 +192,7 @@ export default function Home() {
                 ) : (
                   <Link
                     href="/login"
-                    className="flex items-center justify-center w-full py-3 rounded-[12px] bg-[#690B1B] text-white font-bold text-[15px]"
+                    className="flex items-center justify-center w-full py-3.5 rounded-[14px] bg-[#690B1B] text-white font-bold text-[15px] shadow-[0_6px_20px_rgba(105,11,27,0.22)] hover:bg-[#7A1022] transition-all"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Get Started Free →
@@ -396,28 +419,32 @@ export default function Home() {
             Compare programs across premier global hubs with verified tuition, rankings, and visa options.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 mt-8 sm:mt-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 mt-8 sm:mt-12">
             {[
-              { code: "USA", flag: "🇺🇸", name: "United States", count: "180+ Universities", desc: "Ivy League & top STEM research institutions" },
-              { code: "UK", flag: "🇬🇧", name: "United Kingdom", count: "120+ Universities", desc: "Russell Group & 1-year Master programs" },
-              { code: "CA", flag: "🇨🇦", name: "Canada", count: "85+ Universities", desc: "Post-study work permits & PR pathways" },
-              { code: "AU", flag: "🇦🇺", name: "Australia", count: "60+ Universities", desc: "Group of Eight & high quality of life" },
-              { code: "DE", flag: "🇩🇪", name: "Germany", count: "55+ Universities", desc: "Tuition-free public universities & tech hubs" },
+              { code: "USA", flag: "🇺🇸", name: "United States", count: "180+ Universities", desc: "Ivy League & top STEM research institutions", slug: "usa" },
+              { code: "UK", flag: "🇬🇧", name: "United Kingdom", count: "120+ Universities", desc: "Russell Group & 1-year Master programs", slug: "uk" },
+              { code: "CA", flag: "🇨🇦", name: "Canada", count: "85+ Universities", desc: "Post-study work permits & PR pathways", slug: "canada" },
+              { code: "AU", flag: "🇦🇺", name: "Australia", count: "60+ Universities", desc: "Group of Eight & high quality of life", slug: "australia" },
+              { code: "DE", flag: "🇩🇪", name: "Germany", count: "55+ Universities", desc: "Tuition-free public universities & tech hubs", slug: "germany" },
             ].map((item) => (
-              <div
+              <Link
                 key={item.code}
-                className="bg-white border border-[#E7E2DE] rounded-[16px] p-6 hover:border-[#690B1B] hover:-translate-y-1 transition-all shadow-sm"
+                href={`/country/${item.slug}`}
+                className="group bg-white border border-[#E7E2DE] rounded-[16px] p-5 sm:p-6 hover:border-[#690B1B] hover:-translate-y-1 transition-all shadow-2xs hover:shadow-md flex flex-col cursor-pointer"
               >
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-[32px]">{item.flag}</span>
-                  <span className="text-[11px] font-bold text-[#690B1B] bg-[#F7F0F1] px-2.5 py-1 rounded-full uppercase">
+                <div className="flex justify-between items-center mb-3.5">
+                  <span className="text-[28px] sm:text-[32px]">{item.flag}</span>
+                  <span className="text-[11px] font-bold text-[#690B1B] bg-[#F7F0F1] px-2.5 py-1 rounded-full uppercase border border-[#E8C4CC]/50">
                     {item.code}
                   </span>
                 </div>
-                <h3 className="text-[18px] font-bold text-[#111] mb-1">{item.name}</h3>
-                <div className="text-[13px] font-bold text-[#690B1B] mb-2">{item.count}</div>
-                <p className="text-[13px] text-[#777777] leading-relaxed">{item.desc}</p>
-              </div>
+                <h3 className="text-[17px] sm:text-[18px] font-bold text-[#111] mb-1">{item.name}</h3>
+                <div className="text-[12px] sm:text-[13px] font-bold text-[#690B1B] mb-2">{item.count}</div>
+                <p className="text-[12px] sm:text-[13px] text-[#777777] leading-relaxed flex-1">{item.desc}</p>
+                <div className="mt-4 flex items-center gap-1 text-[12px] font-semibold text-[#690B1B] group-hover:translate-x-0.5 transition-transform">
+                  Explore <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -664,8 +691,11 @@ export default function Home() {
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-14">
             {/* BRAND */}
             <div className="col-span-2 sm:col-span-2 lg:col-span-1 max-w-[300px]">
-              <Link href="/" className="text-white text-[28px] leading-none font-bold hover:opacity-90 transition-opacity">
-                Abroad Simplified
+              <Link href="/" className="flex items-center gap-3 text-white hover:opacity-90 transition-opacity">
+                <div className="w-[46px] h-[46px] rounded-[14px] overflow-hidden shadow-[0_6px_20px_rgba(105,11,27,0.3)] shrink-0">
+                  <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
+                </div>
+                <span className="text-[22px] font-bold tracking-[-0.03em]">Abroad Simplified</span>
               </Link>
               <p className="mt-6 text-[#5E6168] text-[15px] leading-[2]">
                 Think Beyond Your Boundaries. Your ultimate AI-powered study abroad platform.
@@ -703,19 +733,19 @@ export default function Home() {
               </div>
               <div className="space-y-4">
                 {[
-                  { label: "Study in USA", href: "#universities" },
-                  { label: "Study in UK", href: "#universities" },
-                  { label: "Study in Germany", href: "#universities" },
-                  { label: "Study in Canada", href: "#universities" },
-                  { label: "Study in Australia", href: "#universities" },
+                  { label: "Study in USA", href: "/country/usa" },
+                  { label: "Study in UK", href: "/country/uk" },
+                  { label: "Study in Germany", href: "/country/germany" },
+                  { label: "Study in Canada", href: "/country/canada" },
+                  { label: "Study in Australia", href: "/country/australia" },
                 ].map((item) => (
-                  <a
+                  <Link
                     key={item.label}
                     href={item.href}
                     className="block text-[#6B6F78] text-[15px] hover:text-white transition cursor-pointer"
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -753,10 +783,10 @@ export default function Home() {
               © 2026 Abroad Simplified. All rights reserved.
             </div>
             <div className="flex items-center gap-6 text-[#5E6168] text-[14px]">
-              <Link href="/" className="hover:text-white transition cursor-pointer">
+              <Link href="/privacy" className="hover:text-white transition cursor-pointer">
                 Privacy Policy
               </Link>
-              <Link href="/" className="hover:text-white transition cursor-pointer">
+              <Link href="/terms" className="hover:text-white transition cursor-pointer">
                 Terms of Service
               </Link>
             </div>

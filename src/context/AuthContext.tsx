@@ -29,8 +29,8 @@ interface AuthContextType {
   userData: UserData | null;
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
-  signup: (name: string, email: string, pass: string) => Promise<void>;
-  googleSignIn: () => Promise<void>;
+  signup: (name: string, email: string, pass: string, agreedToTerms?: boolean) => Promise<void>;
+  googleSignIn: (agreedToTerms?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), pass);
   };
 
-  const signup = async (name: string, email: string, pass: string) => {
+  const signup = async (name: string, email: string, pass: string, agreedToTerms = false) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = name.trim();
     const res = await createUserWithEmailAndPassword(auth, cleanEmail, pass);
@@ -113,7 +113,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fullName: cleanName,
         email: cleanEmail,
         role: 'student',
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        termsAgreed: agreedToTerms,
+        termsAgreedAt: agreedToTerms ? serverTimestamp() : null,
+        termsVersion: '2026-09-04'
       }, { merge: true });
       const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
       await Promise.race([writePromise, timeoutPromise]);
@@ -122,7 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const googleSignIn = async () => {
+  const googleSignIn = async (agreedToTerms = false) => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     const res = await signInWithPopup(auth, provider);
@@ -147,6 +150,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userSnap = await Promise.race([fetchPromise, timeoutPromise]);
       
       if (userSnap && 'exists' in userSnap && userSnap.exists()) {
+        // Existing user: update termsAgreed only if not already agreed
+        const existingData = userSnap.data();
+        if (agreedToTerms && !existingData?.termsAgreed) {
+          const writePromise = setDoc(userRef, {
+            termsAgreed: true,
+            termsAgreedAt: serverTimestamp(),
+            termsVersion: '2026-09-04'
+          }, { merge: true });
+          await Promise.race([writePromise, timeoutPromise]);
+        }
         setUserData({
           uid: res.user.uid,
           name: displayName,
@@ -154,16 +167,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: email,
           role: 'student',
           photoURL: res.user.photoURL || undefined,
-          ...userSnap.data()
+          ...existingData
         } as UserData);
       } else {
+        // New user via Google: save profile + terms agreement
         const writePromise = setDoc(userRef, {
           name: displayName,
           fullName: displayName,
           email: email,
           role: 'student',
           photoURL: res.user.photoURL || '',
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
+          termsAgreed: agreedToTerms,
+          termsAgreedAt: agreedToTerms ? serverTimestamp() : null,
+          termsVersion: '2026-09-04'
         }, { merge: true });
         await Promise.race([writePromise, timeoutPromise]);
       }
