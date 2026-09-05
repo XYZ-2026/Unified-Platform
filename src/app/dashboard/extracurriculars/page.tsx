@@ -462,47 +462,50 @@ export default function ExtracurricularsPage() {
                     </span>
 
                     {/* Main Activity Content Area */}
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
-                        <div className="min-w-0 flex-1">
-                          <h4 className="text-[16px] sm:text-[17px] font-bold text-[#111] leading-snug break-words">
-                            {act.title}
-                          </h4>
-                          <div className="flex items-center gap-2 flex-wrap mt-1">
-                            <span className="text-[12.5px] sm:text-[13px] text-[#690B1B] font-semibold">
-                              {act.organization}
-                            </span>
-                            {act.category && (
-                              <span className="text-[10.5px] sm:text-[11px] font-semibold text-[#555] bg-[#F7F5F3] px-2.5 py-0.5 rounded-full border border-[#EAE6E2] flex items-center gap-1.5 shrink-0">
-                                <CatIcon size={11} className="text-[#690B1B]" />
-                                <span>{act.category}</span>
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                    <div className="flex-1 min-w-0 space-y-1.5 sm:space-y-2">
+                      {/* Line 1: Activity Title */}
+                      <h4 className="text-[16px] sm:text-[17px] font-bold text-[#111] leading-snug break-words">
+                        {act.title}
+                      </h4>
 
-                        {/* Timing and Actions */}
-                        <div className="flex items-center gap-2 flex-wrap shrink-0 pt-0.5">
-                          <span className="text-[11px] font-bold text-[#666] bg-[#F7F5F3] px-2.5 sm:px-3 py-1 rounded-full border border-[#E7E2DE] flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-                            <Clock size={12} className="text-[#690B1B]" />
-                            <span>{getTimingDisplay(act)}</span>
+                      {/* Line 2: Organization / Non-Profit Line */}
+                      {act.organization && (
+                        <div className="text-[13px] sm:text-[13.5px] text-[#690B1B] font-semibold leading-normal">
+                          {act.organization}
+                        </div>
+                      )}
+
+                      {/* Line 3: Grey Badge Buttons Row (Below the organization line) */}
+                      <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                        {act.category && (
+                          <span className="text-[10.5px] sm:text-[11px] font-semibold text-[#555] bg-[#F7F5F3] px-2.5 py-1 rounded-full border border-[#EAE6E2] flex items-center gap-1.5 shrink-0">
+                            <CatIcon size={11} className="text-[#690B1B]" />
+                            <span>{act.category}</span>
                           </span>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button
-                              onClick={() => handleOpenEditModal(act)}
-                              className="p-1.5 rounded-full text-[#888] hover:text-[#690B1B] hover:bg-[#F7F0F1] transition-all cursor-pointer"
-                              title="Edit activity"
-                            >
-                              <Edit2 size={14} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteActivity(act.id)}
-                              className="p-1.5 rounded-full text-[#888] hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"
-                              title="Delete activity"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
+                        )}
+
+                        <span className="text-[10.5px] sm:text-[11px] font-semibold text-[#666] bg-[#F7F5F3] px-2.5 sm:px-3 py-1 rounded-full border border-[#E7E2DE] flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+                          <Clock size={11} className="text-[#690B1B]" />
+                          <span>{getTimingDisplay(act)}</span>
+                        </span>
+
+                        <div className="flex items-center gap-0.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditModal(act)}
+                            className="p-1.5 rounded-full text-[#888] hover:text-[#690B1B] hover:bg-[#F7F0F1] transition-all cursor-pointer"
+                            title="Edit activity"
+                          >
+                            <Edit2 size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteActivity(act.id)}
+                            className="p-1.5 rounded-full text-[#888] hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"
+                            title="Delete activity"
+                          >
+                            <Trash2 size={13} />
+                          </button>
                         </div>
                       </div>
 

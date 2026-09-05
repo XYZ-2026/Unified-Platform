@@ -28,7 +28,7 @@ export default function PrivacyPolicyPage() {
             href="/login"
             className="text-[13px] font-bold text-[#690B1B] hover:text-[#7A1022] transition-colors border border-[#690B1B]/20 hover:border-[#690B1B]/40 px-4 py-2 rounded-full"
           >
-            Back to Sign In
+            Back
           </Link>
         </div>
       </header>

@@ -20,15 +20,14 @@ import {
   X,
   Trash2
 } from 'lucide-react';
+import { calculateDeadlineInfo } from '@/lib/deadlineUtils';
 
-const INITIAL_TASKS = [
+const RAW_INITIAL_TASKS = [
   {
     id: 'task-1',
     title: 'Draft your Common App personal statement',
     category: 'Milestone',
     date: 'Sep 12',
-    dueIn: 'in 24 days',
-    group: 'NEXT 30 DAYS',
     type: 'task' as const,
     icon: FileText
   },
@@ -37,8 +36,6 @@ const INITIAL_TASKS = [
     title: 'Ask two teachers for rec letters',
     category: 'Recommender',
     date: 'Sep 20',
-    dueIn: 'in 32 days',
-    group: 'LATER THIS CYCLE',
     type: 'task' as const,
     icon: Users
   },
@@ -47,8 +44,6 @@ const INITIAL_TASKS = [
     title: 'FAFSA opens for financial aid',
     category: 'Financial aid',
     date: 'Oct 01',
-    dueIn: 'in 43 days',
-    group: 'LATER THIS CYCLE',
     type: 'aid' as const,
     icon: DollarSign
   },
@@ -57,8 +52,6 @@ const INITIAL_TASKS = [
     title: 'CSS Profile portal opens',
     category: 'Financial aid',
     date: 'Oct 01',
-    dueIn: 'in 43 days',
-    group: 'LATER THIS CYCLE',
     type: 'aid' as const,
     icon: DollarSign
   },
@@ -67,8 +60,6 @@ const INITIAL_TASKS = [
     title: 'Early Decision / Early Action (ED/EA) Application Deadline',
     category: 'Application',
     date: 'Nov 01',
-    dueIn: 'in 2 months',
-    group: 'LATER THIS CYCLE',
     type: 'application' as const,
     icon: Building2
   },
@@ -77,8 +68,6 @@ const INITIAL_TASKS = [
     title: 'CSS Profile due for early schools',
     category: 'Financial aid',
     date: 'Nov 01',
-    dueIn: 'in 2 months',
-    group: 'LATER THIS CYCLE',
     type: 'aid' as const,
     icon: DollarSign
   },
@@ -87,8 +76,6 @@ const INITIAL_TASKS = [
     title: 'Regular Decision (RD) Application Deadline',
     category: 'Application',
     date: 'Jan 01',
-    dueIn: 'in 4 months',
-    group: 'LATER THIS CYCLE',
     type: 'application' as const,
     icon: Building2
   },
@@ -97,8 +84,6 @@ const INITIAL_TASKS = [
     title: 'FAFSA priority deadline',
     category: 'Financial aid',
     date: 'Jan 05',
-    dueIn: 'in 5 months',
-    group: 'LATER THIS CYCLE',
     type: 'aid' as const,
     icon: DollarSign
   },
@@ -107,12 +92,20 @@ const INITIAL_TASKS = [
     title: 'Decision day: commit and deposit',
     category: 'Milestone',
     date: 'May 01',
-    dueIn: 'in 9 months',
-    group: 'LATER THIS CYCLE',
     type: 'task' as const,
     icon: CheckCircle2
   }
 ];
+
+const INITIAL_TASKS = RAW_INITIAL_TASKS.map((t) => {
+  const info = calculateDeadlineInfo(t.date);
+  return {
+    ...t,
+    dueIn: info.dueIn,
+    group: info.group,
+    diffDays: info.diffDays
+  };
+});
 
 export default function ApplicationTrackerPage() {
   const [viewMode, setViewMode] = useState<'timeline' | 'calendar'>('timeline');
@@ -137,18 +130,24 @@ export default function ApplicationTrackerPage() {
   const [newDate, setNewDate] = useState('');
   const [newGroup, setNewGroup] = useState<'NEXT 30 DAYS' | 'LATER THIS CYCLE'>('NEXT 30 DAYS');
 
-  // Load saved deadlines from localStorage on mount
+  // Load saved deadlines from localStorage on mount and dynamically calculate deadline info
   useEffect(() => {
     try {
       const saved = localStorage.getItem('unified_app_tracker_tasks');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Re-map icon component based on type
-          const rehydrated = parsed.map((item: any) => ({
-            ...item,
-            icon: item.type === 'aid' ? DollarSign : item.type === 'application' ? Building2 : FileText
-          }));
+          // Re-map icon component and recalculate deadline countdown dynamically
+          const rehydrated = parsed.map((item: any) => {
+            const info = calculateDeadlineInfo(item.date);
+            return {
+              ...item,
+              dueIn: info.dueIn,
+              group: info.group,
+              diffDays: info.diffDays,
+              icon: item.type === 'aid' ? DollarSign : item.type === 'application' ? Building2 : FileText
+            };
+          });
           setTasks(rehydrated);
         }
       }
@@ -182,13 +181,17 @@ export default function ApplicationTrackerPage() {
       selectedIcon = FileText;
     }
 
+    const dateVal = newDate.trim() || 'Upcoming';
+    const info = calculateDeadlineInfo(dateVal);
+
     const newTaskItem = {
       id: `task-custom-${Date.now()}`,
       title: newTitle.trim(),
       category: newCategory,
-      date: newDate.trim() || 'Upcoming',
-      dueIn: newGroup === 'NEXT 30 DAYS' ? 'Upcoming soon' : 'Later in cycle',
-      group: newGroup,
+      date: dateVal,
+      dueIn: info.dueIn,
+      group: info.group,
+      diffDays: info.diffDays,
       type: newType,
       icon: selectedIcon
     };
@@ -300,8 +303,9 @@ export default function ApplicationTrackerPage() {
     return true;
   });
 
-  const next30DaysTasks = filteredTasks.filter((t) => t.group === 'NEXT 30 DAYS');
-  const laterCycleTasks = filteredTasks.filter((t) => t.group === 'LATER THIS CYCLE');
+  const overdueTasks = filteredTasks.filter((t) => t.group === 'OVERDUE').sort((a, b) => (a.diffDays ?? 0) - (b.diffDays ?? 0));
+  const next30DaysTasks = filteredTasks.filter((t) => t.group === 'NEXT 30 DAYS').sort((a, b) => (a.diffDays ?? 0) - (b.diffDays ?? 0));
+  const laterCycleTasks = filteredTasks.filter((t) => t.group === 'LATER THIS CYCLE').sort((a, b) => (a.diffDays ?? 0) - (b.diffDays ?? 0));
 
   return (
     <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6 relative">
@@ -640,6 +644,87 @@ export default function ApplicationTrackerPage() {
 
         {/* TASK ITEMS LIST */}
         <div className="space-y-6">
+          {/* GROUP: OVERDUE (if any) */}
+          {overdueTasks.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-[11px] font-bold text-red-700 bg-red-50 px-3 py-1 rounded-md w-fit uppercase tracking-wider border border-red-200">
+                OVERDUE ({overdueTasks.length})
+              </div>
+              {overdueTasks.map((t) => {
+                const IconComponent = t.icon;
+                const isDone = !!completedTasks[t.id];
+                return (
+                  <div
+                    key={t.id}
+                    className="group p-3.5 sm:p-4 rounded-[14px] bg-white border border-red-200 hover:border-red-400 hover:shadow-2xs transition-all cursor-pointer"
+                  >
+                    <div className="flex items-start sm:items-center justify-between gap-2.5 sm:gap-3">
+                      <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleTask(t.id);
+                          }}
+                          className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md border flex items-center justify-center transition-all shrink-0 mt-0.5 sm:mt-0 cursor-pointer ${
+                            isDone ? 'bg-[#16a34a] border-[#16a34a] text-white' : 'border-red-300 bg-white'
+                          }`}
+                        >
+                          {isDone && <CheckCircle2 size={13} className="sm:w-4 sm:h-4" />}
+                        </button>
+                        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-red-50 text-red-700 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                          <IconComponent size={15} className="sm:w-[18px] sm:h-[18px]" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className={`text-[13.5px] sm:text-[15px] font-bold leading-snug break-words ${isDone ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
+                            {t.title}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="text-[11px] text-[#777777]">
+                              {t.category} • {t.date}
+                            </span>
+                            <span className="sm:hidden text-[10px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-full shrink-0 border border-red-200">
+                              {t.dueIn}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+                        <span className="text-[11px] font-bold text-red-700 bg-red-50 px-2.5 py-1 rounded-full whitespace-nowrap border border-red-200">
+                          {t.dueIn}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteTask(t.id);
+                          }}
+                          title="Delete Deadline"
+                          className="opacity-0 group-hover:opacity-100 p-1 text-[#999999] hover:text-[#dc2626] transition-all cursor-pointer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        <ChevronRight size={16} className="text-[#CCCCCC]" />
+                      </div>
+
+                      <div className="sm:hidden flex items-center gap-1 shrink-0 mt-0.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteTask(t.id);
+                          }}
+                          title="Delete Deadline"
+                          className="p-1 text-[#aaaaaa] hover:text-[#dc2626] transition-all cursor-pointer"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           {/* GROUP: NEXT 30 DAYS */}
           {next30DaysTasks.length > 0 && (
             <div className="space-y-3">
@@ -939,26 +1024,28 @@ export default function ApplicationTrackerPage() {
       {/* ═══════════════════════════════════════════════════════════════
          UPGRADE PRO BANNER (Mockup Page Footer)
          ═══════════════════════════════════════════════════════════════ */}
-      <Link
-        href="/dashboard"
-        className="w-full flex items-center justify-between p-4 rounded-[16px] bg-gradient-to-r from-[#690B1B] to-[#8A1226] text-white shadow-sm hover:opacity-95 transition-all mt-6 cursor-pointer"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8.5 h-8.5 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-            <Zap size={18} className="text-[#C9A55D] fill-[#C9A55D]" />
+      <div className="pt-2 pb-24 sm:pb-8">
+        <Link
+          href="/dashboard"
+          className="w-full flex items-center justify-between p-4 rounded-[16px] bg-gradient-to-r from-[#690B1B] to-[#8A1226] text-white shadow-sm hover:opacity-95 transition-all cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8.5 h-8.5 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+              <Zap size={18} className="text-[#C9A55D] fill-[#C9A55D]" />
+            </div>
+            <div className="text-left leading-tight">
+              <div className="text-[14px] font-bold">Upgrade Pro</div>
+              <div className="text-[11px] text-[#F7D8A0] mt-0.5">Get Unlimited AI SOP Reviews</div>
+            </div>
           </div>
-          <div className="text-left leading-tight">
-            <div className="text-[14px] font-bold">Upgrade Pro</div>
-            <div className="text-[11px] text-[#F7D8A0] mt-0.5">Get Unlimited AI SOP Reviews</div>
+          <div className="flex items-center gap-2.5">
+            <span className="text-[10.5px] font-bold bg-[#C9A55D] text-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
+              30% OFF
+            </span>
+            <ChevronRight size={16} className="text-white/70" />
           </div>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <span className="text-[10.5px] font-bold bg-[#C9A55D] text-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
-            30% OFF
-          </span>
-          <ChevronRight size={16} className="text-white/70" />
-        </div>
-      </Link>
+        </Link>
+      </div>
     </div>
   );
 }

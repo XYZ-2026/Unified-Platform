@@ -1,0 +1,802 @@
+[
+  {
+    "id": "dadb69f8-18a3-4917-9b8d-62706eab5b4f",
+    "name": "42 US",
+    "state": "California",
+    "country": "United States",
+    "slug": "42-us",
+    "currentBanner": null
+  },
+  {
+    "id": "960c26bc-f09c-42a4-abe2-67174c0ac312",
+    "name": "ASA College",
+    "state": "California",
+    "country": "United States",
+    "slug": "asa-college",
+    "currentBanner": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    "id": "f10587f1-3aab-46f5-9115-8f95de95f608",
+    "name": "Aaniiih Nakoda College",
+    "state": "Montana",
+    "country": "United States",
+    "slug": "aaniiih-nakoda-college",
+    "currentBanner": null
+  },
+  {
+    "id": "be3fac0f-8aab-45ca-902c-18846268b1c7",
+    "name": "Abilene Christian University",
+    "state": "Texas",
+    "country": "United States",
+    "slug": "abilene-christian-university",
+    "currentBanner": null
+  },
+  {
+    "id": "b18cfd9f-cd08-4d7c-97de-58e2d31c8a34",
+    "name": "Abraham Baldwin Agricultural College",
+    "state": "Georgia",
+    "country": "United States",
+    "slug": "abraham-baldwin-agricultural-college",
+    "currentBanner": null
+  },
+  {
+    "id": "f398b1e0-9aa8-42ff-8125-937d1519e3b3",
+    "name": "Academic medical center at State University of New York at Stony Brook",
+    "state": "California",
+    "country": "United States",
+    "slug": "academic-medical-center-at-state-university-of-new-york-at-stony-brook",
+    "currentBanner": null
+  },
+  {
+    "id": "b466bcd2-2e66-426e-a2e5-bcdf51e9f58d",
+    "name": "Academy of Art University",
+    "state": "California",
+    "country": "United States",
+    "slug": "academy-of-art-university",
+    "currentBanner": null
+  },
+  {
+    "id": "4959f2f8-1ef2-4680-8d6f-6bab0a79bd64",
+    "name": "Adelphi University",
+    "state": "New York",
+    "country": "United States",
+    "slug": "adelphi-university",
+    "currentBanner": null
+  },
+  {
+    "id": "5851029a-1d8e-4979-85b1-f9bbe167b8ed",
+    "name": "Adirondack Community College",
+    "state": "California",
+    "country": "United States",
+    "slug": "adirondack-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "0ca778e1-9c50-43ce-9f11-11a221adafc7",
+    "name": "Adrian College",
+    "state": "Michigan",
+    "country": "United States",
+    "slug": "adrian-college",
+    "currentBanner": null
+  },
+  {
+    "id": "400adc88-0d5e-442d-9f28-3ac53581c82c",
+    "name": "Agnes Scott College",
+    "state": "Georgia",
+    "country": "United States",
+    "slug": "agnes-scott-college",
+    "currentBanner": null
+  },
+  {
+    "id": "80e2db6f-6b74-447f-a079-7b609d427bc4",
+    "name": "Aiken Technical College",
+    "state": "South Carolina",
+    "country": "United States",
+    "slug": "aiken-technical-college",
+    "currentBanner": null
+  },
+  {
+    "id": "8b349f7b-e906-4fd2-a677-554da57bbc43",
+    "name": "Aims Community College",
+    "state": "Colorado",
+    "country": "United States",
+    "slug": "aims-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "0411f029-dcbb-4167-ae5f-b2d15340dec9",
+    "name": "Air Force Institute of Technology",
+    "state": "Ohio",
+    "country": "United States",
+    "slug": "air-force-institute-of-technology",
+    "currentBanner": null
+  },
+  {
+    "id": "75df1af7-b5d8-4466-96e5-e3185519d8c7",
+    "name": "Alabama A&M University",
+    "state": "California",
+    "country": "United States",
+    "slug": "alabama-a-m-university",
+    "currentBanner": null
+  },
+  {
+    "id": "4eddbc6f-5a38-4b7f-874d-eeb103419984",
+    "name": "Alabama Southern Community College",
+    "state": "California",
+    "country": "United States",
+    "slug": "alabama-southern-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "bbf61cc2-a224-46ff-8c79-9a92ed4a17a1",
+    "name": "Alabama State University",
+    "state": "Alabama",
+    "country": "United States",
+    "slug": "alabama-state-university",
+    "currentBanner": null
+  },
+  {
+    "id": "b077e8ec-d752-4e86-a28c-5d7a67622075",
+    "name": "Alamance Community College",
+    "state": "North Carolina",
+    "country": "United States",
+    "slug": "alamance-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "7e1c020c-7c58-4687-9a20-86ff3d222897",
+    "name": "Alamo Colleges",
+    "state": "California",
+    "country": "United States",
+    "slug": "alamo-colleges",
+    "currentBanner": null
+  },
+  {
+    "id": "281fe264-a3fd-46f4-b386-5efec8a01362",
+    "name": "Alamo Colleges District",
+    "state": "California",
+    "country": "United States",
+    "slug": "alamo-colleges-district",
+    "currentBanner": null
+  },
+  {
+    "id": "9f2f2668-c581-45de-b961-2d88d5deeff0",
+    "name": "Alaska Pacific University",
+    "state": "Alaska",
+    "country": "United States",
+    "slug": "alaska-pacific-university",
+    "currentBanner": null
+  },
+  {
+    "id": "e7f7200a-1903-4ba3-b45f-9f04bfd96405",
+    "name": "Albany State University",
+    "state": "Georgia",
+    "country": "United States",
+    "slug": "albany-state-university",
+    "currentBanner": null
+  },
+  {
+    "id": "199c29e6-26a6-4dfa-af80-a93833109c1a",
+    "name": "Albany Technical College",
+    "state": "Georgia",
+    "country": "United States",
+    "slug": "albany-technical-college",
+    "currentBanner": null
+  },
+  {
+    "id": "cad71baa-64ad-4629-9944-eb1fb02086e4",
+    "name": "Albertson College of Idaho",
+    "state": "Idaho",
+    "country": "United States",
+    "slug": "albertson-college-of-idaho",
+    "currentBanner": null
+  },
+  {
+    "id": "7524edaf-bb0b-4f46-b7b3-01783c0bb000",
+    "name": "Albion College",
+    "state": "Michigan",
+    "country": "United States",
+    "slug": "albion-college",
+    "currentBanner": null
+  },
+  {
+    "id": "8644ee89-b735-4329-a8ef-9b995b66e8b8",
+    "name": "Alcorn State University",
+    "state": "Mississippi",
+    "country": "United States",
+    "slug": "alcorn-state-university",
+    "currentBanner": null
+  },
+  {
+    "id": "22d53375-3d5e-43d1-8493-c021098a5ae1",
+    "name": "Alexandria Technical & Community College",
+    "state": "Minnesota",
+    "country": "United States",
+    "slug": "alexandria-technical-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "90a008ce-88ea-4e8d-bae9-3f60c5f4381b",
+    "name": "Alfred University",
+    "state": "New York",
+    "country": "United States",
+    "slug": "alfred-university",
+    "currentBanner": null
+  },
+  {
+    "id": "dd927362-9ca7-4d90-9d3b-bd20497ffb16",
+    "name": "Allan Hancock College",
+    "state": "California",
+    "country": "United States",
+    "slug": "allan-hancock-college",
+    "currentBanner": null
+  },
+  {
+    "id": "a9e2a104-01f4-4fd1-a41a-d452bf0de73a",
+    "name": "Allegany College of Maryland",
+    "state": "Maryland",
+    "country": "United States",
+    "slug": "allegany-college-of-maryland",
+    "currentBanner": null
+  },
+  {
+    "id": "8f65a4b2-97ea-42e2-aeeb-65e44f4c6d87",
+    "name": "Allegheny College",
+    "state": "Pennsylvania",
+    "country": "United States",
+    "slug": "allegheny-college",
+    "currentBanner": null
+  },
+  {
+    "id": "fa13d831-b894-4764-80a7-537b33279ee2",
+    "name": "Allen College",
+    "state": "Iowa",
+    "country": "United States",
+    "slug": "allen-college",
+    "currentBanner": null
+  },
+  {
+    "id": "eb33e462-f81f-4593-881b-3e6056a5247f",
+    "name": "Allen County Community College",
+    "state": "Kansas",
+    "country": "United States",
+    "slug": "allen-county-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "f2146147-2b81-4b83-a9cf-136a4da7e0c1",
+    "name": "Allen University",
+    "state": "South Carolina",
+    "country": "United States",
+    "slug": "allen-university",
+    "currentBanner": null
+  },
+  {
+    "id": "489113b7-1354-4b15-9d04-5ea0230c83f9",
+    "name": "Allentown College of Saint Francis de Sales",
+    "state": "California",
+    "country": "United States",
+    "slug": "allentown-college-of-saint-francis-de-sales",
+    "currentBanner": null
+  },
+  {
+    "id": "6f3abd18-2367-4856-9de1-a0e6b4d6e28a",
+    "name": "Alliant International University",
+    "state": "California",
+    "country": "United States",
+    "slug": "alliant-international-university",
+    "currentBanner": null
+  },
+  {
+    "id": "6c0a7893-b55f-4bc3-9f81-843c7ee0e634",
+    "name": "Alma College",
+    "state": "Michigan",
+    "country": "United States",
+    "slug": "alma-college",
+    "currentBanner": null
+  },
+  {
+    "id": "f212a22e-cc42-4bb0-820a-cebc7cf6f61e",
+    "name": "Alpena Community College",
+    "state": "Michigan",
+    "country": "United States",
+    "slug": "alpena-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "923e1cfe-fca5-431b-8918-e7dd1ee470dc",
+    "name": "Alvernia University",
+    "state": "Pennsylvania",
+    "country": "United States",
+    "slug": "alvernia-university",
+    "currentBanner": null
+  },
+  {
+    "id": "461b7a96-c905-4c04-83a2-fe985ce823f6",
+    "name": "Alverno College",
+    "state": "Wisconsin",
+    "country": "United States",
+    "slug": "alverno-college",
+    "currentBanner": null
+  },
+  {
+    "id": "e0034898-957e-4ee2-a08a-967cf62b74a5",
+    "name": "Alvin Community College",
+    "state": "Texas",
+    "country": "United States",
+    "slug": "alvin-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "59bf2dde-3fa9-455a-9e6c-82f9fd5adb8d",
+    "name": "Amarillo College",
+    "state": "Texas",
+    "country": "United States",
+    "slug": "amarillo-college",
+    "currentBanner": null
+  },
+  {
+    "id": "32bb2904-f88f-448b-a5fa-d2c360bfbf80",
+    "name": "Ambassador University",
+    "state": "California",
+    "country": "United States",
+    "slug": "ambassador-university",
+    "currentBanner": null
+  },
+  {
+    "id": "8e269c44-703e-4754-b142-c601029d5da4",
+    "name": "American Academy of Dramatic Arts-New York",
+    "state": "New York",
+    "country": "United States",
+    "slug": "american-academy-of-dramatic-arts-new-york",
+    "currentBanner": null
+  },
+  {
+    "id": "05ab5682-38d0-44d7-8666-0f18cb09ac1a",
+    "name": "American Baptist College",
+    "state": "Tennessee",
+    "country": "United States",
+    "slug": "american-baptist-college",
+    "currentBanner": null
+  },
+  {
+    "id": "77910c0f-f440-4f4d-bd42-2d3250b9d2ca",
+    "name": "American Coastline University",
+    "state": "California",
+    "country": "United States",
+    "slug": "american-coastline-university",
+    "currentBanner": null
+  },
+  {
+    "id": "dc3b0a46-220d-436d-aaf2-0eb094eefad7",
+    "name": "American International College",
+    "state": "Massachusetts",
+    "country": "United States",
+    "slug": "american-international-college",
+    "currentBanner": null
+  },
+  {
+    "id": "103243be-ab06-402e-bdeb-1eb01b55657e",
+    "name": "American Public University System",
+    "state": "West Virginia",
+    "country": "United States",
+    "slug": "american-public-university-system",
+    "currentBanner": null
+  },
+  {
+    "id": "552a03dd-bff9-4c26-9b28-befa9e832299",
+    "name": "American River College",
+    "state": "California",
+    "country": "United States",
+    "slug": "american-river-college",
+    "currentBanner": null
+  },
+  {
+    "id": "85cee153-c68d-4d68-88e9-2db22d5e909b",
+    "name": "American University",
+    "state": "District of Columbia",
+    "country": "United States",
+    "slug": "american-university",
+    "currentBanner": null
+  },
+  {
+    "id": "02cc4169-8a98-4ccf-8885-8642c7909a6d",
+    "name": "Amherst College",
+    "state": "Massachusetts",
+    "country": "United States",
+    "slug": "amherst-college",
+    "currentBanner": null
+  },
+  {
+    "id": "8109a28a-fbe7-41c7-8d78-ed7220ecf970",
+    "name": "Ancilla College",
+    "state": "California",
+    "country": "United States",
+    "slug": "ancilla-college",
+    "currentBanner": null
+  },
+  {
+    "id": "e8782b5b-d8d5-4997-8058-589ac3c0a4c1",
+    "name": "Anderson University",
+    "state": "Indiana",
+    "country": "United States",
+    "slug": "anderson-university",
+    "currentBanner": null
+  },
+  {
+    "id": "3883fe02-44c4-4de8-a0fb-14c2e6545fcf",
+    "name": "Andrew College",
+    "state": "Georgia",
+    "country": "United States",
+    "slug": "andrew-college",
+    "currentBanner": null
+  },
+  {
+    "id": "ccc3342d-3e20-48c3-aad0-f55a76b859a0",
+    "name": "Andrews University",
+    "state": "Michigan",
+    "country": "United States",
+    "slug": "andrews-university",
+    "currentBanner": null
+  },
+  {
+    "id": "bb014bac-9076-46fc-9108-fbbaadcdfcfb",
+    "name": "Angelina College",
+    "state": "Texas",
+    "country": "United States",
+    "slug": "angelina-college",
+    "currentBanner": null
+  },
+  {
+    "id": "bdfdc2aa-74f6-4780-9213-0b0fd88cd7ec",
+    "name": "Angelo State University",
+    "state": "Texas",
+    "country": "United States",
+    "slug": "angelo-state-university",
+    "currentBanner": null
+  },
+  {
+    "id": "bd851035-e684-4269-a835-52132dbd4d38",
+    "name": "Anne Arundel Community College",
+    "state": "Maryland",
+    "country": "United States",
+    "slug": "anne-arundel-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "70daf610-9a0e-448e-9a06-e5c2c2769e8a",
+    "name": "Anoka Technical College",
+    "state": "Minnesota",
+    "country": "United States",
+    "slug": "anoka-technical-college",
+    "currentBanner": null
+  },
+  {
+    "id": "d00e12b6-c08c-4584-b793-bbc2ade92563",
+    "name": "Anoka-Ramsey Community College",
+    "state": "Minnesota",
+    "country": "United States",
+    "slug": "anoka-ramsey-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "bcce0336-cf2d-44fc-b468-28234421d0bd",
+    "name": "Antelope Valley College",
+    "state": "California",
+    "country": "United States",
+    "slug": "antelope-valley-college",
+    "currentBanner": null
+  },
+  {
+    "id": "7bf495ec-1aa6-4f5b-8ce7-444b59c4e823",
+    "name": "Antioch New England",
+    "state": "California",
+    "country": "United States",
+    "slug": "antioch-new-england",
+    "currentBanner": null
+  },
+  {
+    "id": "e052d450-fe73-4c94-af90-136979dc9f2d",
+    "name": "Antioch University",
+    "state": "Ohio",
+    "country": "United States",
+    "slug": "antioch-university",
+    "currentBanner": null
+  },
+  {
+    "id": "ffe77a89-fada-49f5-8cbb-0d25d2e9a4ce",
+    "name": "Antioch University - Los Angeles",
+    "state": "California",
+    "country": "United States",
+    "slug": "antioch-university-los-angeles",
+    "currentBanner": null
+  },
+  {
+    "id": "d4a5b308-7f3e-4017-ac24-0fdf8ef7211a",
+    "name": "Antioch University - Seattle",
+    "state": "Washington",
+    "country": "United States",
+    "slug": "antioch-university-seattle",
+    "currentBanner": null
+  },
+  {
+    "id": "901ba53c-35b3-4aa5-8671-4e538a11f58d",
+    "name": "Appalachian State University",
+    "state": "North Carolina",
+    "country": "United States",
+    "slug": "appalachian-state-university",
+    "currentBanner": null
+  },
+  {
+    "id": "a512864c-0a72-45b0-b9ff-1a7b718a3cd8",
+    "name": "Aquinas College",
+    "state": "Michigan",
+    "country": "United States",
+    "slug": "aquinas-college",
+    "currentBanner": null
+  },
+  {
+    "id": "2eb66403-e6f8-47ae-9b58-e2f7877a1bec",
+    "name": "Arapahoe Community College",
+    "state": "Colorado",
+    "country": "United States",
+    "slug": "arapahoe-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "4fdb7064-7ec0-40dd-82d5-7b54f06e60e7",
+    "name": "Arcadia College",
+    "state": "California",
+    "country": "United States",
+    "slug": "arcadia-college",
+    "currentBanner": null
+  },
+  {
+    "id": "364e872f-936d-4a11-8167-c05932cf7e76",
+    "name": "Arizona State University",
+    "state": "Arizona",
+    "country": "United States",
+    "slug": "arizona-state-university",
+    "currentBanner": null
+  },
+  {
+    "id": "216e8c50-abd2-48d6-bdd6-18d28d602dbf",
+    "name": "Arizona Western College",
+    "state": "Arizona",
+    "country": "United States",
+    "slug": "arizona-western-college",
+    "currentBanner": null
+  },
+  {
+    "id": "fd9d242a-5ca8-400c-bbb0-00ccd41753ac",
+    "name": "Arkansas Baptist College",
+    "state": "Arkansas",
+    "country": "United States",
+    "slug": "arkansas-baptist-college",
+    "currentBanner": null
+  },
+  {
+    "id": "2745e7e4-109d-4909-8c80-31ec6e912150",
+    "name": "Arkansas Northeastern College",
+    "state": "Arkansas",
+    "country": "United States",
+    "slug": "arkansas-northeastern-college",
+    "currentBanner": null
+  },
+  {
+    "id": "6563c7d9-ddf3-44b0-b66e-139ca63d4eae",
+    "name": "Arkansas State University",
+    "state": "Arkansas",
+    "country": "United States",
+    "slug": "arkansas-state-university",
+    "currentBanner": null
+  },
+  {
+    "id": "86fc6c3d-2225-4425-887d-34ccca91d4fc",
+    "name": "Arkansas State University-Beebe",
+    "state": "Arkansas",
+    "country": "United States",
+    "slug": "arkansas-state-university-beebe",
+    "currentBanner": null
+  },
+  {
+    "id": "0c16678c-3e18-4094-804f-cc67285df9d8",
+    "name": "Arkansas State University-Mountain Home",
+    "state": "Arkansas",
+    "country": "United States",
+    "slug": "arkansas-state-university-mountain-home",
+    "currentBanner": null
+  },
+  {
+    "id": "2583f7c8-c5f1-47e6-b5e0-e6cd4351f6b6",
+    "name": "Arkansas State University-Newport",
+    "state": "Arkansas",
+    "country": "United States",
+    "slug": "arkansas-state-university-newport",
+    "currentBanner": null
+  },
+  {
+    "id": "c7c5a5ba-5a6a-449c-98ee-c8e1f71ba4e9",
+    "name": "Arkansas Tech University",
+    "state": "Arkansas",
+    "country": "United States",
+    "slug": "arkansas-tech-university",
+    "currentBanner": null
+  },
+  {
+    "id": "fe1642cd-bc73-42b8-88e0-96ee6c35a3d2",
+    "name": "Arkansas at Pine Bluff, University of",
+    "state": "California",
+    "country": "United States",
+    "slug": "arkansas-at-pine-bluff-university-of",
+    "currentBanner": null
+  },
+  {
+    "id": "05d295a3-b7b4-47ed-b8bc-cd93d270f3f1",
+    "name": "Armstrong State College",
+    "state": "California",
+    "country": "United States",
+    "slug": "armstrong-state-college",
+    "currentBanner": null
+  },
+  {
+    "id": "06e534bf-4c6f-45a2-8c84-decaa16e3cae",
+    "name": "Asheville-Buncombe Technical Community College",
+    "state": "North Carolina",
+    "country": "United States",
+    "slug": "asheville-buncombe-technical-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "965d98d5-4047-4ab0-b828-0b3e287abf9f",
+    "name": "Ashford University",
+    "state": "California",
+    "country": "United States",
+    "slug": "ashford-university",
+    "currentBanner": null
+  },
+  {
+    "id": "098c47c1-fe1c-4230-bb64-a80ea3531ce2",
+    "name": "Ashland Community and Technical College",
+    "state": "Kentucky",
+    "country": "United States",
+    "slug": "ashland-community-and-technical-college",
+    "currentBanner": null
+  },
+  {
+    "id": "09867a5a-03e1-4a8a-9217-665ea27629a5",
+    "name": "Ashland University",
+    "state": "Ohio",
+    "country": "United States",
+    "slug": "ashland-university",
+    "currentBanner": null
+  },
+  {
+    "id": "0046d207-8cf4-4d89-b351-f886e5912805",
+    "name": "Asnuntuck Community College",
+    "state": "California",
+    "country": "United States",
+    "slug": "asnuntuck-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "f08464e8-365b-485f-b1f8-9ee567599a99",
+    "name": "Aspen University",
+    "state": "Arizona",
+    "country": "United States",
+    "slug": "aspen-university",
+    "currentBanner": null
+  },
+  {
+    "id": "af428a19-b518-4917-858f-df91e98749d4",
+    "name": "Assumption College",
+    "state": "New Jersey",
+    "country": "United States",
+    "slug": "assumption-college",
+    "currentBanner": null
+  },
+  {
+    "id": "890ce362-4c60-4fd3-b6f9-653549191e49",
+    "name": "Assumption College for Sisters",
+    "state": "New Jersey",
+    "country": "United States",
+    "slug": "assumption-college-for-sisters",
+    "currentBanner": null
+  },
+  {
+    "id": "eacbff16-903b-41a9-bc0c-c9f80c0d4a00",
+    "name": "Athens State University",
+    "state": "Alabama",
+    "country": "United States",
+    "slug": "athens-state-university",
+    "currentBanner": null
+  },
+  {
+    "id": "1c59e1ac-0f1c-452c-9244-7160018fde65",
+    "name": "Athens Technical College",
+    "state": "Georgia",
+    "country": "United States",
+    "slug": "athens-technical-college",
+    "currentBanner": null
+  },
+  {
+    "id": "be8bbca4-c8dc-48d3-b264-d760e930daa2",
+    "name": "Atlanta Technical College",
+    "state": "Georgia",
+    "country": "United States",
+    "slug": "atlanta-technical-college",
+    "currentBanner": null
+  },
+  {
+    "id": "be4aa1fc-ac29-4150-a19a-d721dbab45c7",
+    "name": "Atlantic Cape Community College",
+    "state": "New Jersey",
+    "country": "United States",
+    "slug": "atlantic-cape-community-college",
+    "currentBanner": null
+  },
+  {
+    "id": "983a3fea-593d-4da6-af83-2941bb2b92bb",
+    "name": "Auburn University",
+    "state": "Alabama",
+    "country": "United States",
+    "slug": "auburn-university",
+    "currentBanner": null
+  },
+  {
+    "id": "9811127c-455f-478d-b7dd-0f955d8cf009",
+    "name": "Auburn University at Montgomery",
+    "state": "Alabama",
+    "country": "United States",
+    "slug": "auburn-university-at-montgomery",
+    "currentBanner": null
+  },
+  {
+    "id": "5bd7c73f-5cc6-4864-aa01-1bd1c4ebe5f8",
+    "name": "Augsburg College",
+    "state": "California",
+    "country": "United States",
+    "slug": "augsburg-college",
+    "currentBanner": null
+  },
+  {
+    "id": "bf2a1532-e77c-4be6-b099-578fde6cd41d",
+    "name": "Augusta Technical College",
+    "state": "Georgia",
+    "country": "United States",
+    "slug": "augusta-technical-college",
+    "currentBanner": null
+  },
+  {
+    "id": "fc17117c-d7e2-4b9e-9af1-3af59c1ea15f",
+    "name": "Augusta University",
+    "state": "Georgia",
+    "country": "United States",
+    "slug": "augusta-university",
+    "currentBanner": null
+  },
+  {
+    "id": "4f189dc4-73b9-4ee7-ada4-609f5e20869f",
+    "name": "Augustana College (IL)",
+    "state": "Illinois",
+    "country": "United States",
+    "slug": "augustana-college-il",
+    "currentBanner": null
+  },
+  {
+    "id": "1d56384a-8703-44b0-953f-38a237404a03",
+    "name": "Aurora University",
+    "state": "Illinois",
+    "country": "United States",
+    "slug": "aurora-university",
+    "currentBanner": null
+  },
+  {
+    "id": "6cecf884-2942-4d41-b448-e7e13fbd3003",
+    "name": "Austin College",
+    "state": "Texas",
+    "country": "United States",
+    "slug": "austin-college",
+    "currentBanner": null
+  }
+]

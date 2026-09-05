@@ -275,31 +275,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
          ═══════════════════════════════════════════════════════════════ */}
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         {/* TOP HEADER BAR */}
-        <header className="h-[64px] sm:h-[76px] px-4 sm:px-5 md:px-8 bg-white border-b border-[#E7E2DE] flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-3">
-            {/* Mobile: Hamburger + logo */}
+        <header className="h-[60px] sm:h-[76px] px-3 sm:px-5 md:px-8 bg-white border-b border-[#E7E2DE] flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {/* Mobile: Hamburger button */}
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="md:hidden p-2 -ml-1 text-[#555555] hover:text-[#690B1B] hover:bg-[#F7F0F1] rounded-lg transition-colors"
+              className="md:hidden p-2 text-[#555555] hover:text-[#690B1B] hover:bg-[#F7F0F1] rounded-lg transition-colors shrink-0 cursor-pointer"
               aria-label="Open sidebar"
             >
               <Menu size={22} />
             </button>
             {/* Mobile: Logo mark & Website Name */}
-            <Link href="/dashboard" className="md:hidden flex items-center gap-2.5">
-              <div className="w-[34px] h-[34px] rounded-[10px] shadow-[0_4px_12px_rgba(105,11,27,0.2)] overflow-hidden shrink-0">
+            <Link href="/dashboard" className="md:hidden flex items-center gap-2 min-w-0">
+              <div className="w-[32px] h-[32px] rounded-[10px] shadow-[0_4px_12px_rgba(105,11,27,0.18)] overflow-hidden shrink-0">
                 <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
               </div>
-              <span className="text-[15px] font-bold text-[#111] tracking-tight">Abroad Simplified</span>
+              <span className="text-[15px] font-bold text-[#111] tracking-tight truncate">
+                Abroad Simplified
+              </span>
             </Link>
-            <div className="hidden sm:block">
-              <h1 className="text-[15px] sm:text-[18px] font-bold text-[#111111]">Abroad Simplified Student Portal</h1>
+            <div className="hidden md:block">
+              <h1 className="text-[16px] sm:text-[18px] font-bold text-[#111111]">Abroad Simplified Student Portal</h1>
               <p className="text-[11px] sm:text-[12px] text-[#888888]">Fall 2026 Admissions Cycle</p>
             </div>
           </div>
 
           {/* HEADER RIGHT ACTIONS */}
-          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
             {/* INVITE FRIENDS / REWARDS BUTTON */}
             <button className="hidden xl:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EBF4FB] border border-[#0088CB]/20 text-[#0088CB] text-[12px] font-bold hover:bg-[#0088CB]/10 transition-all">
               <span>Invite Friends</span>
@@ -317,22 +319,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </span>
             </div>
 
-            {/* AI CREDITS COUNTER */}
-            <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#FFF8EB] border border-[#F4D080] text-[#9E731A] text-[11px] sm:text-[13px] font-bold">
+            {/* AI CREDITS COUNTER - Hidden on mobile, visible on sm+ */}
+            <div className="hidden sm:flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#FFF8EB] border border-[#F4D080] text-[#9E731A] text-[11px] sm:text-[13px] font-bold shrink-0">
               <Zap size={13} className="fill-[#F4B400] text-[#F4B400] shrink-0" />
-              <span className="hidden sm:inline">25 Credits</span>
-              <span className="sm:hidden">25</span>
+              <span>25 Credits</span>
             </div>
 
-            {/* NOTIFICATIONS */}
-            <button className="relative p-1.5 sm:p-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] hover:border-[#690B1B]/30 transition-all">
+            {/* NOTIFICATIONS - Hidden on mobile, visible on sm+ */}
+            <button className="hidden sm:flex relative p-1.5 sm:p-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] hover:border-[#690B1B]/30 transition-all shrink-0 cursor-pointer">
               <Bell size={16} />
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#690B1B] border-2 border-white" />
             </button>
 
             {/* USER AVATAR LINK TO SETTINGS */}
-            <Link href="/dashboard/settings" className="flex items-center gap-2 pl-2 border-l border-[#E7E2DE]">
-              <div className="w-[32px] h-[32px] sm:w-[38px] sm:h-[38px] rounded-full bg-gradient-to-br from-[#7A1022] to-[#530816] text-white flex items-center justify-center font-bold text-[12px] sm:text-[14px] shadow-sm ring-2 ring-[#690B1B]/10">
+            <Link href="/dashboard/settings" className="flex items-center sm:pl-2 sm:border-l sm:border-[#E7E2DE] shrink-0">
+              <div className="w-[34px] h-[34px] sm:w-[38px] sm:h-[38px] aspect-square rounded-full bg-gradient-to-br from-[#7A1022] to-[#530816] text-white flex items-center justify-center font-bold text-[13px] sm:text-[14px] shadow-xs ring-2 ring-[#690B1B]/10 shrink-0">
                 {initial}
               </div>
             </Link>
@@ -340,7 +341,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* PAGE CONTENT ROUTE */}
-        <div className="pb-20 md:pb-0 flex-1">
+        <div className="pb-36 sm:pb-40 md:pb-10 flex-1">
           {children}
         </div>
 

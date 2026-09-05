@@ -32,10 +32,14 @@ interface University {
   livingCosts: string;
   acceptanceRate: string;
   website: string;
+  bannerImage?: string;
   bannerAlt: string;
   popularMajors: string[];
   slug: string;
 }
+
+// Client-side cache for instant search and pagination
+const clientUniCache = new Map<string, { universities: University[]; totalCount: number; totalPages: number }>();
 
 // Country flag emoji mapping
 function getCountryFlag(code: string): string {
@@ -71,12 +75,12 @@ export default function UniversityFinderPage() {
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 30;
 
-  // Debounce search input
+  // Instant snappy debounce for search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setCurrentPage(1); // Reset to page 1 on new search
-    }, 400);
+    }, 120);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
@@ -85,8 +89,20 @@ export default function UniversityFinderPage() {
     setCurrentPage(1);
   }, [selectedCountry]);
 
-  // Fetch universities from Wix CMS
+  // Fetch universities from Wix CMS with instant cache
   const fetchUniversities = useCallback(async () => {
+    const cacheKey = `${currentPage}-${debouncedSearch}-${selectedCountry}`;
+    
+    // Serve from instant client cache if available
+    if (clientUniCache.has(cacheKey)) {
+      const cached = clientUniCache.get(cacheKey)!;
+      setUniversities(cached.universities);
+      setTotalCount(cached.totalCount);
+      setTotalPages(cached.totalPages);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -103,6 +119,11 @@ export default function UniversityFinderPage() {
         setUniversities(data.universities);
         setTotalCount(data.totalCount || 0);
         setTotalPages(data.totalPages || 1);
+        clientUniCache.set(cacheKey, {
+          universities: data.universities,
+          totalCount: data.totalCount || 0,
+          totalPages: data.totalPages || 1,
+        });
       } else {
         setUniversities([]);
         setTotalCount(0);

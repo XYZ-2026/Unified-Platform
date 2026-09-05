@@ -401,11 +401,10 @@ export default function UniversityDetailPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`h-[36px] sm:h-[40px] px-4 rounded-full text-[12px] sm:text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center shrink-0 active:scale-95 ${
-                activeTab === tab.id
+              className={`h-[36px] sm:h-[40px] px-4 rounded-full text-[12px] sm:text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center shrink-0 active:scale-95 ${activeTab === tab.id
                   ? 'bg-[#690B1B] text-white shadow-2xs'
                   : 'text-[#666666] hover:bg-[#F7F5F3] hover:text-[#111]'
-              }`}
+                }`}
             >
               {tab.label}
             </button>

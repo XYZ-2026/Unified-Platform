@@ -167,6 +167,133 @@ function parseSchool(title?: string, program?: string, explicitSchool?: string):
   return program || 'Top University';
 }
 
+// In-memory cache for instant exemplar essays / SOP examples responses
+let cachedEssays: any[] | null = null;
+let cachedUsedCollection = 'Import1';
+let lastEssayFetch = 0;
+const ESSAY_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+let isFetchingEssays = false;
+
+async function fetchEssaysFromWix(wixApiKey: string, wixSiteId: string) {
+  const headers = {
+    'Authorization': wixApiKey,
+    'wix-site-id': wixSiteId,
+    'Content-Type': 'application/json',
+  };
+
+  const targetCollections = ['Import1', 'import1', 'essays', 'Essays', 'sop-examples', 'user-essays'];
+  let wixItems: any[] = [];
+  let usedCol = '';
+
+  for (const colId of targetCollections) {
+    try {
+      let colItems: any[] = [];
+      let cursor: string | null = null;
+      let hasMore = true;
+
+      while (hasMore) {
+        const queryPayload: any = {
+          dataCollectionId: colId,
+          query: {
+            paging: { limit: 1000 },
+            sort: [{ fieldName: '_updatedDate', order: 'DESC' }]
+          }
+        };
+
+        if (cursor) {
+          queryPayload.query.cursorPaging = { cursor, limit: 1000 };
+          delete queryPayload.query.paging;
+          delete queryPayload.query.sort;
+        }
+
+        const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(queryPayload)
+        });
+
+        if (!res.ok) break;
+
+        const data = await res.json();
+        const items = data.dataItems || data.items || [];
+        colItems = colItems.concat(items);
+
+        if (data.pagingMetadata?.hasNext && data.pagingMetadata?.cursors?.next) {
+          cursor = data.pagingMetadata.cursors.next;
+        } else {
+          hasMore = false;
+        }
+
+        if (colItems.length >= 5000) break;
+      }
+
+      if (colItems.length > 0) {
+        wixItems = colItems;
+        usedCol = colId;
+        break;
+      }
+    } catch (e) {
+      // Try next
+    }
+  }
+
+  const parsed: any[] = [];
+  const seenIds = new Set<string>();
+
+  for (const item of wixItems) {
+    const id = item.id || item._id;
+    if (id && seenIds.has(id)) continue;
+    if (id) seenIds.add(id);
+
+    const d = item.data || item;
+    const rawEssay = d.essay || d.content || d.html || d.body || d.text || d.description || '';
+    const fullHtml = formatEssayToHtml(rawEssay);
+
+    const plainText = rawEssay
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/__(.+?)__/g, '$1')
+      .replace(/\*(.+?)\*/g, '$1')
+      .replace(/_(.+?)_/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/^[-*]\s+/gm, '')
+      .replace(/^\d+[\.\)]\s+/gm, '')
+      .replace(/^>\s+/gm, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const count = plainText ? plainText.split(/\s+/).filter(Boolean).length : 0;
+    const words = count > 0 ? `${count.toLocaleString()} words` : '500 words';
+
+    const title = d.title || d.prompt || d.program || 'Statement of Purpose';
+    const school = parseSchool(d.title, d.program, d.school || d.university || d.institution);
+    const tag = d.type || d.categoryLevel || d.tag || 'Admitted SOP';
+    const author = d.author || 'Admitted Student';
+    const year = d.categoryLevel ? `${d.categoryLevel} Level` : (d.year || 'Verified Admit');
+    const previewText = plainText ? plainText.slice(0, 200) + '...' : 'Click View Essay to read full Statement of Purpose.';
+
+    parsed.push({
+      id: id || `wix-${Math.random().toString(36).substring(2, 9)}`,
+      title,
+      school,
+      program: d.program || '',
+      categoryLevel: d.categoryLevel || '',
+      tag,
+      words,
+      previewText,
+      content: fullHtml || `<p>${previewText}</p>`,
+      author,
+      year,
+      link: d.link || d.originalLink || '',
+      updatedAt: d.updatedAt || item._updatedDate || item._createdDate || new Date().toISOString()
+    });
+  }
+
+  return { essays: parsed, usedCollection: usedCol };
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -185,122 +312,46 @@ export async function GET(request: Request) {
       });
     }
 
-    const headers = {
-      'Authorization': wixApiKey,
-      'wix-site-id': wixSiteId,
-      'Content-Type': 'application/json',
-    };
+    const now = Date.now();
+    const isStale = now - lastEssayFetch > ESSAY_CACHE_TTL;
 
-    // Primary target collections in Wix CMS (including Import1 where user's collection was imported)
-    const targetCollections = [
-      'Import1',
-      'import1',
-      'essays',
-      'Essays',
-      'exemplar-essays',
-      'sop-examples',
-      'sops',
-      'user-essays'
-    ];
-
-    let wixItems: any[] = [];
-    let usedCollection = '';
-
-    for (const colId of targetCollections) {
-      try {
-        const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            dataCollectionId: colId,
-            query: {
-              paging: { limit: 100 },
-              sort: [{ fieldName: '_updatedDate', order: 'DESC' }]
-            }
-          })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          const items = data.dataItems || data.items || [];
-          if (items.length > 0) {
-            wixItems = items;
-            usedCollection = colId;
-            break;
-          }
-        }
-      } catch (e) {
-        // Continue to next candidate
+    if (!cachedEssays) {
+      const res = await fetchEssaysFromWix(wixApiKey, wixSiteId);
+      if (res.essays.length > 0) {
+        cachedEssays = res.essays;
+        cachedUsedCollection = res.usedCollection;
+        lastEssayFetch = now;
       }
+    } else if (isStale && !isFetchingEssays) {
+      isFetchingEssays = true;
+      fetchEssaysFromWix(wixApiKey, wixSiteId)
+        .then(res => {
+          if (res.essays.length > 0) {
+            cachedEssays = res.essays;
+            cachedUsedCollection = res.usedCollection;
+            lastEssayFetch = Date.now();
+          }
+        })
+        .finally(() => {
+          isFetchingEssays = false;
+        });
     }
 
-    const parsedEssays: any[] = [];
-    const seenIds = new Set<string>();
-
-    for (const item of wixItems) {
-      const id = item.id || item._id;
-      if (id && seenIds.has(id)) continue;
-      if (id) seenIds.add(id);
-
-      const d = item.data || item;
-      const rawEssay = d.essay || d.content || d.html || d.body || d.text || d.description || '';
-      const fullHtml = formatEssayToHtml(rawEssay);
-
-      const plainText = rawEssay
-        .replace(/<[^>]+>/g, ' ')       // strip HTML tags
-        .replace(/^#{1,6}\s+/gm, '')    // strip heading markers
-        .replace(/\*\*(.+?)\*\*/g, '$1') // strip bold markers
-        .replace(/__(.+?)__/g, '$1')
-        .replace(/\*(.+?)\*/g, '$1')     // strip italic markers
-        .replace(/_(.+?)_/g, '$1')
-        .replace(/`([^`]+)`/g, '$1')     // strip inline code
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // strip links, keep text
-        .replace(/^[-*]\s+/gm, '')       // strip list markers
-        .replace(/^\d+[\.\)]\s+/gm, '')  // strip numbered list markers
-        .replace(/^>\s+/gm, '')          // strip blockquote markers
-        .replace(/\s+/g, ' ')
-        .trim();
-      const count = plainText ? plainText.split(/\s+/).filter(Boolean).length : 0;
-      const words = count > 0 ? `${count.toLocaleString()} words` : '500 words';
-
-      const title = d.title || d.prompt || d.program || 'Statement of Purpose';
-      const school = parseSchool(d.title, d.program, d.school || d.university || d.institution);
-      const tag = d.type || d.categoryLevel || d.tag || 'Admitted SOP';
-      const author = d.author || 'Admitted Student';
-      const year = d.categoryLevel ? `${d.categoryLevel} Level` : (d.year || 'Verified Admit');
-      
-      const previewText = plainText ? plainText.slice(0, 200) + '...' : 'Click View Essay to read full Statement of Purpose.';
-
-      parsedEssays.push({
-        id: id || `wix-${Math.random().toString(36).substring(2, 9)}`,
-        title,
-        school,
-        program: d.program || '',
-        categoryLevel: d.categoryLevel || '',
-        tag,
-        words,
-        previewText,
-        content: fullHtml || `<p>${previewText}</p>`,
-        author,
-        year,
-        link: d.link || d.originalLink || '',
-        updatedAt: d.updatedAt || item._updatedDate || item._createdDate || new Date().toISOString()
-      });
-    }
+    const allEssays = cachedEssays || [];
 
     if (essayId) {
-      const found = parsedEssays.find((e) => e.id === essayId);
+      const found = allEssays.find((e) => e.id === essayId);
       if (found) {
         return NextResponse.json({
           success: true,
           essay: found,
-          source: usedCollection
+          source: cachedUsedCollection
         });
       }
     }
 
     if (search) {
-      const filtered = parsedEssays.filter((e) =>
+      const filtered = allEssays.filter((e) =>
         e.title.toLowerCase().includes(search) ||
         e.school.toLowerCase().includes(search) ||
         e.tag.toLowerCase().includes(search) ||
@@ -311,15 +362,19 @@ export async function GET(request: Request) {
         success: true,
         essays: filtered,
         count: filtered.length,
-        source: usedCollection
+        source: cachedUsedCollection
       });
     }
 
     return NextResponse.json({
       success: true,
-      essays: parsedEssays,
-      count: parsedEssays.length,
-      source: usedCollection
+      essays: allEssays,
+      count: allEssays.length,
+      source: cachedUsedCollection
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      }
     });
   } catch (error: any) {
     console.error('Error fetching dynamic essays from Wix CMS:', error);

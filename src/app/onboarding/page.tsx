@@ -555,14 +555,15 @@ export default function OnboardingPage() {
                   {filteredMajors.map((m) => (
                     <button
                       key={m}
+                      type="button"
                       onClick={() => setTargetMajor(m)}
-                      className={`w-full p-3.5 rounded-[14px] border text-[14px] font-medium transition-all flex items-center justify-between ${targetMajor === m
+                      className={`w-full p-3.5 sm:p-4 rounded-[14px] border text-[14px] font-medium transition-all text-left flex items-center justify-between gap-3 cursor-pointer ${targetMajor === m
                         ? 'bg-[#F7F0F1] border-[#690B1B] text-[#690B1B] font-bold'
                         : 'bg-[#FDFCFB] border-[#E7E2DE] text-[#444] hover:border-[#690B1B]/40'
                         }`}
                     >
-                      <span>{m}</span>
-                      {targetMajor === m && <CheckCircle2 size={18} className="text-[#690B1B]" />}
+                      <span className="text-left leading-snug flex-1">{m}</span>
+                      {targetMajor === m && <CheckCircle2 size={18} className="text-[#690B1B] shrink-0" />}
                     </button>
                   ))}
                 </div>
@@ -601,14 +602,15 @@ export default function OnboardingPage() {
                   {filteredUniversities.map((u) => (
                     <button
                       key={u}
+                      type="button"
                       onClick={() => setDreamSchool(u)}
-                      className={`w-full p-3.5 rounded-[14px] border text-[14px] font-medium transition-all flex items-center justify-between ${dreamSchool === u
+                      className={`w-full p-3.5 sm:p-4 rounded-[14px] border text-[14px] font-medium transition-all text-left flex items-center justify-between gap-3 cursor-pointer ${dreamSchool === u
                         ? 'bg-[#F7F0F1] border-[#690B1B] text-[#690B1B] font-bold'
                         : 'bg-[#FDFCFB] border-[#E7E2DE] text-[#444] hover:border-[#690B1B]/40'
                         }`}
                     >
-                      <span>{u}</span>
-                      {dreamSchool === u && <CheckCircle2 size={18} className="text-[#690B1B]" />}
+                      <span className="text-left leading-snug flex-1">{u}</span>
+                      {dreamSchool === u && <CheckCircle2 size={18} className="text-[#690B1B] shrink-0" />}
                     </button>
                   ))}
                 </div>

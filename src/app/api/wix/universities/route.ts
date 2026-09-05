@@ -601,6 +601,101 @@ const FALLBACK_UNIVERSITIES = [
   },
 ];
 
+// In-memory cache for instant search responses
+let cachedUniversities: any[] | null = null;
+let lastUniversityFetch = 0;
+const UNIVERSITY_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+let isFetchingUniversities = false;
+
+async function fetchAllUniversitiesFromWix(wixApiKey: string, wixSiteId: string): Promise<any[]> {
+  try {
+    const headers = {
+      'Authorization': wixApiKey,
+      'wix-site-id': wixSiteId,
+      'Content-Type': 'application/json',
+    };
+
+    let allItems: any[] = [];
+    let cursor: string | null = null;
+    let hasMore = true;
+
+    while (hasMore) {
+      const queryPayload: any = {
+        dataCollectionId: 'Import2',
+        query: {
+          paging: { limit: 1000 },
+          sort: [{ fieldName: 'university_name', order: 'ASC' }],
+        },
+      };
+
+      if (cursor) {
+        queryPayload.query.cursorPaging = { cursor, limit: 1000 };
+        delete queryPayload.query.paging;
+        delete queryPayload.query.sort;
+      }
+
+      const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(queryPayload),
+      });
+
+      if (!res.ok) break;
+
+      const data = await res.json();
+      const items = data.dataItems || [];
+      allItems = allItems.concat(items);
+
+      if (data.pagingMetadata?.hasNext && data.pagingMetadata?.cursors?.next) {
+        cursor = data.pagingMetadata.cursors.next;
+      } else {
+        hasMore = false;
+      }
+
+      if (allItems.length >= 5000) break;
+    }
+
+    if (allItems.length > 0) {
+      return allItems.map((item) => {
+        const d = item.data || item;
+        const majorsRaw = d.popularMajors || '';
+        const majorsArray = majorsRaw
+          .split(',')
+          .map((m: string) => m.trim())
+          .filter(Boolean);
+
+        const slug = (d.university_name || 'university')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+
+        return {
+          id: d._id || item.id,
+          universityId: d.university_id || '',
+          name: d.university_name || 'Unknown University',
+          country: d.country || 'Unknown',
+          countryCode: d.country_code || '',
+          state: d.state_province || '',
+          qsRanking: d.qsRanking || 'Unranked',
+          tuition: d.tution || 'N/A',
+          livingCosts: d.livingCosts || 'N/A',
+          acceptanceRate: d.acceptanceRate || 'N/A',
+          website: d.official_website || '',
+          bannerImage: d.bannerImage || d.university_image || '',
+          bannerAlt: d.bannerImageAltText || '',
+          popularMajors: majorsArray.slice(0, 8),
+          allMajors: majorsArray,
+          slug,
+          type: 'Public',
+        };
+      });
+    }
+  } catch (err) {
+    console.warn('Wix university fetch notice:', err);
+  }
+  return [];
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -612,94 +707,32 @@ export async function GET(request: Request) {
     const wixApiKey = process.env.WIX_API_KEY;
     const wixSiteId = process.env.WIX_SITE_ID;
 
-    let parsedUniversities: any[] = [];
+    const now = Date.now();
+    const isStale = now - lastUniversityFetch > UNIVERSITY_CACHE_TTL;
 
-    // Attempt to fetch from Wix API if credentials exist
-    if (wixApiKey && wixSiteId) {
-      try {
-        const headers = {
-          'Authorization': wixApiKey,
-          'wix-site-id': wixSiteId,
-          'Content-Type': 'application/json',
-        };
-
-        let allItems: any[] = [];
-        let cursor: string | null = null;
-        let hasMore = true;
-
-        while (hasMore) {
-          const queryPayload: any = {
-            dataCollectionId: 'Import2',
-            query: {
-              paging: { limit: 1000 },
-              sort: [{ fieldName: 'university_name', order: 'ASC' }],
-            },
-          };
-
-          if (cursor) {
-            queryPayload.query.cursorPaging = { cursor, limit: 1000 };
-            delete queryPayload.query.paging;
-          }
-
-          const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(queryPayload),
-          });
-
-          if (!res.ok) break;
-
-          const data = await res.json();
-          const items = data.dataItems || [];
-          allItems = allItems.concat(items);
-
-          if (data.pagingMetadata?.hasNext && data.pagingMetadata?.cursors?.next) {
-            cursor = data.pagingMetadata.cursors.next;
-          } else {
-            hasMore = false;
-          }
-
-          if (allItems.length >= 5000) break;
-        }
-
-        if (allItems.length > 0) {
-          parsedUniversities = allItems.map((item) => {
-            const d = item.data || item;
-            const majorsRaw = d.popularMajors || '';
-            const majorsArray = majorsRaw
-              .split(',')
-              .map((m: string) => m.trim())
-              .filter(Boolean);
-
-            const slug = (d.university_name || 'university')
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/^-|-$/g, '');
-
-            return {
-              id: d._id || item.id,
-              universityId: d.university_id || '',
-              name: d.university_name || 'Unknown University',
-              country: d.country || 'Unknown',
-              countryCode: d.country_code || '',
-              state: d.state_province || '',
-              qsRanking: d.qsRanking || 'Unranked',
-              tuition: d.tution || 'N/A',
-              livingCosts: d.livingCosts || 'N/A',
-              acceptanceRate: d.acceptanceRate || 'N/A',
-              website: d.official_website || '',
-              bannerAlt: d.bannerImageAltText || '',
-              popularMajors: majorsArray.slice(0, 8),
-              allMajors: majorsArray,
-              slug,
-              type: 'Public',
-            };
-          });
-        }
-      } catch (wixErr) {
-        console.warn('Wix API fetch failed, using fallback database:', wixErr);
+    // Check or populate in-memory cache
+    if (!cachedUniversities && wixApiKey && wixSiteId) {
+      const fresh = await fetchAllUniversitiesFromWix(wixApiKey, wixSiteId);
+      if (fresh.length > 0) {
+        cachedUniversities = fresh;
+        lastUniversityFetch = now;
       }
+    } else if (cachedUniversities && isStale && !isFetchingUniversities && wixApiKey && wixSiteId) {
+      // Stale-while-revalidate in background
+      isFetchingUniversities = true;
+      fetchAllUniversitiesFromWix(wixApiKey, wixSiteId)
+        .then((fresh) => {
+          if (fresh.length > 0) {
+            cachedUniversities = fresh;
+            lastUniversityFetch = Date.now();
+          }
+        })
+        .finally(() => {
+          isFetchingUniversities = false;
+        });
     }
+
+    let parsedUniversities = cachedUniversities || [];
 
     // Fall back to curated global university dataset if Wix returned empty
     if (parsedUniversities.length === 0) {
@@ -709,7 +742,7 @@ export async function GET(request: Request) {
       }));
     }
 
-    // Apply server-side filtering
+    // Apply instantaneous server-side filtering
     let filtered = parsedUniversities;
 
     if (search) {

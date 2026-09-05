@@ -19,10 +19,102 @@ import {
   UserCheck,
   FileText
 } from 'lucide-react';
+import { calculateDeadlineInfo } from '@/lib/deadlineUtils';
+
+const RAW_HOME_TIMELINE_TASKS = [
+  {
+    id: 'task-1',
+    title: 'Draft your Common App personal statement',
+    date: 'Sep 12',
+    checkpoint: 'SEP 15',
+    defaultDone: false
+  },
+  {
+    id: 'task-2',
+    title: 'Ask two teachers for rec letters',
+    date: 'Sep 20',
+    checkpoint: 'SEP 15',
+    defaultDone: false
+  },
+  {
+    id: 'task-3',
+    title: 'FAFSA opens for financial aid',
+    date: 'Oct 01',
+    checkpoint: 'OCT 01',
+    defaultDone: false
+  },
+  {
+    id: 'task-5',
+    title: 'Early Decision / Early Action (ED/EA) Application Deadline',
+    date: 'Nov 01',
+    checkpoint: 'NOV 01',
+    defaultDone: false
+  },
+];
 
 export default function DashboardHomePage() {
   const { user, userData } = useAuth();
   const [displayName, setDisplayName] = useState('');
+  const [activeCheckpoint, setActiveCheckpoint] = useState('ALL');
+  const [timelineTasks, setTimelineTasks] = useState(() => {
+    return RAW_HOME_TIMELINE_TASKS.map((t) => {
+      const info = calculateDeadlineInfo(t.date);
+      let status = 'Upcoming';
+      if (info.diffDays < 0) {
+        status = 'Overdue';
+      } else if (info.diffDays <= 7) {
+        status = 'Due Soon';
+      } else if (info.diffDays <= 21) {
+        status = 'In Progress';
+      }
+      return {
+        ...t,
+        dueIn: info.dueIn,
+        diffDays: info.diffDays,
+        status: t.defaultDone ? 'Completed' : status,
+        done: t.defaultDone
+      };
+    });
+  });
+
+  const toggleTask = (id: string) => {
+    setTimelineTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        const nextDone = !t.done;
+        const info = calculateDeadlineInfo(t.date);
+        let activeStatus = info.diffDays < 0 ? 'Overdue' : info.diffDays <= 7 ? 'Due Soon' : 'In Progress';
+        return {
+          ...t,
+          done: nextDone,
+          status: nextDone ? "Completed" : activeStatus
+        };
+      }
+      return t;
+    }));
+  };
+
+  const CHECKPOINTS = [
+    { label: 'SEP 01', sub: 'Cycle Open', date: 'Sep 01' },
+    { label: 'SEP 15', sub: 'Personal SOP', date: 'Sep 15' },
+    { label: 'OCT 01', sub: 'Financial Aid', date: 'Oct 01' },
+    { label: 'NOV 01', sub: 'Early Action', date: 'Nov 01' }
+  ];
+
+  // Dynamically compute progress percentage based on today's date
+  const progressPercent = (() => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 8, 1).getTime(); // Sep 1
+    const end = new Date(now.getFullYear(), 10, 1).getTime(); // Nov 1
+    const current = now.getTime();
+    if (current <= start) return 8;
+    if (current >= end) return 100;
+    const pct = Math.round(((current - start) / (end - start)) * 100);
+    return Math.max(10, Math.min(pct, 95));
+  })();
+
+  const displayedTasks = activeCheckpoint === 'ALL'
+    ? timelineTasks
+    : timelineTasks.filter(t => t.checkpoint === activeCheckpoint);
 
   useEffect(() => {
     const userKey = user?.uid || user?.email || userData?.email || 'default';
@@ -58,7 +150,7 @@ export default function DashboardHomePage() {
             </div>
           </div>
         </div>
-        <button className="shrink-0 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full bg-[#C9A55D] hover:bg-[#b8924b] text-black font-bold text-[11px] sm:text-[13px] transition-all flex items-center gap-1.5 shadow-xs whitespace-nowrap">
+        <button className="shrink-0 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full bg-[#C9A55D] hover:bg-[#b8924b] text-black font-bold text-[11px] sm:text-[13px] transition-all flex items-center gap-1.5 shadow-xs whitespace-nowrap cursor-pointer active:scale-95">
           <span>30% Off</span>
           <ArrowRight size={12} />
         </button>
@@ -74,7 +166,7 @@ export default function DashboardHomePage() {
             Here is your admissions dashboard and action plan for today.
           </p>
         </div>
-        <button className="px-4 py-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] text-[12px] sm:text-[13px] font-semibold flex items-center gap-2 hover:bg-[#F7F0F1] transition-all shadow-2xs shrink-0">
+        <button className="px-4 py-2 rounded-full border border-[#E7E2DE] bg-white text-[#555555] hover:text-[#690B1B] text-[12px] sm:text-[13px] font-semibold flex items-center gap-2 hover:bg-[#F7F0F1] transition-all shadow-2xs shrink-0 cursor-pointer">
           <HelpCircle size={14} />
           <span>Take the tour</span>
         </button>
@@ -88,10 +180,12 @@ export default function DashboardHomePage() {
           <div className="bg-white border border-[#E7E2DE] rounded-[16px] sm:rounded-[20px] p-4 sm:p-6 md:p-8 shadow-xs relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-[#690B1B]/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
             <div className="flex items-center gap-3 sm:gap-6 relative z-10">
-              <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-[14px] sm:rounded-[20px] bg-gradient-to-br from-[#7A1022] to-[#530816] flex items-center justify-center shrink-0 shadow-md border border-white/20 text-white">
-                <BarChart3 size={22} className="text-[#C9A55D] sm:hidden" />
-                <BarChart3 size={32} className="text-[#C9A55D] hidden sm:block" />
+              {/* UPGRADED CRISP HIGH-RES CHANCE-ME LOGO */}
+              <div className="w-13 h-13 sm:w-18 sm:h-18 aspect-square rounded-[18px] sm:rounded-[22px] bg-gradient-to-br from-[#690B1B] via-[#820E22] to-[#420610] flex items-center justify-center shrink-0 shadow-md shadow-[#690B1B]/25 ring-2 ring-white/40 text-white relative">
+                <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-[#E5C178]" strokeWidth={2.4} />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#16a34a] border-2 border-[#690B1B] absolute -top-0.5 -right-0.5" />
               </div>
+
               <div className="space-y-1.5 sm:space-y-2 min-w-0">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#F7F0F1] text-[#690B1B] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
                   <Sparkles size={10} />
@@ -104,7 +198,7 @@ export default function DashboardHomePage() {
                   Get a full read on your profile school-by-school, compared against thousands of verified admitted students.
                 </p>
                 <div className="pt-1 sm:pt-2">
-                  <Link href="/dashboard/chance-me" className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] sm:text-[14px] font-bold transition-all inline-flex items-center gap-2 shadow-xs hover:scale-[1.01]">
+                  <Link href="/dashboard/chance-me" className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] sm:text-[13px] font-bold transition-all inline-flex items-center gap-2 shadow-xs hover:scale-[1.01] active:scale-95 cursor-pointer">
                     <span>Run AI Chance-Me</span>
                     <ArrowRight size={14} />
                   </Link>
@@ -115,7 +209,7 @@ export default function DashboardHomePage() {
 
           {/* APPLICATION DEADLINE TIMELINE CARD */}
           <div className="bg-white border border-[#E7E2DE] rounded-[16px] sm:rounded-[20px] p-4 sm:p-6 shadow-xs">
-            <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-[#F0EBE6]">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#F0EBE6]">
               <div>
                 <h3 className="text-[15px] sm:text-[17px] font-bold text-[#111111] flex items-center gap-2">
                   <Clock size={16} className="text-[#690B1B]" />
@@ -129,37 +223,88 @@ export default function DashboardHomePage() {
               </Link>
             </div>
 
-            {/* TIMELINE PROGRESS GRAPHIC */}
+            {/* WORKING INTERACTIVE TIMELINE PROGRESS GRAPHIC */}
             <div className="space-y-4">
-              <div className="grid grid-cols-4 gap-2 text-center text-[12px] font-bold text-[#888888] border-b border-[#F0EBE6] pb-2">
-                <span className="text-[#690B1B]">SEP 01</span>
-                <span>SEP 15</span>
-                <span>OCT 01</span>
-                <span>OCT 15</span>
+              {/* TIMELINE TRACK WITH NODES */}
+              <div className="relative pt-2 pb-1">
+                {/* Background Track Line */}
+                <div className="absolute top-[18px] left-[10%] right-[10%] h-[3px] bg-[#EAE6E2] rounded-full" />
+                {/* Active Progress Fill Line */}
+                <div
+                  className="absolute top-[18px] left-[10%] h-[3px] bg-gradient-to-r from-[#16a34a] to-[#690B1B] rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(80, Math.max(10, progressPercent * 0.8))}%` }}
+                />
+
+                <div className="relative z-10 grid grid-cols-4 gap-1 text-center">
+                  {CHECKPOINTS.map((cp) => {
+                    const isSelected = activeCheckpoint === cp.label;
+                    const isPast = calculateDeadlineInfo(cp.date).diffDays <= 0;
+                    return (
+                      <button
+                        key={cp.label}
+                        type="button"
+                        onClick={() => setActiveCheckpoint(activeCheckpoint === cp.label ? 'ALL' : cp.label)}
+                        className="group flex flex-col items-center gap-1.5 focus:outline-hidden cursor-pointer"
+                      >
+                        {/* Node Dot */}
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                          isSelected
+                            ? 'bg-[#690B1B] border-[#690B1B] text-white shadow-xs scale-110'
+                            : isPast
+                              ? 'bg-[#16a34a]/10 border-[#16a34a] text-[#16a34a]'
+                              : 'bg-white border-[#C9A55D] text-[#690B1B] group-hover:border-[#690B1B]'
+                        }`}>
+                          <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-white' : isPast ? 'bg-[#16a34a]' : 'bg-[#C9A55D]'}`} />
+                        </div>
+                        {/* Date Label */}
+                        <span className={`text-[11px] sm:text-[12px] font-bold transition-colors ${
+                          isSelected ? 'text-[#690B1B]' : 'text-[#777] group-hover:text-[#111]'
+                        }`}>
+                          {cp.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
+              {/* TIMELINE TASKS LIST - INTERACTIVE CHECKABLE */}
               <div className="space-y-2.5 sm:space-y-3 pt-2">
-                {[
-                  { title: "Draft Common App & Personal SOP", status: "Completed", date: "Sep 05", done: true },
-                  { title: "Request Teacher Recommendation Letters", status: "In Progress", date: "Sep 18", done: false },
-                  { title: "Submit Early Decision Applications (ED/EA)", status: "Upcoming", date: "Oct 15", done: false },
-                ].map((item, idx) => (
+                {displayedTasks.map((item) => (
                   <div
-                    key={idx}
-                    className="flex items-center justify-between p-3 sm:p-3.5 rounded-[12px] sm:rounded-[14px] bg-[#FDFCFB] border border-[#F0EBE6] hover:border-[#690B1B]/20 transition-all gap-2"
+                    key={item.id}
+                    onClick={() => toggleTask(item.id)}
+                    className="flex items-center justify-between p-3 sm:p-3.5 rounded-[12px] sm:rounded-[14px] bg-[#FDFCFB] border border-[#F0EBE6] hover:border-[#690B1B]/30 hover:bg-[#FFFDFD] transition-all gap-2 cursor-pointer group"
+                    title="Click to toggle completion status"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${item.done ? 'bg-[#16a34a]/10 text-[#16a34a]' : 'bg-[#690B1B]/10 text-[#690B1B]'}`}>
-                        {item.done ? <CheckCircle2 size={15} /> : <Clock size={15} />}
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${
+                        item.done ? 'bg-[#16a34a]/15 text-[#16a34a]' : 'bg-[#690B1B]/10 text-[#690B1B]'
+                      }`}>
+                        {item.done ? <CheckCircle2 size={16} /> : <Clock size={16} />}
                       </div>
                       <div className="min-w-0">
-                        <div className={`text-[12px] sm:text-[14px] font-bold truncate ${item.done ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
+                        <div className={`text-[12.5px] sm:text-[14px] font-bold truncate transition-colors ${
+                          item.done ? 'line-through text-[#888888]' : 'text-[#111111]'
+                        }`}>
                           {item.title}
                         </div>
-                        <div className="text-[10px] sm:text-[11px] text-[#888888]">Deadline: {item.date}</div>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap text-[10.5px] sm:text-[11px] text-[#888888]">
+                          <span>Deadline: {item.date}</span>
+                          <span className="w-1 h-1 rounded-full bg-[#ccc]" />
+                          <span className="font-semibold text-[#690B1B] bg-[#F7F0F1] px-1.5 py-0.5 rounded-full">{item.dueIn}</span>
+                        </div>
                       </div>
                     </div>
-                    <span className={`text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-1 rounded-full shrink-0 ${item.done ? 'bg-[#16a34a]/10 text-[#16a34a]' : 'bg-[#C9A55D]/15 text-[#9E731A]'}`}>
+                    <span className={`text-[10px] sm:text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0 transition-colors ${
+                      item.done
+                        ? 'bg-[#16a34a]/15 text-[#16a34a]'
+                        : item.status === 'Due Soon'
+                          ? 'bg-[#690B1B]/10 text-[#690B1B]'
+                          : item.status === 'In Progress'
+                            ? 'bg-[#C9A55D]/20 text-[#9E731A]'
+                            : 'bg-[#F0EBE6] text-[#777]'
+                    }`}>
                       {item.status}
                     </span>
                   </div>

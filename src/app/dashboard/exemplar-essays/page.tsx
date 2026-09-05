@@ -29,9 +29,12 @@ interface ExemplarEssay {
   year?: string;
 }
 
+// In-memory module cache for instant load
+let cachedClientEssays: ExemplarEssay[] | null = null;
+
 export default function ExemplarEssaysPage() {
-  const [essays, setEssays] = useState<ExemplarEssay[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [essays, setEssays] = useState<ExemplarEssay[]>(() => cachedClientEssays || []);
+  const [loading, setLoading] = useState(() => !cachedClientEssays || cachedClientEssays.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSchool, setSelectedSchool] = useState('ALL');
@@ -44,20 +47,25 @@ export default function ExemplarEssaysPage() {
   // Fetch all dynamic essays directly from Wix CMS
   const fetchEssays = async () => {
     try {
-      setLoading(true);
+      if (!cachedClientEssays || cachedClientEssays.length === 0) {
+        setLoading(true);
+      }
       setError(null);
       const res = await fetch('/api/wix/essays');
       const data = await res.json();
       if (data.success && Array.isArray(data.essays)) {
+        cachedClientEssays = data.essays;
         setEssays(data.essays);
-      } else {
+      } else if (!cachedClientEssays) {
         setEssays([]);
         if (data.error) setError(data.error);
       }
     } catch (err: any) {
       console.warn('Error fetching dynamic essays from Wix CMS:', err);
-      setError(err.message || 'Unable to connect to Wix CMS');
-      setEssays([]);
+      if (!cachedClientEssays) {
+        setError(err.message || 'Unable to connect to Wix CMS');
+        setEssays([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -213,44 +221,44 @@ export default function ExemplarEssaysPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredEssays.map((ex) => (
             <div
               key={ex.id}
               onClick={() => handleOpenEssay(ex)}
-              className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs hover:border-[#690B1B] hover:shadow-md transition-all flex flex-col justify-between space-y-4 group cursor-pointer"
+              className="bg-white border border-[#E7E2DE] rounded-[18px] sm:rounded-[20px] p-4 sm:p-6 shadow-xs hover:border-[#690B1B] hover:shadow-md transition-all flex flex-col justify-between space-y-3 sm:space-y-4 group cursor-pointer"
             >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-3 py-1 rounded-full uppercase tracking-wider">
+              <div className="space-y-2.5 sm:space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10.5px] sm:text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-wider truncate">
                     {ex.school}
                   </span>
-                  <span className="text-[11px] font-medium text-[#888] flex items-center gap-1">
+                  <span className="text-[10.5px] sm:text-[11px] font-medium text-[#888] flex items-center gap-1 shrink-0">
                     <Clock size={12} />
                     <span>{ex.words}</span>
                   </span>
                 </div>
 
                 {/* ESSAY PREVIEW BOX */}
-                <div className="p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] space-y-2 group-hover:bg-[#FFFDFD] transition-colors">
+                <div className="p-3 sm:p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] space-y-1.5 sm:space-y-2 group-hover:bg-[#FFFDFD] transition-colors">
                   <div className="flex items-center justify-between">
-                    <FileText size={18} className="text-[#C9A55D]" />
-                    <span className="text-[10px] uppercase font-bold text-[#999] tracking-wider">
+                    <FileText size={16} className="text-[#C9A55D]" />
+                    <span className="text-[9.5px] sm:text-[10px] uppercase font-bold text-[#999] tracking-wider">
                       {ex.tag || 'SOP'}
                     </span>
                   </div>
-                  <p className="text-[12px] text-[#555] italic line-clamp-3 leading-relaxed">
+                  <p className="text-[11.5px] sm:text-[12px] text-[#555] italic line-clamp-3 leading-relaxed">
                     &ldquo;{ex.previewText}&rdquo;
                   </p>
                 </div>
 
-                <h3 className="text-[15px] font-bold text-[#111] leading-snug line-clamp-2 group-hover:text-[#690B1B] transition-colors">
+                <h3 className="text-[14.5px] sm:text-[15px] font-bold text-[#111] leading-snug line-clamp-2 group-hover:text-[#690B1B] transition-colors">
                   {ex.title}
                 </h3>
               </div>
 
-              <div className="pt-3 border-t border-[#F0EBE6] flex items-center justify-between">
-                <span className="text-[11px] font-bold text-[#16a34a] bg-[#16a34a]/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              <div className="pt-3 border-t border-[#F0EBE6] flex items-center justify-between gap-2">
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[#16a34a] bg-[#16a34a]/10 px-2 sm:px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0 whitespace-nowrap">
                   <CheckCircle2 size={12} />
                   <span>Verified Admit</span>
                 </span>
@@ -261,9 +269,9 @@ export default function ExemplarEssaysPage() {
                     e.stopPropagation();
                     handleOpenEssay(ex);
                   }}
-                  className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="h-[32px] sm:h-[34px] px-3.5 sm:px-4 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[11.5px] sm:text-[12px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 shrink-0 whitespace-nowrap"
                 >
-                  <Eye size={14} />
+                  <Eye size={13} />
                   <span>View Essay</span>
                 </button>
               </div>
@@ -276,63 +284,63 @@ export default function ExemplarEssaysPage() {
          FULL ESSAY RICH TEXT VIEWER MODAL
          ═══════════════════════════════════════════════════════════════ */}
       {activeModalEssay && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div
-            className="bg-white border border-[#E7E2DE] rounded-[24px] w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
+            className="bg-white border border-[#E7E2DE] rounded-[20px] sm:rounded-[24px] w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* MODAL HEADER */}
-            <div className="px-6 py-5 border-b border-[#F0EBE6] flex items-center justify-between bg-gradient-to-r from-[#FAF8F6] to-white">
-              <div className="space-y-1 max-w-[75%]">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-3 py-0.5 rounded-full uppercase">
+            <div className="px-4 sm:px-6 py-3.5 sm:py-5 border-b border-[#F0EBE6] flex items-center justify-between bg-gradient-to-r from-[#FAF8F6] to-white gap-3">
+              <div className="space-y-1 min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10.5px] sm:text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-2.5 sm:px-3 py-0.5 rounded-full uppercase shrink-0">
                     {activeModalEssay.school}
                   </span>
-                  <span className="text-[12px] text-[#777] font-medium">• {activeModalEssay.words}</span>
-                  <span className="text-[11px] font-bold bg-[#16a34a]/10 text-[#16a34a] px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="text-[11px] sm:text-[12px] text-[#777] font-medium shrink-0">• {activeModalEssay.words}</span>
+                  <span className="text-[10.5px] sm:text-[11px] font-bold bg-[#16a34a]/10 text-[#16a34a] px-2 sm:px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0">
                     <CheckCircle2 size={11} />
                     <span>Full Essay</span>
                   </span>
                 </div>
-                <h3 className="text-[18px] font-bold text-[#111] truncate">
+                <h3 className="text-[15px] sm:text-[18px] font-bold text-[#111] leading-tight line-clamp-1">
                   {activeModalEssay.title}
                 </h3>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <Link
                   href={`/dashboard/essays/studio?topic=${encodeURIComponent(activeModalEssay.title)}&format=ieee&essayId=${encodeURIComponent(activeModalEssay.id)}`}
-                  className="px-4 py-2 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  className="hidden md:flex h-[36px] px-4 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all items-center justify-center gap-1.5 shadow-xs cursor-pointer whitespace-nowrap active:scale-95"
                 >
-                  <Sparkles size={14} className="text-[#C9A55D]" />
+                  <Sparkles size={13} className="text-[#C9A55D]" />
                   <span>Open in AI Studio</span>
-                  <ExternalLink size={13} />
+                  <ExternalLink size={12} />
                 </Link>
 
                 <button
                   onClick={() => setActiveModalEssay(null)}
-                  className="p-2 rounded-full text-[#777] hover:bg-[#F7F0F1] hover:text-[#111] transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full text-[#777] hover:bg-[#F7F0F1] hover:text-[#111] transition-colors cursor-pointer flex items-center justify-center shrink-0"
                   title="Close"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
             </div>
 
             {/* MODAL BODY DISPLAYING THE FULL ESSAY */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-[#F0EBE6]">
-                <div className="text-[13px] font-semibold text-[#555] flex items-center gap-2">
-                  <FileText size={16} className="text-[#690B1B]" />
+            <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-[#F0EBE6]">
+                <div className="text-[12px] sm:text-[13px] font-semibold text-[#555] flex items-center gap-2">
+                  <FileText size={15} className="text-[#690B1B] shrink-0" />
                   <span>Full Statement of Purpose / Essay Text</span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleCopyContent}
-                    className="px-3 py-1.5 rounded-lg border border-[#E7E2DE] bg-[#FDFCFB] hover:bg-[#F7F0F1] text-[#555] text-[12px] font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="h-[32px] px-3 rounded-full border border-[#E7E2DE] bg-[#FDFCFB] hover:bg-[#F7F0F1] text-[#555] text-[11.5px] sm:text-[12px] font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap active:scale-95"
                   >
-                    {copied ? <Check size={14} className="text-[#16a34a]" /> : <Copy size={14} />}
+                    {copied ? <Check size={13} className="text-[#16a34a]" /> : <Copy size={13} />}
                     <span>{copied ? 'Copied Full Essay!' : 'Copy Full Essay'}</span>
                   </button>
                 </div>
@@ -340,30 +348,31 @@ export default function ExemplarEssaysPage() {
 
               {/* FORMATTED ESSAY VIEWER */}
               <div
-                className="essay-viewer-content min-h-[420px] bg-white border border-[#E7E2DE] rounded-[18px] px-10 py-8 shadow-2xs"
+                className="essay-viewer-content min-h-[300px] bg-white border border-[#E7E2DE] rounded-[16px] sm:rounded-[18px] px-4 py-5 sm:px-10 sm:py-8 shadow-2xs text-[14px] sm:text-[15px] leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: modalContent }}
               />
             </div>
 
             {/* MODAL FOOTER */}
-            <div className="px-6 py-4 border-t border-[#F0EBE6] flex items-center justify-between bg-[#FAF8F6] text-[13px]">
-              <span className="text-[#777]">
-                Author: <strong>{activeModalEssay.author || 'Verified Admit'}</strong> • Cycle: <strong>{activeModalEssay.year || 'Class of 2028'}</strong>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-[#F0EBE6] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#FAF8F6]">
+              <span className="text-[11.5px] sm:text-[12.5px] text-[#777] leading-tight">
+                Author: <strong className="text-[#111]">{activeModalEssay.author || 'Verified Admit'}</strong> • Cycle: <strong className="text-[#111]">{activeModalEssay.year || 'Class of 2028'}</strong>
               </span>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <button
                   onClick={() => setActiveModalEssay(null)}
-                  className="px-4 py-2 rounded-full border border-[#E7E2DE] bg-white text-[#555] hover:bg-[#F9F7F5] font-bold text-[13px] transition-all cursor-pointer"
+                  className="flex-1 sm:flex-initial h-[38px] sm:h-[42px] px-4 rounded-full border border-[#E7E2DE] bg-white text-[#555] hover:bg-[#F9F7F5] font-bold text-[12.5px] sm:text-[13px] transition-all cursor-pointer flex items-center justify-center active:scale-95 whitespace-nowrap"
                 >
                   Close
                 </button>
                 <Link
                   href={`/dashboard/essays/studio?topic=${encodeURIComponent(activeModalEssay.title)}&format=ieee&essayId=${encodeURIComponent(activeModalEssay.id)}`}
-                  className="px-5 py-2 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white font-bold text-[13px] transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  className="flex-1 sm:flex-initial h-[38px] sm:h-[42px] px-4 sm:px-5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white font-bold text-[12.5px] sm:text-[13px] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95 whitespace-nowrap"
                 >
+                  <Sparkles size={14} className="text-[#C9A55D] shrink-0" />
                   <span>Open in AI Studio</span>
-                  <ArrowRight size={14} />
+                  <ArrowRight size={13} className="shrink-0" />
                 </Link>
               </div>
             </div>

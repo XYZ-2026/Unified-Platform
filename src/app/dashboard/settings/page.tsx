@@ -135,60 +135,69 @@ export default function SettingsPage() {
 
             <div className="space-y-6">
               {/* TOGGLE 1: TRANSACTIONAL EMAILS */}
-              <div className="flex items-center justify-between gap-4">
-                <div>
+              <div className="flex items-start sm:items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
                   <h4 className="text-[15px] font-bold text-[#111]">Transactional Emails</h4>
-                  <p className="text-[13px] text-[#777]">Only used for login links, password resets, and critical alerts.</p>
+                  <p className="text-[13px] text-[#777] leading-relaxed">Only used for login links, password resets, and critical alerts.</p>
                 </div>
                 <button
+                  type="button"
+                  role="switch"
+                  aria-checked={transactionalEmails}
                   onClick={() => setTransactionalEmails(!transactionalEmails)}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${
-                    transactionalEmails ? 'bg-[#690B1B]' : 'bg-[#E7E2DE]'
+                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                    transactionalEmails ? 'bg-[#690B1B]' : 'bg-[#E5E0DC]'
                   }`}
                 >
                   <span
-                    className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${
-                      transactionalEmails ? 'right-0.5' : 'left-0.5'
+                    className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      transactionalEmails ? 'translate-x-5' : 'translate-x-0'
                     }`}
                   />
                 </button>
               </div>
 
               {/* TOGGLE 2: MARKETING EMAILS */}
-              <div className="flex items-center justify-between gap-4">
-                <div>
+              <div className="flex items-start sm:items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
                   <h4 className="text-[15px] font-bold text-[#111]">Marketing &amp; Tips Emails</h4>
-                  <p className="text-[13px] text-[#777]">Receive updates about new admissions tools and curated application tips.</p>
+                  <p className="text-[13px] text-[#777] leading-relaxed">Receive updates about new admissions tools and curated application tips.</p>
                 </div>
                 <button
+                  type="button"
+                  role="switch"
+                  aria-checked={marketingEmails}
                   onClick={() => setMarketingEmails(!marketingEmails)}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${
-                    marketingEmails ? 'bg-[#690B1B]' : 'bg-[#E7E2DE]'
+                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                    marketingEmails ? 'bg-[#690B1B]' : 'bg-[#E5E0DC]'
                   }`}
                 >
                   <span
-                    className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${
-                      marketingEmails ? 'right-0.5' : 'left-0.5'
+                    className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      marketingEmails ? 'translate-x-5' : 'translate-x-0'
                     }`}
                   />
                 </button>
               </div>
 
               {/* TOGGLE 3: DARK MODE */}
-              <div className="flex items-center justify-between gap-4 border-t border-[#F0EBE6] pt-4">
-                <div>
+              <div className="flex items-start sm:items-center justify-between gap-4 border-t border-[#F0EBE6] pt-4">
+                <div className="min-w-0 flex-1">
                   <h4 className="text-[15px] font-bold text-[#111]">Dark Mode</h4>
-                  <p className="text-[13px] text-[#777]">Switch between light and dark appearance themes.</p>
+                  <p className="text-[13px] text-[#777] leading-relaxed">Switch between light and dark appearance themes.</p>
                 </div>
                 <button
+                  type="button"
+                  role="switch"
+                  aria-checked={darkMode}
                   onClick={() => setDarkMode(!darkMode)}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${
-                    darkMode ? 'bg-[#690B1B]' : 'bg-[#E7E2DE]'
+                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                    darkMode ? 'bg-[#690B1B]' : 'bg-[#E5E0DC]'
                   }`}
                 >
                   <span
-                    className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${
-                      darkMode ? 'right-0.5' : 'left-0.5'
+                    className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      darkMode ? 'translate-x-5' : 'translate-x-0'
                     }`}
                   />
                 </button>
