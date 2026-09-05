@@ -513,7 +513,7 @@ export default function AIChanceMePage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 flex-1 flex flex-col xl:flex-row gap-6 max-w-[1600px] mx-auto w-full font-sans">
+    <div className="p-3 sm:p-6 lg:p-8 flex-1 flex flex-col xl:flex-row gap-6 max-w-[1600px] mx-auto w-full font-sans">
       {/* ═══════════════════════════════════════════════════════════════
          LEFT SIDEBAR — History of Past Reviews & Navigation
          ═══════════════════════════════════════════════════════════════ */}
@@ -623,12 +623,12 @@ export default function AIChanceMePage() {
         {evaluationResult ? (
           <div className="space-y-6">
             {/* ─── 1. TOP HERO DASHBOARD CARD ────────────────────────── */}
-            <div className="bg-white border border-[#E7E2DE] rounded-[24px] p-6 sm:p-8 shadow-xs relative overflow-hidden">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 border-b border-[#F0EBE6] pb-6">
+            <div className="bg-white border border-[#E7E2DE] rounded-[24px] p-4 sm:p-8 shadow-xs relative overflow-hidden">
+              <div className="flex flex-col lg:flex-row items-center sm:items-start lg:items-center justify-between gap-5 sm:gap-6 border-b border-[#F0EBE6] pb-5 sm:pb-6">
                 {/* Left: Score Dial & Target Info */}
-                <div className="flex items-center gap-5 sm:gap-6">
+                <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 sm:gap-5 md:gap-6 text-center sm:text-left w-full lg:w-auto">
                   {/* Circular SVG Gauge */}
-                  <div className="relative shrink-0 w-[110px] h-[110px] sm:w-[124px] sm:h-[124px]">
+                  <div className="relative shrink-0 w-[100px] h-[100px] sm:w-[110px] sm:h-[110px] md:w-[124px] md:h-[124px] aspect-square">
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
                       <circle cx="60" cy="60" r="50" fill="none" stroke="#F4EFEA" strokeWidth="10" />
                       <circle
@@ -642,7 +642,7 @@ export default function AIChanceMePage() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-[28px] sm:text-[32px] font-black text-[#111] leading-none">
+                      <span className="text-[26px] sm:text-[32px] font-black text-[#111] leading-none">
                         {evaluationResult.admitChanceNum}%
                       </span>
                       <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider mt-0.5">
@@ -652,32 +652,32 @@ export default function AIChanceMePage() {
                   </div>
 
                   {/* School & Major Header */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[12px] font-bold text-[#690B1B] bg-[#F7F0F1] px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                      <span className="text-[11.5px] sm:text-[12px] font-bold text-[#690B1B] bg-[#F7F0F1] px-3 py-1 rounded-full flex items-center gap-1.5 whitespace-nowrap shrink-0">
                         <GraduationCap size={13} />
                         {selectedSchool}
                       </span>
-                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${getTierBadgeStyle(evaluationResult.admitTier)}`}>
+                      <span className={`text-[10.5px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full border whitespace-nowrap shrink-0 ${getTierBadgeStyle(evaluationResult.admitTier)}`}>
                         {evaluationResult.admitTier}
                       </span>
                       {evaluationProvider && (
-                        <span className="text-[10px] font-medium text-[#888] bg-[#F7F5F3] px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-medium text-[#888] bg-[#F7F5F3] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">
                           {evaluationProvider}
                         </span>
                       )}
                     </div>
-                    <h3 className="text-[20px] sm:text-[24px] font-bold text-[#111] leading-snug">
+                    <h3 className="text-[18px] sm:text-[22px] md:text-[24px] font-bold text-[#111] leading-snug break-words">
                       {evaluationResult.verdictHeadline}
                     </h3>
                   </div>
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-2.5 shrink-0 self-end lg:self-center">
+                <div className="w-full lg:w-auto flex items-center gap-2.5 shrink-0 pt-1 lg:pt-0">
                   <button
                     onClick={() => setEvaluationResult(null)}
-                    className="px-4 py-2 rounded-full border border-[#E7E2DE] text-[#444] text-[13px] font-bold hover:bg-[#F7F5F3] flex items-center gap-2 transition-all"
+                    className="flex-1 lg:flex-initial h-[40px] sm:h-[42px] px-4 sm:px-5 rounded-full border border-[#E7E2DE] bg-white text-[#444] text-[12.5px] sm:text-[13px] font-bold hover:bg-[#F7F5F3] flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-2xs"
                   >
                     <RotateCcw size={14} />
                     <span>Change School</span>
@@ -685,7 +685,7 @@ export default function AIChanceMePage() {
                   <button
                     onClick={handleRunEvaluation}
                     disabled={isEvaluating}
-                    className="px-4 py-2 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold flex items-center gap-2 transition-all shadow-xs"
+                    className="flex-1 lg:flex-initial h-[40px] sm:h-[42px] px-4 sm:px-5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12.5px] sm:text-[13px] font-bold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer whitespace-nowrap active:scale-95 disabled:opacity-50"
                   >
                     <Sparkles size={14} />
                     <span>Re-evaluate</span>
@@ -755,7 +755,7 @@ export default function AIChanceMePage() {
                     <TrendingUp size={18} className="text-[#690B1B]" />
                     <span>Competitive Profile Benchmarking vs Admitted Median</span>
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
                     {evaluationResult.benchmarks.map((bench, idx) => (
                       <div
                         key={idx}

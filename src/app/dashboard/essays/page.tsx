@@ -82,25 +82,25 @@ export default function MyEssaysPage() {
   });
 
   return (
-    <div className="p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6 font-sans">
+    <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6 font-sans">
       {/* HEADER & NEW ESSAY BUTTON */}
-      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-[26px] font-bold text-[#111111] tracking-[-0.03em]">My Essays &amp; SOPs</h2>
-          <p className="text-[13px] text-[#777777]">Write, polish, humanise, and evaluate your admissions drafts with AI</p>
+      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-4 sm:p-6 shadow-xs space-y-2">
+        <div className="flex items-center justify-between gap-3 w-full">
+          <h2 className="text-[20px] sm:text-[26px] font-bold text-[#111111] tracking-[-0.03em]">My Essays &amp; SOPs</h2>
+          <Link
+            href="/dashboard/essays/studio?topic=Statement+of+Purpose"
+            className="h-[38px] sm:h-[42px] px-3.5 sm:px-5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs shrink-0 cursor-pointer active:scale-95 whitespace-nowrap"
+          >
+            <Plus size={15} />
+            <span>New Essay Draft</span>
+          </Link>
         </div>
-        <Link
-          href="/dashboard/essays/studio?topic=Statement+of+Purpose"
-          className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs shrink-0 cursor-pointer"
-        >
-          <Plus size={16} />
-          <span>New Essay Draft</span>
-        </Link>
+        <p className="text-[12px] sm:text-[13px] text-[#777777]">Write, polish, humanise, and evaluate your admissions drafts with AI</p>
       </div>
 
       {/* CONTROLS BAR */}
-      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-5 shadow-xs flex flex-col sm:flex-row gap-4 justify-between items-center">
-        <div className="relative flex-1 w-full sm:w-auto">
+      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-stretch sm:items-center">
+        <div className="relative flex-1 w-full">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999]" size={18} />
           <input
             type="text"
@@ -111,31 +111,22 @@ export default function MyEssaysPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setFilterMode('all')}
-            className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all cursor-pointer ${
-              filterMode === 'all' ? 'bg-[#690B1B] text-white' : 'bg-[#F7F5F3] text-[#555] hover:bg-[#EFEBE7]'
-            }`}
-          >
-            All ({essayDrafts.length})
-          </button>
-          <button
-            onClick={() => setFilterMode('in-progress')}
-            className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all cursor-pointer ${
-              filterMode === 'in-progress' ? 'bg-[#690B1B] text-white' : 'bg-[#F7F5F3] text-[#555] hover:bg-[#EFEBE7]'
-            }`}
-          >
-            In Progress
-          </button>
-          <button
-            onClick={() => setFilterMode('ready')}
-            className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all cursor-pointer ${
-              filterMode === 'ready' ? 'bg-[#690B1B] text-white' : 'bg-[#F7F5F3] text-[#555] hover:bg-[#EFEBE7]'
-            }`}
-          >
-            Ready
-          </button>
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 sm:pb-0 shrink-0">
+          {[
+            { id: 'all', label: `All (${essayDrafts.length})` },
+            { id: 'in-progress', label: 'In Progress' },
+            { id: 'ready', label: 'Ready' }
+          ].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setFilterMode(f.id as any)}
+              className={`h-[34px] sm:h-[36px] px-3.5 sm:px-4 rounded-full text-[12px] font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center justify-center active:scale-95 ${
+                filterMode === f.id ? 'bg-[#690B1B] text-white shadow-2xs' : 'bg-[#F7F5F3] text-[#555] hover:bg-[#EFEBE7]'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
       </div>
 

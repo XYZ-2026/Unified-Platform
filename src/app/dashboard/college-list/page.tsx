@@ -276,7 +276,7 @@ export default function CollegeListPage() {
   };
 
   return (
-    <div className="p-5 md:p-8 flex-1 flex flex-col xl:flex-row gap-6 max-w-[1600px] mx-auto w-full">
+    <div className="p-4 sm:p-5 md:p-8 flex-1 flex flex-col xl:flex-row gap-6 max-w-[1600px] mx-auto w-full">
       {/* ═══════════════════════════════════════════════════════════════
          LEFT MAIN SECTION — My College List & Tier Dropzones
          ═══════════════════════════════════════════════════════════════ */}
@@ -320,24 +320,24 @@ export default function CollegeListPage() {
               {dreamSchools.map((school) => (
                 <div
                   key={school.id}
-                  className="flex items-center justify-between p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] hover:border-[#C9A55D] transition-all group"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] hover:border-[#C9A55D] transition-all group"
                 >
-                  <div className="flex items-center gap-3.5">
-                    <span className="text-[28px]">{school.logo}</span>
-                    <div>
-                      <Link href={`/dashboard/schools/${school.id}`} className="text-[16px] font-bold text-[#111] hover:text-[#690B1B] transition-colors">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="text-[28px] shrink-0">{school.logo}</span>
+                    <div className="min-w-0">
+                      <Link href={`/dashboard/schools/${school.id}`} className="text-[15px] sm:text-[16px] font-bold text-[#111] hover:text-[#690B1B] transition-colors">
                         {school.name}
                       </Link>
-                      <div className="flex items-center gap-3 text-[12px] text-[#777777] mt-0.5">
+                      <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-[12px] text-[#777777] mt-0.5 flex-wrap">
                         <span>{school.location}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span className="font-bold text-[#690B1B]">{school.deadline}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>Acceptance: {school.acceptanceRate}</span>
                       </div>
                     </div>
                   </div>
-                  <Link href={`/dashboard/schools/${school.id}`} className="px-3.5 py-1.5 rounded-full text-[12px] font-bold border border-[#E7E2DE] bg-white text-[#555] group-hover:border-[#690B1B] group-hover:text-[#690B1B] transition-all">
+                  <Link href={`/dashboard/schools/${school.id}`} className="px-3.5 py-1.5 rounded-full text-[12px] font-bold border border-[#E7E2DE] bg-white text-[#555] group-hover:border-[#690B1B] group-hover:text-[#690B1B] transition-all w-full sm:w-auto text-center shrink-0">
                     View Details →
                   </Link>
                 </div>
@@ -355,24 +355,24 @@ export default function CollegeListPage() {
               {reachSchools.map((school) => (
                 <div
                   key={school.id}
-                  className="flex items-center justify-between p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] hover:border-[#690B1B] transition-all group"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] hover:border-[#690B1B] transition-all group"
                 >
-                  <div className="flex items-center gap-3.5">
-                    <span className="text-[28px]">{school.logo}</span>
-                    <div>
-                      <Link href={`/dashboard/schools/${school.id}`} className="text-[16px] font-bold text-[#111] hover:text-[#690B1B] transition-colors">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="text-[28px] shrink-0">{school.logo}</span>
+                    <div className="min-w-0">
+                      <Link href={`/dashboard/schools/${school.id}`} className="text-[15px] sm:text-[16px] font-bold text-[#111] hover:text-[#690B1B] transition-colors">
                         {school.name}
                       </Link>
-                      <div className="flex items-center gap-3 text-[12px] text-[#777777] mt-0.5">
+                      <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-[12px] text-[#777777] mt-0.5 flex-wrap">
                         <span>{school.location}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span className="font-bold text-[#690B1B]">{school.deadline}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>Acceptance: {school.acceptanceRate}</span>
                       </div>
                     </div>
                   </div>
-                  <Link href={`/dashboard/schools/${school.id}`} className="px-3.5 py-1.5 rounded-full text-[12px] font-bold border border-[#E7E2DE] bg-white text-[#555] group-hover:border-[#690B1B] group-hover:text-[#690B1B] transition-all">
+                  <Link href={`/dashboard/schools/${school.id}`} className="px-3.5 py-1.5 rounded-full text-[12px] font-bold border border-[#E7E2DE] bg-white text-[#555] group-hover:border-[#690B1B] group-hover:text-[#690B1B] transition-all w-full sm:w-auto text-center shrink-0">
                     View Details →
                   </Link>
                 </div>
@@ -390,24 +390,24 @@ export default function CollegeListPage() {
               {targetSchools.map((school) => (
                 <div
                   key={school.id}
-                  className="flex items-center justify-between p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] hover:border-[#0088CB] transition-all group"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] hover:border-[#0088CB] transition-all group"
                 >
-                  <div className="flex items-center gap-3.5">
-                    <span className="text-[28px]">{school.logo}</span>
-                    <div>
-                      <Link href={`/dashboard/schools/${school.id}`} className="text-[16px] font-bold text-[#111] hover:text-[#0088CB] transition-colors">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="text-[28px] shrink-0">{school.logo}</span>
+                    <div className="min-w-0">
+                      <Link href={`/dashboard/schools/${school.id}`} className="text-[15px] sm:text-[16px] font-bold text-[#111] hover:text-[#0088CB] transition-colors">
                         {school.name}
                       </Link>
-                      <div className="flex items-center gap-3 text-[12px] text-[#777777] mt-0.5">
+                      <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-[12px] text-[#777777] mt-0.5 flex-wrap">
                         <span>{school.location}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span className="font-bold text-[#0088CB]">{school.deadline}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>Acceptance: {school.acceptanceRate}</span>
                       </div>
                     </div>
                   </div>
-                  <Link href={`/dashboard/schools/${school.id}`} className="px-3.5 py-1.5 rounded-full text-[12px] font-bold border border-[#E7E2DE] bg-white text-[#555] group-hover:border-[#0088CB] group-hover:text-[#0088CB] transition-all">
+                  <Link href={`/dashboard/schools/${school.id}`} className="px-3.5 py-1.5 rounded-full text-[12px] font-bold border border-[#E7E2DE] bg-white text-[#555] group-hover:border-[#0088CB] group-hover:text-[#0088CB] transition-all w-full sm:w-auto text-center shrink-0">
                     View Details →
                   </Link>
                 </div>
@@ -425,24 +425,24 @@ export default function CollegeListPage() {
               {safetySchools.map((school) => (
                 <div
                   key={school.id}
-                  className="flex items-center justify-between p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] hover:border-[#16a34a] transition-all group"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 p-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] hover:border-[#16a34a] transition-all group"
                 >
-                  <div className="flex items-center gap-3.5">
-                    <span className="text-[28px]">{school.logo}</span>
-                    <div>
-                      <Link href={`/dashboard/schools/${school.id}`} className="text-[16px] font-bold text-[#111] hover:text-[#16a34a] transition-colors">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="text-[28px] shrink-0">{school.logo}</span>
+                    <div className="min-w-0">
+                      <Link href={`/dashboard/schools/${school.id}`} className="text-[15px] sm:text-[16px] font-bold text-[#111] hover:text-[#16a34a] transition-colors">
                         {school.name}
                       </Link>
-                      <div className="flex items-center gap-3 text-[12px] text-[#777777] mt-0.5">
+                      <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-[12px] text-[#777777] mt-0.5 flex-wrap">
                         <span>{school.location}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span className="font-bold text-[#16a34a]">{school.deadline}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>Acceptance: {school.acceptanceRate}</span>
                       </div>
                     </div>
                   </div>
-                  <Link href={`/dashboard/schools/${school.id}`} className="px-3.5 py-1.5 rounded-full text-[12px] font-bold border border-[#E7E2DE] bg-white text-[#555] group-hover:border-[#16a34a] group-hover:text-[#16a34a] transition-all">
+                  <Link href={`/dashboard/schools/${school.id}`} className="px-3.5 py-1.5 rounded-full text-[12px] font-bold border border-[#E7E2DE] bg-white text-[#555] group-hover:border-[#16a34a] group-hover:text-[#16a34a] transition-all w-full sm:w-auto text-center shrink-0">
                     View Details →
                   </Link>
                 </div>
@@ -455,7 +455,7 @@ export default function CollegeListPage() {
       {/* ═══════════════════════════════════════════════════════════════
          RIGHT SIDE DRAWER — Application AI Advisor Side Panel
          ═══════════════════════════════════════════════════════════════ */}
-      <div className="w-full xl:w-[420px] bg-white border border-[#E7E2DE] rounded-[20px] p-5 shadow-xs flex flex-col justify-between h-auto xl:h-[calc(100vh-120px)] sticky top-[96px]">
+      <div className="w-full xl:w-[420px] bg-white border border-[#E7E2DE] rounded-[20px] p-4 sm:p-5 shadow-xs flex flex-col justify-between h-auto xl:h-[calc(100vh-120px)] xl:sticky top-[96px]">
         {/* ASSISTANT HEADER */}
         <div>
           <div className="flex items-center justify-between pb-4 border-b border-[#F0EBE6] mb-4">

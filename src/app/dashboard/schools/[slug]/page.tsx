@@ -189,7 +189,7 @@ export default function UniversityDetailPage() {
   // ─── LOADING STATE ─────────────────────────────────────────
   if (loading) {
     return (
-      <div className="p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
+      <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
         {/* Skeleton hero */}
         <div className="relative rounded-[24px] overflow-hidden border border-[#E7E2DE] bg-white animate-pulse">
           <div className="h-[220px] md:h-[260px] bg-gradient-to-r from-gray-200 to-gray-300" />
@@ -243,7 +243,7 @@ export default function UniversityDetailPage() {
   // ─── ERROR STATE ───────────────────────────────────────────
   if (error || !university) {
     return (
-      <div className="p-5 md:p-8 max-w-[1400px] mx-auto w-full">
+      <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full">
         <div className="bg-white border border-[#E7E2DE] rounded-[24px] p-12 text-center space-y-4">
           <div className="w-16 h-16 rounded-full bg-[#FEF2F2] text-red-500 mx-auto flex items-center justify-center">
             <AlertCircle size={28} />
@@ -283,13 +283,13 @@ export default function UniversityDetailPage() {
 
   // ─── RENDER ────────────────────────────────────────────────
   return (
-    <div className="p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
+    <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
       {/* ═══════════════════════════════════════════════════════
          BACK NAVIGATION
          ═══════════════════════════════════════════════════════ */}
       <button
         onClick={() => router.push('/dashboard/schools')}
-        className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#690B1B] hover:text-[#7A1022] transition-colors cursor-pointer group"
+        className="h-[36px] px-4 rounded-full inline-flex items-center justify-center gap-1.5 text-[12.5px] font-bold text-[#690B1B] bg-white border border-[#E7E2DE] hover:bg-[#F7F0F1] transition-all cursor-pointer group shadow-2xs active:scale-95 shrink-0 whitespace-nowrap"
       >
         <ArrowLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
         <span>Back to University Finder</span>
@@ -300,59 +300,59 @@ export default function UniversityDetailPage() {
          ═══════════════════════════════════════════════════════ */}
       <div className="relative rounded-[24px] overflow-hidden shadow-sm border border-[#E7E2DE] bg-white">
         {/* TOP GRADIENT BANNER */}
-        <div className="h-[220px] md:h-[260px] bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] relative p-6 flex items-start justify-between text-white">
+        <div className="h-[190px] sm:h-[230px] md:h-[260px] bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] relative p-3.5 sm:p-6 flex flex-wrap items-start justify-between gap-2.5 text-white">
           <div className="absolute right-0 top-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
           <div className="absolute left-1/2 bottom-0 w-60 h-60 bg-white/3 rounded-full blur-2xl -mb-32 pointer-events-none" />
 
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[#C9A55D] text-[12px] font-bold relative z-10">
-            <Sparkles size={14} />
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 h-[32px] sm:h-[36px] px-3 sm:px-3.5 rounded-full bg-white/10 backdrop-blur-md text-[#C9A55D] text-[11px] sm:text-[12px] font-bold relative z-10 shrink-0">
+            <Sparkles size={14} className="shrink-0" />
             <span>Verified University Profile</span>
           </div>
 
-          <div className="flex items-center gap-3 relative z-10">
-            <button className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white text-[13px] font-bold transition-all flex items-center gap-2 cursor-pointer">
-              <Bookmark size={15} />
+          <div className="flex items-center gap-2 relative z-10 shrink-0">
+            <button className="h-[32px] sm:h-[36px] px-3.5 sm:px-4 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-[11.5px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 shrink-0">
+              <Bookmark size={14} className="shrink-0" />
               <span>Add to My List</span>
             </button>
           </div>
         </div>
 
         {/* FLOATING DETAILS OVERLAY CARD */}
-        <div className="p-6 md:p-8 bg-white relative -mt-16 mx-4 md:mx-8 rounded-[20px] shadow-lg border border-[#E7E2DE] space-y-4">
+        <div className="p-4 sm:p-6 md:p-8 bg-white relative -mt-14 sm:-mt-16 mx-3 sm:mx-6 md:mx-8 rounded-[18px] sm:rounded-[20px] shadow-lg border border-[#E7E2DE] space-y-4">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-[18px] bg-[#F7F0F1] border border-[#690B1B]/20 flex items-center justify-center text-[36px] shrink-0">
+            <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-[14px] sm:rounded-[18px] bg-[#F7F0F1] border border-[#690B1B]/20 flex items-center justify-center text-[26px] sm:text-[36px] shrink-0 aspect-square">
                 {getUniversityEmoji(u.name)}
               </div>
-              <div>
-                <h1 className="text-[26px] md:text-[32px] font-bold text-[#111111] leading-tight">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-[20px] sm:text-[26px] md:text-[32px] font-bold text-[#111111] leading-tight break-words">
                   {u.name}
                 </h1>
-                <p className="text-[14px] text-[#777777] flex items-center gap-1.5 mt-0.5">
-                  <MapPin size={15} className="text-[#690B1B]" />
+                <div className="text-[12.5px] sm:text-[14px] text-[#777777] flex items-center gap-1.5 mt-1 flex-wrap">
+                  <MapPin size={14} className="text-[#690B1B] shrink-0" />
                   <span>{location}</span>
-                  <span className="ml-1">{getCountryFlag(u.countryCode)}</span>
-                </p>
+                  {u.countryCode && <span className="ml-1 shrink-0">{getCountryFlag(u.countryCode)}</span>}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap w-full md:w-auto pt-1 md:pt-0">
               {u.qsRanking && u.qsRanking !== 'Unranked' && (
-                <span className="text-[12px] font-bold bg-[#690B1B] text-white px-3.5 py-1.5 rounded-full">
+                <span className="text-[11px] sm:text-[12px] font-bold bg-[#690B1B] text-white px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
                   #{u.qsRanking} QS World
                 </span>
               )}
-              <span className="text-[12px] font-bold bg-[#F7F0F1] text-[#690B1B] px-3.5 py-1.5 rounded-full">
+              <span className="text-[11px] sm:text-[12px] font-bold bg-[#F7F0F1] text-[#690B1B] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
                 {u.acceptanceRate} Acceptance
               </span>
-              <span className="text-[12px] font-bold bg-[#FFF8EB] text-[#9E731A] px-3.5 py-1.5 rounded-full">
+              <span className="text-[11px] sm:text-[12px] font-bold bg-[#FFF8EB] text-[#9E731A] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
                 {uniType}
               </span>
             </div>
           </div>
 
           {/* EXTERNAL LINKS */}
-          <div className="flex items-center gap-4 pt-2 border-t border-[#F0EBE6] text-[13px] font-medium text-[#690B1B] flex-wrap">
+          <div className="flex items-center gap-3 sm:gap-4 pt-3 border-t border-[#F0EBE6] text-[12px] sm:text-[13px] font-medium text-[#690B1B] flex-wrap">
             {u.website && (
               <>
                 <a
@@ -390,7 +390,7 @@ export default function UniversityDetailPage() {
         </div>
 
         {/* NAVIGATION SUB-TABS */}
-        <div className="px-6 md:px-8 pt-4 pb-2 border-t border-[#F0EBE6] flex items-center gap-2 overflow-x-auto">
+        <div className="px-4 sm:px-6 md:px-8 pt-3 sm:pt-4 pb-2 border-t border-[#F0EBE6] flex items-center gap-2 overflow-x-auto scrollbar-none">
           {[
             { id: 'overview', label: 'Overview' },
             { id: 'admissions', label: 'Admissions & Requirements' },
@@ -401,7 +401,7 @@ export default function UniversityDetailPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2.5 rounded-full text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`h-[36px] sm:h-[40px] px-4 rounded-full text-[12px] sm:text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center shrink-0 active:scale-95 ${
                 activeTab === tab.id
                   ? 'bg-[#690B1B] text-white shadow-2xs'
                   : 'text-[#666666] hover:bg-[#F7F5F3] hover:text-[#111]'
@@ -422,37 +422,47 @@ export default function UniversityDetailPage() {
 
           {/* ─── OVERVIEW / ADMISSIONS TAB ────────────────────── */}
           {(activeTab === 'overview' || activeTab === 'admissions') && (
-            <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-4">
-              <h3 className="text-[20px] font-bold text-[#111] flex items-center gap-2">
-                <BarChart3 size={20} className="text-[#690B1B]" />
+            <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-4 sm:p-6 shadow-xs space-y-4">
+              <h3 className="text-[18px] sm:text-[20px] font-bold text-[#111] flex items-center gap-2">
+                <BarChart3 size={20} className="text-[#690B1B] shrink-0" />
                 <span>Admission Metrics &amp; Requirements</span>
               </h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
-                <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-4 text-center">
-                  <div className="text-[12px] text-[#777] font-medium">Avg GPA</div>
-                  <div className="text-[22px] font-bold text-[#690B1B] mt-1">
-                    {u.avgGpa !== null ? `${u.avgGpa} / 4.0` : 'N/A'}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 pt-2">
+                {[
+                  {
+                    label: 'Avg GPA',
+                    value: u.avgGpa !== null ? `${u.avgGpa} / 4.0` : 'N/A',
+                    color: 'text-[#690B1B]'
+                  },
+                  {
+                    label: 'SAT Middle 50%',
+                    value: u.satScore || 'N/A',
+                    color: 'text-[#111111]'
+                  },
+                  {
+                    label: 'Acceptance Rate',
+                    value: u.acceptanceRate || 'N/A',
+                    color: 'text-[#690B1B]'
+                  },
+                  {
+                    label: 'QS World Rank',
+                    value: u.qsRanking === 'Unranked' || !u.qsRanking ? '—' : `#${u.qsRanking}`,
+                    color: 'text-[#C9A55D]'
+                  }
+                ].map((m, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-3 sm:p-4 text-center flex flex-col justify-center items-center min-h-[108px] sm:min-h-[120px] h-full"
+                  >
+                    <div className="text-[11px] sm:text-[12px] text-[#777] font-medium h-[32px] flex items-center justify-center text-center leading-snug">
+                      {m.label}
+                    </div>
+                    <div className={`text-[17px] xs:text-[19px] sm:text-[22px] font-bold mt-1 leading-tight ${m.color} flex items-center justify-center flex-1`}>
+                      {m.value}
+                    </div>
                   </div>
-                </div>
-                <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-4 text-center">
-                  <div className="text-[12px] text-[#777] font-medium">SAT Middle 50%</div>
-                  <div className="text-[22px] font-bold text-[#111] mt-1">
-                    {u.satScore || 'N/A'}
-                  </div>
-                </div>
-                <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-4 text-center">
-                  <div className="text-[12px] text-[#777] font-medium">Acceptance Rate</div>
-                  <div className="text-[22px] font-bold text-[#690B1B] mt-1">
-                    {u.acceptanceRate}
-                  </div>
-                </div>
-                <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-4 text-center">
-                  <div className="text-[12px] text-[#777] font-medium">QS World Rank</div>
-                  <div className="text-[22px] font-bold text-[#C9A55D] mt-1">
-                    {u.qsRanking === 'Unranked' ? '—' : `#${u.qsRanking}`}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           )}

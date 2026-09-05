@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Calendar as CalendarIcon,
@@ -222,11 +222,8 @@ export default function ApplicationTrackerPage() {
     return title.length > 20 ? `${title.slice(0, 18)}...` : title;
   };
 
-  // Helper to place dates on 0% - 100% horizontal timeline scale
-  const getTimelinePercentage = (dateStr: string, idxOnTrack: number = 0, totalOnTrack: number = 1): number => {
-    if (!dateStr) return 10 + idxOnTrack * 20;
-    const str = dateStr.toLowerCase();
-
+  // Collision-free timeline position calculator with above/below staggering
+  const getTimelinePlacement = (taskList: typeof tasks) => {
     const monthRanges: Record<string, { start: number; span: number }> = {
       sep: { start: 4, span: 10 },
       oct: { start: 16, span: 11 },
@@ -239,25 +236,50 @@ export default function ApplicationTrackerPage() {
       may: { start: 93, span: 5 }
     };
 
-    let monthKey = 'nov';
-    for (const m of Object.keys(monthRanges)) {
-      if (str.includes(m)) {
-        monthKey = m;
-        break;
+    const parsed = taskList.map((t, idx) => {
+      const str = (t.date || '').toLowerCase();
+      let monthKey = 'nov';
+      for (const m of Object.keys(monthRanges)) {
+        if (str.includes(m)) {
+          monthKey = m;
+          break;
+        }
       }
-    }
+      const { start, span } = monthRanges[monthKey];
+      const dayMatch = str.match(/\d+/);
+      const day = dayMatch ? Math.min(Math.max(parseInt(dayMatch[0], 10), 1), 31) : 15;
+      const rawPct = start + ((day - 1) / 30) * span;
+      return { t, rawPct, originalIdx: idx };
+    });
 
-    const { start, span } = monthRanges[monthKey];
-    const dayMatch = str.match(/\d+/);
-    const day = dayMatch ? Math.min(Math.max(parseInt(dayMatch[0], 10), 1), 31) : 15;
-    let pct = start + ((day - 1) / 30) * span;
+    parsed.sort((a, b) => a.rawPct - b.rawPct);
 
-    // Apply offset for consecutive items on same track to prevent overlapping
-    if (totalOnTrack > 1) {
-      pct += idxOnTrack * 4.2;
-    }
+    const MIN_GAP = 7.5; // percent points minimum gap between adjacent badges
+    let lastPct = -999;
+    let lastTier: 'above' | 'below' = 'above';
 
-    return Math.min(Math.max(pct, 3), 96);
+    const placed = parsed.map((item, i) => {
+      let pct = item.rawPct;
+      let tier: 'above' | 'below' = 'above';
+
+      if (pct - lastPct < MIN_GAP) {
+        pct = lastPct + MIN_GAP;
+        tier = lastTier === 'above' ? 'below' : 'above';
+      } else {
+        tier = i % 2 === 0 ? 'above' : 'below';
+      }
+
+      lastPct = pct;
+      lastTier = tier;
+
+      return {
+        ...item.t,
+        leftPct: Math.min(Math.max(pct, 4), 95),
+        tier
+      };
+    });
+
+    return placed;
   };
 
   const [selectedMonth, setSelectedMonth] = useState('Nov');
@@ -266,6 +288,10 @@ export default function ApplicationTrackerPage() {
   const applicationTasks = tasks.filter((t) => t.type === 'application');
   const aidTasks = tasks.filter((t) => t.type === 'aid');
   const genericTasks = tasks.filter((t) => t.type === 'task');
+
+  const placedApplicationTasks = useMemo(() => getTimelinePlacement(applicationTasks), [applicationTasks]);
+  const placedAidTasks = useMemo(() => getTimelinePlacement(aidTasks), [aidTasks]);
+  const placedGenericTasks = useMemo(() => getTimelinePlacement(genericTasks), [genericTasks]);
 
   const filteredTasks = tasks.filter((t) => {
     if (activeFilter === 'applications') return t.type === 'application';
@@ -278,34 +304,34 @@ export default function ApplicationTrackerPage() {
   const laterCycleTasks = filteredTasks.filter((t) => t.group === 'LATER THIS CYCLE');
 
   return (
-    <div className="p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6 relative">
+    <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6 relative">
       {/* ═══════════════════════════════════════════════════════════════
          HEADER AREA & ADD DEADLINE BUTTON
          ═══════════════════════════════════════════════════════════════ */}
-      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-2">
+      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-4 sm:p-6 shadow-xs space-y-2">
         <div className="flex items-center justify-between gap-4 w-full">
-          <h2 className="text-[22px] sm:text-[26px] font-bold text-[#111111] tracking-[-0.03em]">Application Tracker</h2>
+          <h2 className="text-[20px] sm:text-[26px] font-bold text-[#111111] tracking-[-0.03em]">Application Tracker</h2>
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] sm:text-[13px] font-bold transition-all flex items-center gap-1.5 sm:gap-2 shadow-xs shrink-0 cursor-pointer active:scale-95"
+            className="h-[38px] sm:h-[42px] px-3.5 sm:px-5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs shrink-0 cursor-pointer active:scale-95 whitespace-nowrap"
           >
-            <Plus size={14} className="sm:w-4 sm:h-4" />
+            <Plus size={15} />
             <span>Add Deadline</span>
           </button>
         </div>
-        <p className="text-[12.5px] sm:text-[13.5px] text-[#777777]">General application cycle · 3 application systems · {tasks.length} key dates tracked</p>
+        <p className="text-[12px] sm:text-[13.5px] text-[#777777]">General application cycle · 3 application systems · {tasks.length} key dates tracked</p>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
          DYNAMIC TIMELINE / CALENDAR CHART CARD
          ═══════════════════════════════════════════════════════════════ */}
-      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#F0EBE6] pb-4">
+      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-4 sm:p-6 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 border-b border-[#F0EBE6] pb-4">
           {/* VIEW MODE SWITCH */}
-          <div className="flex items-center gap-1 bg-[#F7F5F3] p-1 rounded-full border border-[#E7E2DE]">
+          <div className="flex items-center gap-1 bg-[#F7F5F3] p-1 rounded-full border border-[#E7E2DE] shrink-0">
             <button
               onClick={() => setViewMode('timeline')}
-              className={`px-4 py-1.5 rounded-full text-[13px] font-bold transition-all cursor-pointer ${
+              className={`h-[32px] sm:h-[34px] px-3.5 sm:px-4 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer flex items-center justify-center whitespace-nowrap ${
                 viewMode === 'timeline'
                   ? 'bg-white text-[#690B1B] shadow-2xs'
                   : 'text-[#666666] hover:text-[#11]'
@@ -315,7 +341,7 @@ export default function ApplicationTrackerPage() {
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`px-4 py-1.5 rounded-full text-[13px] font-bold transition-all cursor-pointer ${
+              className={`h-[32px] sm:h-[34px] px-3.5 sm:px-4 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer flex items-center justify-center whitespace-nowrap ${
                 viewMode === 'calendar'
                   ? 'bg-white text-[#690B1B] shadow-2xs'
                   : 'text-[#666666] hover:text-[#11]'
@@ -325,8 +351,8 @@ export default function ApplicationTrackerPage() {
             </button>
           </div>
 
-          <div className="flex items-center gap-3 text-[12px] text-[#777777]">
-            <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2.5 sm:gap-3 text-[12px] text-[#777777]">
+            <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={() => scrollTimeline('left')}
                 className="w-7 h-7 rounded-full bg-[#F7F5F3] hover:bg-[#E7E2DE] text-[#333] flex items-center justify-center transition-all cursor-pointer"
@@ -342,10 +368,7 @@ export default function ApplicationTrackerPage() {
                 <ChevronRight size={14} />
               </button>
             </div>
-            <span className="font-semibold">Range: Sep 2026 to May 2027</span>
-            <span className="bg-[#F7F0F1] text-[#690B1B] font-bold px-2.5 py-0.5 rounded-full text-[11px]">
-              {viewMode === 'timeline' ? 'Scrollable View' : `${selectedMonth} View`}
-            </span>
+            <span className="font-semibold text-[11px] sm:text-[12px]">Range: Sep 2026 to May 2027</span>
           </div>
         </div>
 
@@ -356,32 +379,42 @@ export default function ApplicationTrackerPage() {
             {/* Scroll Container */}
             <div
               ref={timelineScrollRef}
-              className="p-4 bg-[#FDFCFB] border border-[#E7E2DE] rounded-[16px] space-y-6 overflow-x-auto scrollbar-thin scrollbar-thumb-[#690B1B]/20 hover:scrollbar-thumb-[#690B1B]/40 transition-all scroll-smooth"
+              className="p-3 sm:p-4 bg-[#FDFCFB] border border-[#E7E2DE] rounded-[16px] space-y-6 overflow-x-auto scrollbar-thin scrollbar-thumb-[#690B1B]/20 hover:scrollbar-thumb-[#690B1B]/40 transition-all scroll-smooth"
             >
               {/* TRACK LINES */}
-              <div className="space-y-7 min-w-[1450px] pt-3 pb-1">
+              <div className="space-y-14 min-w-[1450px] pt-8 pb-8">
                 {/* TRACK 1: COMMON APP / APPLICATIONS */}
                 <div className="flex items-center gap-4">
                   <span className="w-24 text-[10px] font-bold text-[#A3A3A3] uppercase tracking-wider shrink-0">Common App</span>
                   <div className="flex-1 h-px bg-[#E7E2DE] relative">
-                    {applicationTasks.map((t, idx) => {
-                      const leftPct = getTimelinePercentage(t.date, idx, applicationTasks.length);
+                    {placedApplicationTasks.map((t) => {
                       const isDone = !!completedTasks[t.id];
+                      const isAbove = t.tier === 'above';
                       return (
-                        <button
+                        <div
                           key={t.id}
-                          onClick={() => toggleTask(t.id)}
-                          title={`${t.title} • Date: ${t.date} (${t.dueIn}) - Click to toggle complete`}
-                          style={{ left: `${leftPct}%` }}
-                          className={`absolute -top-3.5 -translate-x-1/2 px-2.5 py-1 rounded-full text-[10.5px] font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap z-10 hover:scale-105 ${
-                            isDone
-                              ? 'bg-[#16a34a]/10 border border-[#16a34a]/40 text-[#16a34a] line-through'
-                              : 'bg-[#FDF0F2] border border-[#690B1B]/15 text-[#690B1B]'
-                          }`}
+                          style={{ left: `${t.leftPct}%` }}
+                          className={`absolute ${isAbove ? '-top-7' : 'top-2.5'} -translate-x-1/2 z-10`}
                         >
-                          {isDone && <CheckCircle2 size={11} />}
-                          <span>{getShortTitle(t.title)}</span>
-                        </button>
+                          {/* Vertical Connector Tick to Track Line */}
+                          <span
+                            className={`absolute left-1/2 -translate-x-1/2 w-[1.5px] ${
+                              isAbove ? '-bottom-2 h-2 bg-[#690B1B]/25' : '-top-2 h-2 bg-[#690B1B]/25'
+                            } pointer-events-none`}
+                          />
+                          <button
+                            onClick={() => toggleTask(t.id)}
+                            title={`${t.title} • Date: ${t.date} (${t.dueIn}) - Click to toggle complete`}
+                            className={`px-2.5 py-1 rounded-full text-[10.5px] font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap hover:scale-105 ${
+                              isDone
+                                ? 'bg-[#16a34a]/10 border border-[#16a34a]/40 text-[#16a34a] line-through'
+                                : 'bg-[#FDF0F2] border border-[#690B1B]/20 text-[#690B1B]'
+                            }`}
+                          >
+                            {isDone && <CheckCircle2 size={11} />}
+                            <span>{getShortTitle(t.title)}</span>
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -391,24 +424,34 @@ export default function ApplicationTrackerPage() {
                 <div className="flex items-center gap-4">
                   <span className="w-24 text-[10px] font-bold text-[#A3A3A3] uppercase tracking-wider shrink-0">Financial Aid</span>
                   <div className="flex-1 h-px bg-[#E7E2DE] relative">
-                    {aidTasks.map((t, idx) => {
-                      const leftPct = getTimelinePercentage(t.date, idx, aidTasks.length);
+                    {placedAidTasks.map((t) => {
                       const isDone = !!completedTasks[t.id];
+                      const isAbove = t.tier === 'above';
                       return (
-                        <button
+                        <div
                           key={t.id}
-                          onClick={() => toggleTask(t.id)}
-                          title={`${t.title} • Date: ${t.date} (${t.dueIn}) - Click to toggle complete`}
-                          style={{ left: `${leftPct}%` }}
-                          className={`absolute -top-3.5 -translate-x-1/2 px-2.5 py-1 rounded-full text-[10.5px] font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap z-10 hover:scale-105 ${
-                            isDone
-                              ? 'bg-[#16a34a]/10 border border-[#16a34a]/40 text-[#16a34a] line-through'
-                              : 'bg-[#EBF4FB] border border-[#0088CB]/15 text-[#0088CB]'
-                          }`}
+                          style={{ left: `${t.leftPct}%` }}
+                          className={`absolute ${isAbove ? '-top-7' : 'top-2.5'} -translate-x-1/2 z-10`}
                         >
-                          {isDone && <CheckCircle2 size={11} />}
-                          <span>{getShortTitle(t.title)}</span>
-                        </button>
+                          {/* Vertical Connector Tick to Track Line */}
+                          <span
+                            className={`absolute left-1/2 -translate-x-1/2 w-[1.5px] ${
+                              isAbove ? '-bottom-2 h-2 bg-[#0088CB]/25' : '-top-2 h-2 bg-[#0088CB]/25'
+                            } pointer-events-none`}
+                          />
+                          <button
+                            onClick={() => toggleTask(t.id)}
+                            title={`${t.title} • Date: ${t.date} (${t.dueIn}) - Click to toggle complete`}
+                            className={`px-2.5 py-1 rounded-full text-[10.5px] font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap hover:scale-105 ${
+                              isDone
+                                ? 'bg-[#16a34a]/10 border border-[#16a34a]/40 text-[#16a34a] line-through'
+                                : 'bg-[#EBF4FB] border border-[#0088CB]/20 text-[#0088CB]'
+                            }`}
+                          >
+                            {isDone && <CheckCircle2 size={11} />}
+                            <span>{getShortTitle(t.title)}</span>
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -418,24 +461,34 @@ export default function ApplicationTrackerPage() {
                 <div className="flex items-center gap-4">
                   <span className="w-24 text-[10px] font-bold text-[#A3A3A3] uppercase tracking-wider shrink-0">You</span>
                   <div className="flex-1 h-px bg-[#E7E2DE] relative">
-                    {genericTasks.map((t, idx) => {
-                      const leftPct = getTimelinePercentage(t.date, idx, genericTasks.length);
+                    {placedGenericTasks.map((t) => {
                       const isDone = !!completedTasks[t.id];
+                      const isAbove = t.tier === 'above';
                       return (
-                        <button
+                        <div
                           key={t.id}
-                          onClick={() => toggleTask(t.id)}
-                          title={`${t.title} • Date: ${t.date} (${t.dueIn}) - Click to toggle complete`}
-                          style={{ left: `${leftPct}%` }}
-                          className={`absolute -top-3.5 -translate-x-1/2 px-2.5 py-1 rounded-full text-[10.5px] font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap z-10 hover:scale-105 ${
-                            isDone
-                              ? 'bg-[#16a34a]/10 border border-[#16a34a]/40 text-[#16a34a] line-through'
-                              : 'bg-[#EBF7EE] border border-[#16a34a]/15 text-[#16a34a]'
-                          }`}
+                          style={{ left: `${t.leftPct}%` }}
+                          className={`absolute ${isAbove ? '-top-7' : 'top-2.5'} -translate-x-1/2 z-10`}
                         >
-                          {isDone && <CheckCircle2 size={11} />}
-                          <span>{getShortTitle(t.title)}</span>
-                        </button>
+                          {/* Vertical Connector Tick to Track Line */}
+                          <span
+                            className={`absolute left-1/2 -translate-x-1/2 w-[1.5px] ${
+                              isAbove ? '-bottom-2 h-2 bg-[#16a34a]/25' : '-top-2 h-2 bg-[#16a34a]/25'
+                            } pointer-events-none`}
+                          />
+                          <button
+                            onClick={() => toggleTask(t.id)}
+                            title={`${t.title} • Date: ${t.date} (${t.dueIn}) - Click to toggle complete`}
+                            className={`px-2.5 py-1 rounded-full text-[10.5px] font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap hover:scale-105 ${
+                              isDone
+                                ? 'bg-[#16a34a]/10 border border-[#16a34a]/40 text-[#16a34a] line-through'
+                                : 'bg-[#EBF7EE] border border-[#16a34a]/20 text-[#16a34a]'
+                            }`}
+                          >
+                            {isDone && <CheckCircle2 size={11} />}
+                            <span>{getShortTitle(t.title)}</span>
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -599,47 +652,71 @@ export default function ApplicationTrackerPage() {
                 return (
                   <div
                     key={t.id}
-                    className="group flex items-center justify-between p-4 rounded-[14px] bg-white border border-[#E7E2DE] hover:border-[#690B1B]/30 hover:shadow-2xs transition-all gap-3 cursor-pointer"
+                    className="group p-3.5 sm:p-4 rounded-[14px] bg-white border border-[#E7E2DE] hover:border-[#690B1B]/30 hover:shadow-2xs transition-all cursor-pointer"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleTask(t.id);
-                        }}
-                        className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all shrink-0 ${
-                          isDone ? 'bg-[#16a34a] border-[#16a34a] text-white' : 'border-[#CCCCCC] bg-white'
-                        }`}
-                      >
-                        {isDone && <CheckCircle2 size={16} />}
-                      </button>
-                      <div className="w-9 h-9 rounded-xl bg-[#F7F0F1] text-[#690B1B] flex items-center justify-center shrink-0">
-                        <IconComponent size={18} />
-                      </div>
-                      <div className="min-w-0">
-                        <div className={`text-[14px] sm:text-[15px] font-bold truncate ${isDone ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
-                          {t.title}
+                    <div className="flex items-start sm:items-center justify-between gap-2.5 sm:gap-3">
+                      <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleTask(t.id);
+                          }}
+                          className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md border flex items-center justify-center transition-all shrink-0 mt-0.5 sm:mt-0 cursor-pointer ${
+                            isDone ? 'bg-[#16a34a] border-[#16a34a] text-white' : 'border-[#CCCCCC] bg-white'
+                          }`}
+                        >
+                          {isDone && <CheckCircle2 size={13} className="sm:w-4 sm:h-4" />}
+                        </button>
+                        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#F7F0F1] text-[#690B1B] flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                          <IconComponent size={15} className="sm:w-[18px] sm:h-[18px]" />
                         </div>
-                        <div className="text-[11.5px] text-[#777777] mt-0.5">
-                          {t.category} • {t.date}
+                        <div className="min-w-0 flex-1">
+                          <div className={`text-[13.5px] sm:text-[15px] font-bold leading-snug break-words ${isDone ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
+                            {t.title}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="text-[11px] text-[#777777]">
+                              {t.category} • {t.date}
+                            </span>
+                            {/* Mobile Due Badge */}
+                            <span className="sm:hidden text-[10px] font-bold text-[#690B1B] bg-[#F7F0F1] px-2 py-0.5 rounded-full shrink-0">
+                              {t.dueIn}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <span className="text-[11px] font-bold text-[#690B1B] bg-[#F7F0F1] px-2.5 py-1 rounded-full">
-                        {t.dueIn}
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteTask(t.id);
-                        }}
-                        title="Delete Deadline"
-                        className="opacity-0 group-hover:opacity-100 p-1 text-[#999999] hover:text-[#dc2626] transition-all"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                      <ChevronRight size={16} className="text-[#CCCCCC]" />
+
+                      {/* Desktop Action Badges */}
+                      <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+                        <span className="text-[11px] font-bold text-[#690B1B] bg-[#F7F0F1] px-2.5 py-1 rounded-full whitespace-nowrap">
+                          {t.dueIn}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteTask(t.id);
+                          }}
+                          title="Delete Deadline"
+                          className="opacity-0 group-hover:opacity-100 p-1 text-[#999999] hover:text-[#dc2626] transition-all cursor-pointer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        <ChevronRight size={16} className="text-[#CCCCCC]" />
+                      </div>
+
+                      {/* Mobile Delete Button */}
+                      <div className="sm:hidden flex items-center gap-1 shrink-0 mt-0.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteTask(t.id);
+                          }}
+                          title="Delete Deadline"
+                          className="p-1 text-[#aaaaaa] hover:text-[#dc2626] transition-all cursor-pointer"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -659,53 +736,77 @@ export default function ApplicationTrackerPage() {
                 return (
                   <div
                     key={t.id}
-                    className="group flex items-center justify-between p-4 rounded-[14px] bg-white border border-[#E7E2DE] hover:border-[#690B1B]/30 hover:shadow-2xs transition-all gap-3 cursor-pointer"
+                    className="group p-3.5 sm:p-4 rounded-[14px] bg-white border border-[#E7E2DE] hover:border-[#690B1B]/30 hover:shadow-2xs transition-all cursor-pointer"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleTask(t.id);
-                        }}
-                        className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all shrink-0 ${
-                          isDone ? 'bg-[#16a34a] border-[#16a34a] text-white' : 'border-[#CCCCCC] bg-white'
-                        }`}
-                      >
-                        {isDone && <CheckCircle2 size={16} />}
-                      </button>
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                        t.type === 'aid'
-                          ? 'bg-[#EBF4FB] text-[#0088CB]'
-                          : t.type === 'application'
-                          ? 'bg-[#F7F5F3] text-[#555555]'
-                          : 'bg-[#F7F5F3] text-[#555555]'
-                      }`}>
-                        <IconComponent size={18} />
-                      </div>
-                      <div className="min-w-0">
-                        <div className={`text-[14px] sm:text-[15px] font-bold truncate ${isDone ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
-                          {t.title}
+                    <div className="flex items-start sm:items-center justify-between gap-2.5 sm:gap-3">
+                      <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleTask(t.id);
+                          }}
+                          className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md border flex items-center justify-center transition-all shrink-0 mt-0.5 sm:mt-0 cursor-pointer ${
+                            isDone ? 'bg-[#16a34a] border-[#16a34a] text-white' : 'border-[#CCCCCC] bg-white'
+                          }`}
+                        >
+                          {isDone && <CheckCircle2 size={13} className="sm:w-4 sm:h-4" />}
+                        </button>
+                        <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0 ${
+                          t.type === 'aid'
+                            ? 'bg-[#EBF4FB] text-[#0088CB]'
+                            : t.type === 'application'
+                            ? 'bg-[#F7F5F3] text-[#555555]'
+                            : 'bg-[#F7F5F3] text-[#555555]'
+                        }`}>
+                          <IconComponent size={15} className="sm:w-[18px] sm:h-[18px]" />
                         </div>
-                        <div className="text-[11.5px] text-[#777777] mt-0.5">
-                          {t.category} • {t.date}
+                        <div className="min-w-0 flex-1">
+                          <div className={`text-[13.5px] sm:text-[15px] font-bold leading-snug break-words ${isDone ? 'line-through text-[#888888]' : 'text-[#111111]'}`}>
+                            {t.title}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="text-[11px] text-[#777777]">
+                              {t.category} • {t.date}
+                            </span>
+                            {/* Mobile Due Badge */}
+                            <span className="sm:hidden text-[10px] font-bold text-[#777777] bg-[#F7F5F3] px-2 py-0.5 rounded-full shrink-0">
+                              {t.dueIn}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <span className="text-[11px] font-bold text-[#777777] bg-[#F7F5F3] px-2.5 py-1 rounded-full">
-                        {t.dueIn}
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteTask(t.id);
-                        }}
-                        title="Delete Deadline"
-                        className="opacity-0 group-hover:opacity-100 p-1 text-[#999999] hover:text-[#dc2626] transition-all"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                      <ChevronRight size={16} className="text-[#CCCCCC]" />
+
+                      {/* Desktop Action Badges */}
+                      <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+                        <span className="text-[11px] font-bold text-[#777777] bg-[#F7F5F3] px-2.5 py-1 rounded-full whitespace-nowrap">
+                          {t.dueIn}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteTask(t.id);
+                          }}
+                          title="Delete Deadline"
+                          className="opacity-0 group-hover:opacity-100 p-1 text-[#999999] hover:text-[#dc2626] transition-all cursor-pointer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        <ChevronRight size={16} className="text-[#CCCCCC]" />
+                      </div>
+
+                      {/* Mobile Delete Button */}
+                      <div className="sm:hidden flex items-center gap-1 shrink-0 mt-0.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteTask(t.id);
+                          }}
+                          title="Delete Deadline"
+                          className="p-1 text-[#aaaaaa] hover:text-[#dc2626] transition-all cursor-pointer"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

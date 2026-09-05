@@ -273,7 +273,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ═══════════════════════════════════════════════════════════════
          MAIN CONTENT AREA
          ═══════════════════════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         {/* TOP HEADER BAR */}
         <header className="h-[64px] sm:h-[76px] px-4 sm:px-5 md:px-8 bg-white border-b border-[#E7E2DE] flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3">

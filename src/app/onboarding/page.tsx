@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { setCachedUserDetails } from '@/lib/userDetailsCache';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import {
   ChevronLeft,
   ChevronDown,
@@ -273,6 +275,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { user, userData } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const totalSteps = 6;
 
   // Onboarding Form State
@@ -330,6 +333,7 @@ export default function OnboardingPage() {
     if (currentStep < totalSteps) {
       setCurrentStep((prev) => prev + 1);
     } else {
+      setIsSubmitting(true);
       // Save onboarding answers to Wix CMS user-details collection and local cache
       const payload = {
         userId: user?.uid || 'guest-user',
@@ -341,12 +345,14 @@ export default function OnboardingPage() {
         dreamSchool,
         gpa,
         country: country || 'Unspecified',
-        financialAid
+        financialAid,
+        onboardingCompleted: true
       };
 
       const userKey = user?.uid || user?.email || 'default';
       setCachedUserDetails(userKey, payload);
 
+      // 1. Post to Wix CMS
       try {
         await fetch('/api/wix/user-details', {
           method: 'POST',
@@ -356,6 +362,22 @@ export default function OnboardingPage() {
       } catch (err) {
         console.error('Error submitting data to Wix CMS:', err);
       }
+
+      // 2. Sync to Firebase Firestore safely
+      try {
+        if (user?.uid) {
+          const userRef = doc(db, 'users', user.uid);
+          const writePromise = setDoc(userRef, {
+            ...payload,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+          const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+          await Promise.race([writePromise, timeoutPromise]);
+        }
+      } catch (firestoreErr) {
+        console.warn('Firestore onboarding save notice:', firestoreErr);
+      }
+
       router.push('/dashboard');
     }
   };
@@ -680,9 +702,16 @@ export default function OnboardingPage() {
           {/* CONTINUE BUTTON */}
           <button
             onClick={handleNext}
-            className="w-full h-[54px] rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[15px] font-bold transition-all flex items-center justify-center gap-2 shadow-xs hover:scale-[1.01]"
+            disabled={isSubmitting}
+            className="w-full h-[54px] rounded-full bg-[#690B1B] hover:bg-[#7A1022] disabled:opacity-60 text-white text-[15px] font-bold transition-all flex items-center justify-center gap-2 shadow-xs hover:scale-[1.01]"
           >
-            <span>{currentStep === totalSteps ? 'Complete Setup & Open Dashboard →' : 'Continue →'}</span>
+            <span>
+              {isSubmitting
+                ? 'Saving Profile & Opening Dashboard...'
+                : currentStep === totalSteps
+                  ? 'Complete Setup & Open Dashboard →'
+                  : 'Continue →'}
+            </span>
           </button>
         </div>
       </main>

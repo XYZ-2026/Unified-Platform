@@ -99,7 +99,7 @@ export default function ExemplarEssaysPage() {
   });
 
   return (
-    <div className="p-5 md:p-8 max-w-[1500px] mx-auto w-full space-y-6">
+    <div className="p-4 sm:p-5 md:p-8 max-w-[1500px] mx-auto w-full space-y-6">
       {/* HERO BANNER */}
       <div className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[24px] p-6 sm:p-8 text-white shadow-sm space-y-3 border border-white/10 relative overflow-hidden">
         <div className="absolute right-0 top-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />

@@ -20,7 +20,8 @@ import {
   GraduationCap,
   School,
   Phone,
-  Calendar
+  Calendar,
+  ArrowRight
 } from 'lucide-react';
 
 export default function StudentProfilePage() {
@@ -189,37 +190,37 @@ export default function StudentProfilePage() {
   ].filter(Boolean);
 
   return (
-    <div className="p-5 md:p-8 max-w-[1500px] mx-auto w-full space-y-6">
+    <div className="p-4 sm:p-5 md:p-8 max-w-[1500px] mx-auto w-full space-y-6">
       {/* ═══════════════════════════════════════════════════════════════
          HEADER PROFILE CARD
          ═══════════════════════════════════════════════════════════════ */}
       <div className="bg-white border border-[#E7E2DE] rounded-[24px] p-6 md:p-8 shadow-xs space-y-6">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-full bg-[#690B1B] text-white flex items-center justify-center text-[32px] font-bold shadow-md border-4 border-[#F7F0F1]">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 md:gap-6">
+          <div className="flex items-center gap-3.5 sm:gap-5 min-w-0">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 aspect-square rounded-full bg-[#690B1B] text-white flex items-center justify-center text-[26px] sm:text-[32px] font-bold shadow-md border-4 border-[#F7F0F1]">
               {fullName ? fullName.charAt(0).toUpperCase() : (user?.email?.charAt(0).toUpperCase() || 'S')}
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-[26px] md:text-[30px] font-bold text-[#111]">
+            <div className="space-y-1 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <h1 className="text-[20px] sm:text-[26px] md:text-[30px] font-bold text-[#111] leading-tight break-words">
                   {fullName || userData?.name || user?.email?.split('@')[0] || 'Student Profile'}
                 </h1>
-                <span className="text-[11px] font-bold bg-[#16a34a]/10 text-[#16a34a] px-3 py-1 rounded-full flex items-center gap-1">
-                  <CheckCircle2 size={13} />
+                <span className="text-[10.5px] sm:text-[11px] font-bold bg-[#16a34a]/10 text-[#16a34a] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full flex items-center gap-1 shrink-0">
+                  <CheckCircle2 size={12} />
                   <span>Cloud Synced &amp; Up to Date</span>
                 </span>
               </div>
-              <p className="text-[14px] text-[#777]">
+              <p className="text-[12.5px] sm:text-[14px] text-[#777] leading-relaxed">
                 {user?.email || 'Student Account'} • Manage your profile, academics, and target universities.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="w-full md:w-auto flex items-center shrink-0">
             <button
               onClick={() => handleSaveProfile()}
               disabled={saving}
-              className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
+              className="w-full md:w-auto h-[42px] sm:h-[46px] px-5 sm:px-6 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12.5px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer active:scale-95 whitespace-nowrap"
             >
               {saveSuccess ? <Check size={16} /> : <Save size={16} />}
               <span>{saving ? 'Saving...' : saveSuccess ? 'Saved & Synced!' : 'Save Profile Changes'}</span>
@@ -335,7 +336,7 @@ export default function StudentProfilePage() {
               <span>Academics &amp; Test Scores</span>
             </h3>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="text-[12px] font-bold text-[#777] block mb-1">Unweighted GPA</label>
                 <input
@@ -413,17 +414,21 @@ export default function StudentProfilePage() {
           </div>
 
           {/* EXTRACURRICULARS LINK CARD */}
-          <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[18px] font-bold text-[#111] flex items-center gap-2">
-                <Activity size={18} className="text-[#690B1B]" />
+          <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h3 className="text-[17px] sm:text-[18px] font-bold text-[#111] flex items-center gap-2">
+                <Activity size={18} className="text-[#690B1B] shrink-0" />
                 <span>Extracurricular Activities</span>
               </h3>
-              <Link href="/dashboard/extracurriculars" className="text-[13px] font-bold text-[#690B1B] hover:underline flex items-center gap-1">
-                <span>Manage Extracurriculars →</span>
+              <Link
+                href="/dashboard/extracurriculars"
+                className="h-[34px] sm:h-[38px] px-3.5 sm:px-4 rounded-full bg-[#F7F0F1] hover:bg-[#690B1B] text-[#690B1B] hover:text-white border border-[#690B1B]/15 text-[12px] sm:text-[12.5px] font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap active:scale-95 self-start sm:self-auto shadow-2xs"
+              >
+                <span>Manage Extracurriculars</span>
+                <ArrowRight size={13} />
               </Link>
             </div>
-            <p className="text-[13px] text-[#666]">
+            <p className="text-[12.5px] sm:text-[13px] text-[#666] leading-relaxed">
               Your extracurricular activities entered on the Extracurriculars page are automatically saved and synchronized with your unified student profile.
             </p>
           </div>

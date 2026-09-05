@@ -383,7 +383,7 @@ export default function ExtracurricularsPage() {
   const selectedCategoryObj = CATEGORY_OPTIONS.find((c) => c.id === newCategory) || CATEGORY_OPTIONS[0];
 
   return (
-    <div className="p-5 md:p-8 flex-1 flex flex-col xl:flex-row gap-6 max-w-[1600px] mx-auto w-full font-[Poppins]">
+    <div className="p-4 sm:p-5 md:p-8 flex-1 flex flex-col xl:flex-row gap-6 max-w-[1600px] mx-auto w-full font-[Poppins]">
       {/* ═══════════════════════════════════════════════════════════════
          LEFT MAIN SECTION — Extracurricular Activity Slots
          ═══════════════════════════════════════════════════════════════ */}
@@ -453,50 +453,65 @@ export default function ExtracurricularsPage() {
               return (
                 <div
                   key={act.id}
-                  className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs hover:border-[#690B1B]/40 transition-all space-y-3 group"
+                  className="bg-white border border-[#E7E2DE] rounded-[18px] sm:rounded-[20px] p-4 sm:p-6 shadow-xs hover:border-[#690B1B]/40 transition-all group"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-full bg-[#F7F0F1] text-[#690B1B] font-bold text-[13px] flex items-center justify-center shrink-0">
-                        #{index + 1}
-                      </span>
-                      <div>
-                        <h4 className="text-[17px] font-bold text-[#111]">{act.title}</h4>
-                        <div className="flex items-center gap-2 flex-wrap mt-0.5">
-                          <span className="text-[13px] text-[#690B1B] font-semibold">{act.organization}</span>
-                          {act.category && (
-                            <span className="text-[11px] font-semibold text-[#555] bg-[#F7F5F3] px-2.5 py-0.5 rounded-full border border-[#EAE6E2] flex items-center gap-1.5">
-                              <CatIcon size={12} className="text-[#690B1B]" />
-                              <span>{act.category}</span>
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    {/* Activity Slot Index Badge */}
+                    <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#F7F0F1] text-[#690B1B] font-bold text-[12px] sm:text-[13px] flex items-center justify-center shrink-0 aspect-square mt-0.5 shadow-2xs">
+                      #{index + 1}
+                    </span>
+
+                    {/* Main Activity Content Area */}
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-[16px] sm:text-[17px] font-bold text-[#111] leading-snug break-words">
+                            {act.title}
+                          </h4>
+                          <div className="flex items-center gap-2 flex-wrap mt-1">
+                            <span className="text-[12.5px] sm:text-[13px] text-[#690B1B] font-semibold">
+                              {act.organization}
                             </span>
-                          )}
+                            {act.category && (
+                              <span className="text-[10.5px] sm:text-[11px] font-semibold text-[#555] bg-[#F7F5F3] px-2.5 py-0.5 rounded-full border border-[#EAE6E2] flex items-center gap-1.5 shrink-0">
+                                <CatIcon size={11} className="text-[#690B1B]" />
+                                <span>{act.category}</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Timing and Actions */}
+                        <div className="flex items-center gap-2 flex-wrap shrink-0 pt-0.5">
+                          <span className="text-[11px] font-bold text-[#666] bg-[#F7F5F3] px-2.5 sm:px-3 py-1 rounded-full border border-[#E7E2DE] flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+                            <Clock size={12} className="text-[#690B1B]" />
+                            <span>{getTimingDisplay(act)}</span>
+                          </span>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              onClick={() => handleOpenEditModal(act)}
+                              className="p-1.5 rounded-full text-[#888] hover:text-[#690B1B] hover:bg-[#F7F0F1] transition-all cursor-pointer"
+                              title="Edit activity"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteActivity(act.id)}
+                              className="p-1.5 rounded-full text-[#888] hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"
+                              title="Delete activity"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-[#666] bg-[#F7F5F3] px-3 py-1 rounded-full border border-[#E7E2DE] flex items-center gap-1.5 shrink-0">
-                        <Clock size={12} className="text-[#690B1B]" />
-                        <span>{getTimingDisplay(act)}</span>
-                      </span>
-                      <button
-                        onClick={() => handleOpenEditModal(act)}
-                        className="p-1.5 rounded-full text-[#999] hover:text-[#690B1B] hover:bg-[#F7F0F1] transition-all opacity-80 group-hover:opacity-100 cursor-pointer"
-                        title="Edit activity"
-                      >
-                        <Edit2 size={15} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteActivity(act.id)}
-                        className="p-1.5 rounded-full text-[#999] hover:text-red-600 hover:bg-red-50 transition-all opacity-80 group-hover:opacity-100 cursor-pointer"
-                        title="Delete activity"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+
+                      {/* Description - Perfectly Aligned */}
+                      <p className="text-[13px] sm:text-[14px] text-[#555] leading-relaxed pt-1">
+                        {act.description}
+                      </p>
                     </div>
                   </div>
-                  <p className="text-[14px] text-[#555] leading-relaxed pl-11">
-                    {act.description}
-                  </p>
                 </div>
               );
             })}
@@ -687,7 +702,7 @@ export default function ExtracurricularsPage() {
       {/* ═══════════════════════════════════════════════════════════════
          RIGHT SIDE PANEL — Analysis, Chat & Exemplars Tabs
          ═══════════════════════════════════════════════════════════════ */}
-      <div className="w-full xl:w-[460px] bg-white border border-[#E7E2DE] rounded-[24px] p-6 shadow-xs flex flex-col justify-between h-auto xl:h-[calc(100vh-120px)] sticky top-[96px] overflow-hidden">
+      <div className="w-full xl:w-[460px] bg-white border border-[#E7E2DE] rounded-[24px] p-4 sm:p-6 shadow-xs flex flex-col justify-between h-auto xl:h-[calc(100vh-120px)] xl:sticky top-[96px] overflow-hidden">
         <div className="flex flex-col h-full overflow-hidden">
           {/* TABS HEADER */}
           <div className="flex items-center gap-1 bg-[#F7F5F3] p-1 rounded-full border border-[#E7E2DE] mb-5 shrink-0">

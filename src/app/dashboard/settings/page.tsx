@@ -58,7 +58,7 @@ export default function SettingsPage() {
   const initial = nameToShow.charAt(0).toUpperCase();
 
   return (
-    <div className="p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
+    <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
       <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs">
         <h2 className="text-[26px] font-bold text-[#111111] tracking-[-0.03em]">Account Settings &amp; Preferences</h2>
         <p className="text-[13px] text-[#777777]">Manage your profile details, notification preferences, and subscription plan</p>

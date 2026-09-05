@@ -22,10 +22,14 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  // Redirect if already logged in
+  // Target redirect ref to prevent race condition with onAuthStateChanged
+  const targetRedirectRef = React.useRef<string | null>(null);
+
+  // Redirect if already logged in (e.g. direct page visit)
   React.useEffect(() => {
     if (user) {
-      router.push('/dashboard');
+      const destination = targetRedirectRef.current || '/dashboard';
+      router.push(destination);
     }
   }, [user, router]);
 
@@ -64,10 +68,12 @@ export default function LoginPage() {
     setError('');
     setMessage('');
     setLoading(true);
+    targetRedirectRef.current = '/dashboard';
     try {
       await login(email, password);
       router.push('/dashboard');
     } catch (err: any) {
+      targetRedirectRef.current = null;
       console.error(err);
       setError(formatAuthError(err, 'Failed to sign in. Please try again.'));
     } finally {
@@ -92,10 +98,12 @@ export default function LoginPage() {
       return;
     }
     setLoading(true);
+    targetRedirectRef.current = '/onboarding';
     try {
-      await signup(name, email, password, agreedToTerms);
+      await signup(name, email, password);
       router.push('/onboarding');
     } catch (err: any) {
+      targetRedirectRef.current = null;
       console.error(err);
       setError(formatAuthError(err, 'Failed to register account.'));
     } finally {
@@ -106,10 +114,12 @@ export default function LoginPage() {
   const handleGoogle = async () => {
     setError('');
     setLoading(true);
+    targetRedirectRef.current = '/onboarding';
     try {
-      await googleSignIn(agreedToTerms);
-      router.push('/dashboard');
+      await googleSignIn();
+      router.push('/onboarding');
     } catch (err: any) {
+      targetRedirectRef.current = null;
       console.error(err);
       setError(formatAuthError(err, 'Google sign-in failed. Please try again.'));
     } finally {
