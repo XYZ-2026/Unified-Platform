@@ -41,6 +41,7 @@ interface UniversityDetail {
   livingCosts: string;
   acceptanceRate: string;
   website: string;
+  bannerImage?: string;
   bannerAlt: string;
   popularMajors: string[];
   slug: string;
@@ -52,6 +53,23 @@ interface UniversityDetail {
 }
 
 /* ─── Helpers ─────────────────────────────────────────────── */
+
+function formatWixImageUrl(url: any): string {
+  if (!url) return '';
+  if (typeof url !== 'string') {
+    if (url.url) return formatWixImageUrl(url.url);
+    if (url.src) return formatWixImageUrl(url.src);
+    return '';
+  }
+  const trimmed = url.trim();
+  if (trimmed.startsWith('wix:image://v1/')) {
+    const match = trimmed.match(/^wix:image:\/\/v1\/([^\/#]+)/);
+    if (match && match[1]) {
+      return `https://static.wixstatic.com/media/${match[1]}`;
+    }
+  }
+  return trimmed;
+}
 
 function getCountryFlag(code: string): string {
   const flags: Record<string, string> = {
@@ -155,6 +173,7 @@ export default function UniversityDetailPage() {
   const slug = (params?.slug as string) || '';
 
   const [university, setUniversity] = useState<UniversityDetail | null>(null);
+  const [bannerError, setBannerError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -172,6 +191,7 @@ export default function UniversityDetailPage() {
 
         if (data.success && data.university) {
           setUniversity(data.university);
+          setBannerError(false);
         } else {
           setError(data.error || 'University not found');
         }
@@ -192,7 +212,7 @@ export default function UniversityDetailPage() {
       <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
         {/* Skeleton hero */}
         <div className="relative rounded-[24px] overflow-hidden border border-[#E7E2DE] bg-white animate-pulse">
-          <div className="h-[220px] md:h-[260px] bg-gradient-to-r from-gray-200 to-gray-300" />
+          <div className="h-[250px] sm:h-[320px] md:h-[370px] lg:h-[400px] bg-gradient-to-r from-gray-200 to-gray-300" />
           <div className="p-6 md:p-8 -mt-16 mx-4 md:mx-8 rounded-[20px] bg-white border border-[#E7E2DE] space-y-4 relative">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-[18px] bg-gray-200" />
@@ -271,6 +291,7 @@ export default function UniversityDetailPage() {
   const location = [u.state, u.country].filter(Boolean).join(', ');
   const essaySections = parseEssayPrompts(u.requiredEssayPromptsDetails);
   const uniType = getUniversityType(u.name);
+  const bannerSrc = formatWixImageUrl(u.bannerImage);
 
   // Compute total cost
   const parseCurrency = (s: string) => {
@@ -299,18 +320,36 @@ export default function UniversityDetailPage() {
          HERO COVER BANNER & OVERLAY CARD
          ═══════════════════════════════════════════════════════ */}
       <div className="relative rounded-[24px] overflow-hidden shadow-sm border border-[#E7E2DE] bg-white">
-        {/* TOP GRADIENT BANNER */}
-        <div className="h-[190px] sm:h-[230px] md:h-[260px] bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] relative p-3.5 sm:p-6 flex flex-wrap items-start justify-between gap-2.5 text-white">
-          <div className="absolute right-0 top-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-          <div className="absolute left-1/2 bottom-0 w-60 h-60 bg-white/3 rounded-full blur-2xl -mb-32 pointer-events-none" />
+        {/* TOP MAROON BANNER CONTAINER */}
+        <div className="h-[250px] sm:h-[320px] md:h-[370px] lg:h-[400px] bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] relative p-3.5 sm:p-6 flex flex-wrap items-start justify-between gap-2.5 text-white overflow-hidden">
+          {/* University Banner Image from CMS (if available & valid) */}
+          {bannerSrc && !bannerError ? (
+            <>
+              <img
+                src={bannerSrc}
+                alt={u.bannerAlt || `${u.name} campus banner`}
+                onError={() => setBannerError(true)}
+                className="absolute inset-0 w-full h-full object-cover object-center z-0 select-none transition-opacity duration-300"
+              />
+              {/* Refined gradient overlays to ensure badge/button readability and sleek visual depth */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/35 z-[1] pointer-events-none" />
+              <div className="absolute inset-0 bg-[#690B1B]/15 mix-blend-multiply z-[1] pointer-events-none" />
+            </>
+          ) : (
+            /* Fallback maroon ambient lights when no image is present in CMS */
+            <>
+              <div className="absolute right-0 top-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+              <div className="absolute left-1/2 bottom-0 w-60 h-60 bg-white/3 rounded-full blur-2xl -mb-32 pointer-events-none" />
+            </>
+          )}
 
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 h-[32px] sm:h-[36px] px-3 sm:px-3.5 rounded-full bg-white/10 backdrop-blur-md text-[#C9A55D] text-[11px] sm:text-[12px] font-bold relative z-10 shrink-0">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 h-[32px] sm:h-[36px] px-3 sm:px-3.5 rounded-full bg-black/25 backdrop-blur-md border border-white/15 text-[#C9A55D] text-[11px] sm:text-[12px] font-bold relative z-10 shrink-0 shadow-xs">
             <Sparkles size={14} className="shrink-0" />
             <span>Verified University Profile</span>
           </div>
 
           <div className="flex items-center gap-2 relative z-10 shrink-0">
-            <button className="h-[32px] sm:h-[36px] px-3.5 sm:px-4 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-[11.5px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 shrink-0">
+            <button className="h-[32px] sm:h-[36px] px-3.5 sm:px-4 rounded-full bg-black/25 hover:bg-black/40 backdrop-blur-md border border-white/15 text-white text-[11.5px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 shrink-0 shadow-xs">
               <Bookmark size={14} className="shrink-0" />
               <span>Add to My List</span>
             </button>
@@ -318,7 +357,7 @@ export default function UniversityDetailPage() {
         </div>
 
         {/* FLOATING DETAILS OVERLAY CARD */}
-        <div className="p-4 sm:p-6 md:p-8 bg-white relative -mt-14 sm:-mt-16 mx-3 sm:mx-6 md:mx-8 rounded-[18px] sm:rounded-[20px] shadow-lg border border-[#E7E2DE] space-y-4">
+        <div className="p-4 sm:p-6 md:p-8 bg-white relative -mt-14 sm:-mt-16 mx-3 sm:mx-6 md:mx-8 rounded-[18px] sm:rounded-[20px] shadow-lg border border-[#E7E2DE] space-y-4 z-10">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
               <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-[14px] sm:rounded-[18px] bg-[#F7F0F1] border border-[#690B1B]/20 flex items-center justify-center text-[26px] sm:text-[36px] shrink-0 aspect-square">

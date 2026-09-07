@@ -1,5 +1,62 @@
 import { NextResponse } from 'next/server';
 
+function formatWixImageUrl(url: any): string {
+  if (!url) return '';
+  if (typeof url !== 'string') {
+    if (url.url) return formatWixImageUrl(url.url);
+    if (url.src) return formatWixImageUrl(url.src);
+    return '';
+  }
+  const trimmed = url.trim();
+  if (trimmed.startsWith('wix:image://v1/')) {
+    const match = trimmed.match(/^wix:image:\/\/v1\/([^\/#]+)/);
+    if (match && match[1]) {
+      return `https://static.wixstatic.com/media/${match[1]}`;
+    }
+  }
+  return trimmed;
+}
+
+function extractBannerAndAlt(d: any): { bannerImage: string; bannerAlt: string } {
+  if (!d) return { bannerImage: '', bannerAlt: '' };
+
+  const rawImage =
+    d.bannerImage ??
+    d.universityBanner ??
+    d['university banner'] ??
+    d['university-banner'] ??
+    d.university_banner ??
+    d.universityBanner_1 ??
+    d.banner ??
+    d.university_image ??
+    '';
+
+  let rawUrl = '';
+  let embeddedAlt = '';
+
+  if (typeof rawImage === 'string') {
+    rawUrl = rawImage;
+  } else if (rawImage && typeof rawImage === 'object') {
+    rawUrl = rawImage.url || rawImage.src || '';
+    embeddedAlt = rawImage.altText || rawImage.alt || rawImage.description || '';
+  }
+
+  const rawAlt =
+    d.bannerImageAltText ||
+    d.bannerAlt ||
+    d.universityBannerAltText ||
+    d['university banner alt'] ||
+    d.university_banner_alt_text ||
+    d.altText ||
+    embeddedAlt ||
+    (d.university_name || d.name ? `${d.university_name || d.name} Campus Banner` : 'University Campus Banner');
+
+  return {
+    bannerImage: formatWixImageUrl(rawUrl),
+    bannerAlt: typeof rawAlt === 'string' ? rawAlt.trim() : 'University Campus Banner',
+  };
+}
+
 const FALLBACK_UNIVERSITIES = [
   // UNITED STATES
   {
@@ -669,6 +726,8 @@ async function fetchAllUniversitiesFromWix(wixApiKey: string, wixSiteId: string)
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-|-$/g, '');
 
+        const { bannerImage, bannerAlt } = extractBannerAndAlt(d);
+
         return {
           id: d._id || item.id,
           universityId: d.university_id || '',
@@ -681,8 +740,8 @@ async function fetchAllUniversitiesFromWix(wixApiKey: string, wixSiteId: string)
           livingCosts: d.livingCosts || 'N/A',
           acceptanceRate: d.acceptanceRate || 'N/A',
           website: d.official_website || '',
-          bannerImage: d.bannerImage || d.university_image || '',
-          bannerAlt: d.bannerImageAltText || '',
+          bannerImage,
+          bannerAlt,
           popularMajors: majorsArray.slice(0, 8),
           allMajors: majorsArray,
           slug,

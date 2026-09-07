@@ -76,8 +76,8 @@ export default function MyEssaysPage() {
       e.school.toLowerCase().includes(searchTerm.toLowerCase());
 
     if (!matchesSearch) return false;
-    if (filterMode === 'in-progress') return e.status === 'In Progress';
-    if (filterMode === 'ready') return e.status === 'Draft Ready' || e.status === 'Accepted';
+    if (filterMode === 'in-progress') return e.status === 'In Progress' || !e.status;
+    if (filterMode === 'ready') return e.status === 'Ready' || e.status === 'Draft Ready' || e.status === 'Accepted';
     return true;
   });
 
@@ -189,9 +189,11 @@ export default function MyEssaysPage() {
 
               <div className="pt-3 border-t border-[#F0EBE6] flex items-center justify-between">
                 <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-                  essay.status === 'In Progress' ? 'bg-[#FFF8EB] text-[#9E731A]' : 'bg-[#F0FDF4] text-[#16A34A]'
+                  essay.status === 'Ready' || essay.status === 'Draft Ready' || essay.status === 'Accepted'
+                    ? 'bg-[#F0FDF4] text-[#16A34A] border border-[#DCFCE7]'
+                    : 'bg-[#FFF8EB] text-[#9E731A] border border-[#FEF3C7]'
                 }`}>
-                  {essay.status}
+                  {essay.status || 'In Progress'}
                 </span>
                 <Link
                   href={`/dashboard/essays/studio?topic=${encodeURIComponent(essay.title)}&paperId=${encodeURIComponent(essay.id)}`}

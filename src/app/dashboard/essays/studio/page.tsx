@@ -20,6 +20,9 @@ import {
   IconX,
   IconArrowRight,
   IconFileTypePdf,
+  IconEdit,
+  IconCheck,
+  IconChevronDown,
 } from "@tabler/icons-react";
 
 
@@ -125,6 +128,30 @@ function StudioContent() {
   const [pdfReuploadError, setPdfReuploadError] = useState("");
   const [isPdfReuploading, setIsPdfReuploading] = useState(false);
 
+  /* ── Essay Title & Rename State ───────────────────────────────────── */
+  const [essayTitle, setEssayTitle] = useState<string>(rawTopic || "Statement of Purpose");
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const [titleInputValue, setTitleInputValue] = useState<string>(rawTopic || "Statement of Purpose");
+
+  /* ── Status Dropdown State ────────────────────────────────────────── */
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState<boolean>(false);
+  const statusDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  // Close status dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
+        setStatusDropdownOpen(false);
+      }
+    }
+    if (statusDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [statusDropdownOpen]);
+
   useEffect(() => {
     const initPaper = async () => {
       try {
@@ -141,10 +168,13 @@ function StudioContent() {
               const essayJson = await essayRes.json();
               if (essayJson.success && essayJson.essay) {
                 const e = essayJson.essay;
+                const initialTitle = e.title || rawTopic || "Statement of Purpose";
+                setEssayTitle(initialTitle);
+                setTitleInputValue(initialTitle);
                 const essaySections: SectionContent[] = [
                   {
                     id: "essay-body",
-                    title: e.title || rawTopic,
+                    title: initialTitle,
                     html: sanitizeHtml(e.content || "<p></p>")
                   }
                 ];
@@ -178,10 +208,14 @@ function StudioContent() {
         setDraftId(generatedId);
         setPaperAuthor(currentAuthor);
         setPaperAffiliation(currentAffiliation);
+        const fallbackTitle = rawTopic || "Statement of Purpose";
+        setEssayTitle(fallbackTitle);
+        setTitleInputValue(fallbackTitle);
+        setPaperStatus("In Progress");
         const initialSections: SectionContent[] = [
           {
             id: "essay-body",
-            title: rawTopic || "Statement of Purpose",
+            title: fallbackTitle,
             html: "<p></p>"
           }
         ];
@@ -366,67 +400,115 @@ function StudioContent() {
     }
   }, [draftId]);
 
-  const savePaperDraft = useCallback(async () => {
-    if (!draftId || isGenerating) return;
-    try {
-      const uId = userData?.uid || (typeof window !== "undefined" ? localStorage.getItem("abroad_current_uid") : "") || "guest-user";
-      const uEmail = userData?.email || (typeof window !== "undefined" ? localStorage.getItem("abroad_current_email") : "") || "";
+  const savePaperDraft = useCallback(
+    async (overrides?: { title?: string; status?: string }) => {
+      if (!draftId || isGenerating) return;
+      try {
+        const uId = userData?.uid || (typeof window !== "undefined" ? localStorage.getItem("abroad_current_uid") : "") || "guest-user";
+        const uEmail = userData?.email || (typeof window !== "undefined" ? localStorage.getItem("abroad_current_email") : "") || "";
 
-      // Ensure we extract the latest typed content
-      const activeSec = sections.find((s) => s.id === activeSectionId) || sections[0];
-      const htmlContent = activeSec?.html || editorRef.current?.getHTML?.() || "<p></p>";
-      const plainText = stripHTML(htmlContent);
-      const wordCountVal = plainText.split(/\s+/).filter(Boolean).length;
-      const pageCountVal = Math.max(1, Math.ceil(wordCountVal / 380));
+        // Ensure we extract the latest typed content
+        const activeSec = sections.find((s) => s.id === activeSectionId) || sections[0];
+        const htmlContent = activeSec?.html || editorRef.current?.getHTML?.() || "<p></p>";
+        const plainText = stripHTML(htmlContent);
+        const wordCountVal = plainText.split(/\s+/).filter(Boolean).length;
+        const pageCountVal = Math.max(1, Math.ceil(wordCountVal / 380));
 
-      const res = await fetch("/api/wix/user-essays", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: draftId,
-          userId: uId,
-          userEmail: uEmail,
-          title: rawTopic || "Statement of Purpose",
-          school: paperAffiliation || "Target University",
-          content: htmlContent,
-          plainText: plainText,
-          wordCount: wordCountVal,
-          pageCount: pageCountVal,
-          status: paperStatus || "In Progress",
-          aiScore: aiScore,
-          score: qualityScore || 88,
-          format: format
-        })
-      });
+        const titleToSave = overrides?.title !== undefined ? overrides.title : (essayTitle || rawTopic || "Statement of Purpose");
+        const statusToSave = overrides?.status !== undefined ? overrides.status : (paperStatus || "In Progress");
 
-      if (res.ok) {
-        const json = await res.json();
-        if (json.id && json.id !== draftId) {
-          setDraftId(json.id);
+        const res = await fetch("/api/wix/user-essays", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: draftId,
+            userId: uId,
+            userEmail: uEmail,
+            title: titleToSave,
+            school: paperAffiliation || "Target University",
+            content: htmlContent,
+            plainText: plainText,
+            wordCount: wordCountVal,
+            pageCount: pageCountVal,
+            status: statusToSave,
+            aiScore: aiScore,
+            score: qualityScore || 88,
+            format: format
+          })
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.id && json.id !== draftId) {
+            setDraftId(json.id);
+          }
         }
+      } catch (e) {
+        console.error("Auto-save to Wix CMS failed:", e);
       }
-    } catch (e) {
-      console.error("Auto-save to Wix CMS failed:", e);
-    }
-  }, [
-    draftId,
-    isGenerating,
-    sections,
-    activeSectionId,
-    rawTopic,
-    paperAffiliation,
-    userData,
-    paperStatus,
-    aiScore,
-    qualityScore,
-    format
-  ]);
+    },
+    [
+      draftId,
+      isGenerating,
+      sections,
+      activeSectionId,
+      essayTitle,
+      rawTopic,
+      paperAffiliation,
+      userData,
+      paperStatus,
+      aiScore,
+      qualityScore,
+      format
+    ]
+  );
 
   const handleSaveDraft = async () => {
     setIsSaving(true);
     await savePaperDraft();
     setIsSaving(false);
     toast.success("Essay draft saved to cloud!");
+  };
+
+  const handleStartRename = () => {
+    setTitleInputValue(essayTitle || rawTopic || "Statement of Purpose");
+    setIsEditingTitle(true);
+  };
+
+  const handleSaveRename = async () => {
+    const trimmed = titleInputValue.trim();
+    if (!trimmed) {
+      toast.warning("Title cannot be empty");
+      return;
+    }
+    setEssayTitle(trimmed);
+    setIsEditingTitle(false);
+
+    // Update active section title
+    setSections((prev) =>
+      prev.map((s) => (s.id === "essay-body" ? { ...s, title: trimmed } : s))
+    );
+
+    setIsSaving(true);
+    await savePaperDraft({ title: trimmed });
+    setIsSaving(false);
+    toast.success(`Renamed to "${trimmed}"`);
+  };
+
+  const handleCancelRename = () => {
+    setTitleInputValue(essayTitle || rawTopic || "Statement of Purpose");
+    setIsEditingTitle(false);
+  };
+
+  const handleSelectStatus = async (newStatus: "In Progress" | "Ready") => {
+    setStatusDropdownOpen(false);
+    if (paperStatus === newStatus) return;
+
+    setPaperStatus(newStatus);
+    setIsSaving(true);
+    await savePaperDraft({ status: newStatus });
+    setIsSaving(false);
+    toast.success(`Draft marked as "${newStatus}"!`);
   };
 
   useEffect(() => {
@@ -1527,7 +1609,8 @@ function StudioContent() {
         paper.pageCount = pageCount.toString();
         paper.sections = sections;
         paper.submittedAt = new Date().toISOString();
-        paper.status = newStatus;
+        paper.title = essayTitle || paper.title || rawTopic;
+        paper.status = paperStatus || newStatus;
         paper.aiScore = aiScore;
         if (qualityScore !== null) {
           paper.score = qualityScore;
@@ -1538,7 +1621,7 @@ function StudioContent() {
       } else {
         paper = {
           id: targetId,
-          title: rawTopic,
+          title: essayTitle || rawTopic,
           author: paperAuthor || userData?.fullName || "Author Name",
           authorEmail: userData?.email || "author@example.com",
           affiliation: paperAffiliation || userData?.institution || "Independent Researcher",
@@ -1549,7 +1632,7 @@ function StudioContent() {
           rubricRigor: rubricRigor !== null ? rubricRigor : 8.5,
           rubricStyle: rubricStyle !== null ? rubricStyle : 8.5,
           rubricNovelty: rubricNovelty !== null ? rubricNovelty : 8.5,
-          status: "In Progress",
+          status: paperStatus || "In Progress",
           submittedAt: new Date().toISOString(),
           assignmentStatus: null,
           pref1: "",
@@ -1764,12 +1847,59 @@ function StudioContent() {
           </button>
           <div className="overflow-hidden">
             <div className="flex items-center gap-2 sm:gap-3">
-              <h1 className="text-[14px] sm:text-[17px] font-bold text-[#111] tracking-tight truncate max-w-[130px] sm:max-w-[450px]">
-                {rawTopic}
-              </h1>
-              <span className="px-2 py-0.5 rounded-[5px] bg-[#690B1B]/[0.06] text-[#690B1B] text-[8.5px] sm:text-[9.5px] uppercase tracking-wider font-extrabold shrink-0">
-                {format.toUpperCase()}
-              </span>
+              {isEditingTitle ? (
+                <div className="flex items-center gap-1.5 py-0.5">
+                  <input
+                    type="text"
+                    value={titleInputValue}
+                    onChange={(e) => setTitleInputValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveRename();
+                      if (e.key === "Escape") handleCancelRename();
+                    }}
+                    autoFocus
+                    placeholder="Enter essay or SOP title..."
+                    className="h-8 px-2.5 rounded-lg border-2 border-[#690B1B] text-[13px] sm:text-[15px] font-bold text-[#111] bg-white outline-none focus:ring-2 focus:ring-[#690B1B]/20 w-[180px] sm:w-[300px] md:w-[420px] shadow-inner transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveRename}
+                    className="w-7 h-7 rounded-lg bg-[#0F8A43] hover:bg-[#0D7539] text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 shadow-xs"
+                    title="Save title (Enter)"
+                  >
+                    <IconCheck size={16} stroke={2.5} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelRename}
+                    className="w-7 h-7 rounded-lg bg-neutral-200 hover:bg-neutral-300 text-neutral-700 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                    title="Cancel (Esc)"
+                  >
+                    <IconX size={15} stroke={2.5} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 sm:gap-2 group min-w-0">
+                  <h1
+                    onClick={handleStartRename}
+                    title="Click to rename"
+                    className="text-[14px] sm:text-[17px] font-bold text-[#111] tracking-tight truncate max-w-[130px] sm:max-w-[340px] md:max-w-[440px] cursor-pointer hover:text-[#690B1B] transition-colors"
+                  >
+                    {essayTitle || rawTopic}
+                  </h1>
+                  <button
+                    type="button"
+                    onClick={handleStartRename}
+                    className="p-1 rounded-md text-neutral-400 hover:text-[#690B1B] hover:bg-[#690B1B]/5 opacity-80 sm:opacity-0 group-hover:opacity-100 transition-all cursor-pointer shrink-0"
+                    title="Rename essay or SOP"
+                  >
+                    <IconEdit size={15} stroke={2} />
+                  </button>
+                  <span className="px-2 py-0.5 rounded-[5px] bg-[#690B1B]/[0.06] text-[#690B1B] text-[8.5px] sm:text-[9.5px] uppercase tracking-wider font-extrabold shrink-0">
+                    {format.toUpperCase()}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 mt-0.5">
               <div className="flex items-center gap-1.5">
@@ -1861,6 +1991,96 @@ function StudioContent() {
                 <span className="hidden sm:inline">Export PDF</span>
               </button>
 
+              {/* Status Dropdown Selector (In Progress vs Ready) */}
+              {!role && !["Accepted", "Awaiting Publisher", "Review Pending", "Under Review"].includes(paperStatus) && (
+                <div className="relative" ref={statusDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setStatusDropdownOpen((prev) => !prev)}
+                    className={`h-[42px] px-3 sm:px-3.5 rounded-xl border flex items-center gap-2 text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer shadow-xs active:scale-[0.98] ${
+                      paperStatus === "Ready" || paperStatus === "Draft Ready"
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100/80"
+                        : "bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100/80"
+                    }`}
+                    title="Click to change draft status"
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        paperStatus === "Ready" || paperStatus === "Draft Ready"
+                          ? "bg-emerald-500"
+                          : "bg-amber-500 animate-pulse"
+                      }`}
+                    />
+                    <span className="whitespace-nowrap">
+                      {paperStatus === "Ready" || paperStatus === "Draft Ready" ? "Ready" : "In Progress"}
+                    </span>
+                    <IconChevronDown
+                      size={14}
+                      className={`transition-transform duration-200 ${statusDropdownOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {statusDropdownOpen && (
+                    <div className="absolute right-0 mt-1.5 w-64 bg-white rounded-2xl border border-[#E7E2DE] shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                      <div className="px-2.5 py-1 border-b border-[#F2EDE9] mb-1.5 flex items-center justify-between">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#A5A5A5]">
+                          Draft Status
+                        </span>
+                        <span className="text-[10px] text-[#A5A5A5] font-medium">Auto-saves</span>
+                      </div>
+
+                      {/* Option 1: In Progress */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectStatus("In Progress")}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-start gap-2.5 cursor-pointer ${
+                          paperStatus !== "Ready" && paperStatus !== "Draft Ready"
+                            ? "bg-amber-50 text-amber-900 font-semibold"
+                            : "hover:bg-neutral-50 text-neutral-700 font-medium"
+                        }`}
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 mt-1 shrink-0 animate-pulse" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[13px] font-bold">In Progress</span>
+                            {paperStatus !== "Ready" && paperStatus !== "Draft Ready" && (
+                              <IconCheck size={14} className="text-amber-700" stroke={2.5} />
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#888] font-normal leading-tight mt-0.5">
+                            Still actively writing, refining, or editing
+                          </p>
+                        </div>
+                      </button>
+
+                      {/* Option 2: Ready */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectStatus("Ready")}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-start gap-2.5 cursor-pointer mt-1 ${
+                          paperStatus === "Ready" || paperStatus === "Draft Ready"
+                            ? "bg-emerald-50 text-emerald-900 font-semibold"
+                            : "hover:bg-neutral-50 text-neutral-700 font-medium"
+                        }`}
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mt-1 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[13px] font-bold">Ready</span>
+                            {(paperStatus === "Ready" || paperStatus === "Draft Ready") && (
+                              <IconCheck size={14} className="text-emerald-700" stroke={2.5} />
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#888] font-normal leading-tight mt-0.5">
+                            Draft completed &amp; ready for submission
+                          </p>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {paperStatus === "Accepted" ? (
                 <span className="h-[42px] px-5 rounded-xl bg-[#0F8A43] text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider">
                   Accepted
@@ -1937,9 +2157,23 @@ function StudioContent() {
                 <span className="text-[9.5px] uppercase tracking-[0.2em] font-extrabold text-[#C9A55D]">
                   Statement of Purpose &bull; Admissions Draft
                 </span>
-                <h2 className="text-[#3A000C] text-[18px] sm:text-[20px] font-bold tracking-tight mt-0.5 truncate max-w-[500px]">
-                  {uploadedPdfContent ? (uploadedPdfName || "Manuscript PDF") : rawTopic}
-                </h2>
+                <div className="flex items-center gap-2 group mt-0.5">
+                  <h2
+                    onClick={handleStartRename}
+                    title="Click to rename essay"
+                    className="text-[#3A000C] text-[18px] sm:text-[20px] font-bold tracking-tight truncate max-w-[500px] cursor-pointer hover:text-[#690B1B] transition-colors"
+                  >
+                    {uploadedPdfContent ? (uploadedPdfName || "Manuscript PDF") : (essayTitle || rawTopic)}
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={handleStartRename}
+                    className="p-1 rounded-md text-neutral-400 hover:text-[#690B1B] hover:bg-[#690B1B]/5 opacity-0 group-hover:opacity-100 transition-all cursor-pointer shrink-0"
+                    title="Rename essay or SOP"
+                  >
+                    <IconEdit size={16} />
+                  </button>
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 {aiScore !== null && (

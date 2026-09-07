@@ -1,5 +1,62 @@
 import { NextResponse } from 'next/server';
 
+function formatWixImageUrl(url: any): string {
+  if (!url) return '';
+  if (typeof url !== 'string') {
+    if (url.url) return formatWixImageUrl(url.url);
+    if (url.src) return formatWixImageUrl(url.src);
+    return '';
+  }
+  const trimmed = url.trim();
+  if (trimmed.startsWith('wix:image://v1/')) {
+    const match = trimmed.match(/^wix:image:\/\/v1\/([^\/#]+)/);
+    if (match && match[1]) {
+      return `https://static.wixstatic.com/media/${match[1]}`;
+    }
+  }
+  return trimmed;
+}
+
+function extractBannerAndAlt(d: any): { bannerImage: string; bannerAlt: string } {
+  if (!d) return { bannerImage: '', bannerAlt: '' };
+
+  const rawImage =
+    d.bannerImage ??
+    d.universityBanner ??
+    d['university banner'] ??
+    d['university-banner'] ??
+    d.university_banner ??
+    d.universityBanner_1 ??
+    d.banner ??
+    d.university_image ??
+    '';
+
+  let rawUrl = '';
+  let embeddedAlt = '';
+
+  if (typeof rawImage === 'string') {
+    rawUrl = rawImage;
+  } else if (rawImage && typeof rawImage === 'object') {
+    rawUrl = rawImage.url || rawImage.src || '';
+    embeddedAlt = rawImage.altText || rawImage.alt || rawImage.description || '';
+  }
+
+  const rawAlt =
+    d.bannerImageAltText ||
+    d.bannerAlt ||
+    d.universityBannerAltText ||
+    d['university banner alt'] ||
+    d.university_banner_alt_text ||
+    d.altText ||
+    embeddedAlt ||
+    (d.university_name || d.name ? `${d.university_name || d.name} Campus Banner` : 'University Campus Banner');
+
+  return {
+    bannerImage: formatWixImageUrl(rawUrl),
+    bannerAlt: typeof rawAlt === 'string' ? rawAlt.trim() : 'University Campus Banner',
+  };
+}
+
 const FALLBACK_UNIVERSITIES: Record<string, any> = {
   'massachusetts-institute-of-technology': {
     id: 'mit-us',
@@ -286,6 +343,8 @@ export async function GET(
       ? majorsRaw
       : majorsRaw.split(',').map((m: string) => m.trim()).filter(Boolean);
 
+    const { bannerImage, bannerAlt } = extractBannerAndAlt(found);
+
     const university = {
       id: found.id || found._id || slug,
       universityId: found.university_id || found.universityId || slug,
@@ -298,7 +357,8 @@ export async function GET(
       livingCosts: found.livingCosts || '$1,800/mo',
       acceptanceRate: found.acceptanceRate || '25%',
       website: found.official_website || found.website || '',
-      bannerAlt: found.bannerImageAltText || found.name || '',
+      bannerImage,
+      bannerAlt,
       popularMajors: majorsArray,
       slug,
       avgGpa: found.avgGpa ?? 3.7,
