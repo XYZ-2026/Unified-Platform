@@ -16,6 +16,15 @@ import {
   ExternalLink,
   ShieldCheck,
   Zap,
+  Clock,
+  FileCheck2,
+  BookOpen,
+  Award,
+  Layers,
+  Landmark,
+  CheckCircle2,
+  Building2,
+  TrendingUp,
 } from 'lucide-react';
 import { COUNTRY_GUIDES, CountryGuideData } from '@/data/countryGuides';
 import { useAuth } from '@/context/AuthContext';
@@ -166,26 +175,6 @@ export default function CountryGuidesHubPage() {
   const { user } = useAuth();
   const authTarget = user ? '/dashboard' : '/login';
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRegion, setSelectedRegion] = useState('ALL');
-
-  // Filtered countries for the dropdown / search
-  const filteredCountries = useMemo(() => {
-    const q = searchTerm.toLowerCase().trim();
-    return ALL_50_COUNTRIES.filter((c) => {
-      const matchSearch =
-        !q ||
-        c.name.toLowerCase().includes(q) ||
-        c.slug.toLowerCase().includes(q) ||
-        c.region.toLowerCase().includes(q);
-
-      const matchRegion =
-        selectedRegion === 'ALL' || c.region === selectedRegion;
-
-      return matchSearch && matchRegion;
-    });
-  }, [searchTerm, selectedRegion]);
-
   const featuredGuides = useMemo(() => {
     return ALL_50_COUNTRIES.filter((c) => c.featured).map((entry) => {
       const guideData: CountryGuideData =
@@ -237,7 +226,7 @@ export default function CountryGuidesHubPage() {
           <div className="flex items-center gap-3">
             <Link
               href={authTarget}
-              className="h-[38px] px-5 rounded-full bg-[#690B1B] text-white text-[12.5px] font-bold hover:bg-[#7A1022] transition-all shadow-xs flex items-center gap-1.5 active:scale-95"
+              className="h-[38px] px-5 rounded-full bg-[#690B1B] text-white text-[12.5px] font-bold hover:bg-[#7A1022] transition-all shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
             >
               <span>{user ? 'Dashboard' : 'Get Started'}</span>
               <ArrowRight size={13} />
@@ -251,7 +240,7 @@ export default function CountryGuidesHubPage() {
          ═══════════════════════════════════════════════════════════ */}
       <main className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12 space-y-10 sm:space-y-14 flex-1 w-full">
 
-        {/* ─── HERO CONTAINER CARD ─────────────────────────────── */}
+        {/* ─── 1. HERO BANNER CONTAINER ─────────────────────────── */}
         <header className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[24px] p-6 sm:p-10 text-white shadow-sm border border-white/10 relative overflow-hidden space-y-6">
           <div className="absolute right-0 top-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
           <div className="absolute left-1/2 bottom-0 w-60 h-60 bg-white/3 rounded-full blur-2xl -mb-32 pointer-events-none" />
@@ -334,7 +323,7 @@ export default function CountryGuidesHubPage() {
           </div>
         </header>
 
-        {/* ─── 6 FEATURED COUNTRY CARDS SECTION ────────────────── */}
+        {/* ─── 2. 6 FEATURED COUNTRY CARDS CONTAINER ───────────── */}
         <section className="space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-[20px] sm:text-[24px] font-extrabold tracking-[-0.02em] text-[#111]">
@@ -457,7 +446,143 @@ export default function CountryGuidesHubPage() {
           </div>
         </section>
 
-        {/* ─── SIDE-BY-SIDE KEY METRICS COMPARISON CONTAINER ─── */}
+        {/* ─── 3. GLOBAL INTAKE SEASONS CONTAINER ──────────────── */}
+        <section className="bg-white border border-[#E7E2DE] rounded-[20px] p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-[#F0EBE6] pb-3">
+            <div>
+              <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[#111]">
+                Global Admissions Calendar
+              </h2>
+              <p className="text-[12px] text-[#777] mt-0.5">
+                Key intake windows &amp; application timelines across top countries
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[16px] p-4.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#690B1B] bg-[#FAF0F2] px-2.5 py-0.5 rounded-full">
+                  Primary Intake
+                </span>
+                <Clock size={16} className="text-[#690B1B]" />
+              </div>
+              <div>
+                <h3 className="text-[16px] font-bold text-[#111]">Fall Intake</h3>
+                <div className="text-[12px] font-semibold text-[#666]">August – October</div>
+              </div>
+              <p className="text-[12px] text-[#555] leading-relaxed">
+                Largest admission cycle with 100% course availability and highest departmental scholarship quotas.
+              </p>
+              <div className="text-[11px] font-bold text-[#111] pt-1 border-t border-[#E7E2DE]/60 flex justify-between">
+                <span className="text-[#888]">Apply by:</span>
+                <span className="text-[#690B1B]">Nov – Feb (Previous Year)</span>
+              </div>
+            </div>
+
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[16px] p-4.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#16a34a] bg-[#F0FFF4] px-2.5 py-0.5 rounded-full">
+                  Secondary Intake
+                </span>
+                <Clock size={16} className="text-[#16a34a]" />
+              </div>
+              <div>
+                <h3 className="text-[16px] font-bold text-[#111]">Spring Intake</h3>
+                <div className="text-[12px] font-semibold text-[#666]">January – March</div>
+              </div>
+              <p className="text-[12px] text-[#555] leading-relaxed">
+                Ideal for students needing extra time for exams, score improvements, or financial arrangements.
+              </p>
+              <div className="text-[11px] font-bold text-[#111] pt-1 border-t border-[#E7E2DE]/60 flex justify-between">
+                <span className="text-[#888]">Apply by:</span>
+                <span className="text-[#16a34a]">June – October</span>
+              </div>
+            </div>
+
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[16px] p-4.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E731A] bg-[#FFF8EB] px-2.5 py-0.5 rounded-full">
+                  Regional Intake
+                </span>
+                <Clock size={16} className="text-[#9E731A]" />
+              </div>
+              <div>
+                <h3 className="text-[16px] font-bold text-[#111]">Summer Intake</h3>
+                <div className="text-[12px] font-semibold text-[#666]">May – July</div>
+              </div>
+              <p className="text-[12px] text-[#555] leading-relaxed">
+                Primary cycle for Australia &amp; New Zealand (Semester 2), plus select European &amp; Canadian diplomas.
+              </p>
+              <div className="text-[11px] font-bold text-[#111] pt-1 border-t border-[#E7E2DE]/60 flex justify-between">
+                <span className="text-[#888]">Apply by:</span>
+                <span className="text-[#9E731A]">November – February</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─── 4. PROOF OF FUNDS BENCHMARKS CONTAINER ──────────── */}
+        <section className="bg-white border border-[#E7E2DE] rounded-[20px] p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-[#F0EBE6] pb-3">
+            <div>
+              <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[#111]">
+                Proof of Living Funds by Destination
+              </h2>
+              <p className="text-[12px] text-[#777] mt-0.5">
+                Official statutory living benchmarks required for student visa approval
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[20px]">🇩🇪</span>
+                <span className="font-bold text-[14px] text-[#111]">Germany</span>
+              </div>
+              <div className="text-[18px] font-extrabold text-[#690B1B]">€11,208 / yr</div>
+              <div className="text-[11.5px] text-[#555] leading-snug">
+                Held in certified Blocked Account (Sperrkonto) releasing €934/mo.
+              </div>
+            </div>
+
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[20px]">🇨🇦</span>
+                <span className="font-bold text-[14px] text-[#111]">Canada</span>
+              </div>
+              <div className="text-[18px] font-extrabold text-[#690B1B]">CAD $20,635 / yr</div>
+              <div className="text-[11.5px] text-[#555] leading-snug">
+                Deposited into Guaranteed Investment Certificate (GIC) + 1st yr tuition.
+              </div>
+            </div>
+
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[20px]">🇬🇧</span>
+                <span className="font-bold text-[14px] text-[#111]">UK</span>
+              </div>
+              <div className="text-[18px] font-extrabold text-[#690B1B]">£9,207–£12,006</div>
+              <div className="text-[11.5px] text-[#555] leading-snug">
+                9 months living funds held unbroken in bank account for 28 consecutive days.
+              </div>
+            </div>
+
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[20px]">🇦🇺</span>
+                <span className="font-bold text-[14px] text-[#111]">Australia</span>
+              </div>
+              <div className="text-[18px] font-extrabold text-[#690B1B]">AUD $29,710 / yr</div>
+              <div className="text-[11.5px] text-[#555] leading-snug">
+                Official living cost requirement + travel allowance + 1st yr tuition balance.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─── 5. SIDE-BY-SIDE KEY METRICS COMPARISON CONTAINER ─── */}
         <section className="bg-white border border-[#E7E2DE] rounded-[20px] p-5 sm:p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-[#F0EBE6] pb-3">
             <div>
@@ -509,7 +634,54 @@ export default function CountryGuidesHubPage() {
           </div>
         </section>
 
-        {/* ─── 4 DECISION PILLARS CONTAINER ───────────────────── */}
+        {/* ─── 6. APPLICATION DOCUMENT CHECKLIST CONTAINER ─────── */}
+        <section className="bg-white border border-[#E7E2DE] rounded-[20px] p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-[#F0EBE6] pb-3">
+            <div>
+              <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[#111]">
+                Standard Application Checklist
+              </h2>
+              <p className="text-[12px] text-[#777] mt-0.5">
+                Core documents required across almost all international university applications
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-center">
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-3.5 space-y-2 flex flex-col items-center justify-center">
+              <span className="text-[24px]">🛂</span>
+              <div className="text-[12px] font-bold text-[#111]">Valid Passport</div>
+              <div className="text-[10px] text-[#888]">6+ mos validity</div>
+            </div>
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-3.5 space-y-2 flex flex-col items-center justify-center">
+              <span className="text-[24px]">📜</span>
+              <div className="text-[12px] font-bold text-[#111]">Transcripts</div>
+              <div className="text-[10px] text-[#888]">Official records</div>
+            </div>
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-3.5 space-y-2 flex flex-col items-center justify-center">
+              <span className="text-[24px]">✍️</span>
+              <div className="text-[12px] font-bold text-[#111]">Statement (SOP)</div>
+              <div className="text-[10px] text-[#888]">Academic essay</div>
+            </div>
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-3.5 space-y-2 flex flex-col items-center justify-center">
+              <span className="text-[24px]">✉️</span>
+              <div className="text-[12px] font-bold text-[#111]">2–3 LORs</div>
+              <div className="text-[10px] text-[#888]">Academic/Work</div>
+            </div>
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-3.5 space-y-2 flex flex-col items-center justify-center">
+              <span className="text-[24px]">🗣️</span>
+              <div className="text-[12px] font-bold text-[#111]">English Scores</div>
+              <div className="text-[10px] text-[#888]">IELTS / PTE / DET</div>
+            </div>
+            <div className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-3.5 space-y-2 flex flex-col items-center justify-center">
+              <span className="text-[24px]">💼</span>
+              <div className="text-[12px] font-bold text-[#111]">Updated CV</div>
+              <div className="text-[10px] text-[#888]">1–2 pages</div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─── 7. 4 DECISION PILLARS CONTAINER ─────────────────── */}
         <section className="bg-white border border-[#E7E2DE] rounded-[20px] p-5 sm:p-6 shadow-xs space-y-4">
           <div>
             <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[#111]">
@@ -567,7 +739,7 @@ export default function CountryGuidesHubPage() {
           </div>
         </section>
 
-        {/* ─── MINIMAL BOTTOM CTA BANNER ──────────────────────── */}
+        {/* ─── 8. MINIMAL BOTTOM CTA BANNER ────────────────────── */}
         <section className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[20px] p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-5 shadow-xs">
           <div className="space-y-1.5 text-center sm:text-left">
             <h2 className="text-[20px] sm:text-[22px] font-bold leading-tight">
@@ -589,7 +761,7 @@ export default function CountryGuidesHubPage() {
       </main>
 
       {/* ═══════════════════════════════════════════════════════════
-         8. CLEAN FOOTER
+         3. CLEAN FOOTER
          ═══════════════════════════════════════════════════════════ */}
       <footer className="border-t border-[#E7E2DE] bg-white py-6 px-4 sm:px-8 mt-auto">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-[#777]">
