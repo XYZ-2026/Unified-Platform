@@ -247,61 +247,23 @@ export default function CountryGuidesHubPage() {
           <div className="absolute left-1/3 bottom-0 w-80 h-80 bg-[#8B1227]/30 rounded-full blur-3xl -mb-32 pointer-events-none" />
           <div className="absolute left-0 top-1/2 w-64 h-64 bg-black/20 rounded-full blur-2xl -ml-20 pointer-events-none" />
 
-          {/* Top Row: Eyebrow + Heading + Quick Jump */}
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 relative z-10">
-            <div className="space-y-4 max-w-[660px]">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-[#C9A55D]/40 text-[#F5DEB3] text-[11.5px] font-bold shadow-xs">
-                <Sparkles size={14} className="text-[#C9A55D]" />
-                <span className="tracking-wide">50 GLOBAL STUDY DESTINATIONS · 2026 EDITION</span>
-              </div>
-
-              <h1 className="text-[32px] sm:text-[46px] lg:text-[50px] font-extrabold tracking-[-0.03em] leading-[1.08]">
-                Explore Top Global <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFF0D4] via-[#F0CB7E] to-[#C9A55D]">
-                  Study Destinations
-                </span>
-              </h1>
-
-              <p className="text-[14px] sm:text-[15.5px] text-white/85 leading-relaxed max-w-[580px]">
-                Compare verified tuition fees, living costs, stay-back work permits, and admission benchmarks across 50 top countries.
-              </p>
+          {/* Top Row: Eyebrow + Heading */}
+          <div className="space-y-4 max-w-[760px] relative z-10">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-[#C9A55D]/40 text-[#F5DEB3] text-[11.5px] font-bold shadow-xs">
+              <Sparkles size={14} className="text-[#C9A55D]" />
+              <span className="tracking-wide">50 GLOBAL STUDY DESTINATIONS · 2026 EDITION</span>
             </div>
 
-            {/* Quick 50 Countries Glassmorphic Navigator Card */}
-            <div className="w-full lg:w-[320px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-[20px] p-5 space-y-3 shrink-0 shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
-              <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#F0CB7E] flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <Globe size={14} />
-                  <span>Quick Destination Jump</span>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-white/10 text-[9.5px] text-white/90">50 Countries</span>
-              </div>
+            <h1 className="text-[32px] sm:text-[46px] lg:text-[52px] font-extrabold tracking-[-0.03em] leading-[1.08]">
+              Explore Top Global <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFF0D4] via-[#F0CB7E] to-[#C9A55D]">
+                Study Destinations
+              </span>
+            </h1>
 
-              <div className="relative">
-                <select
-                  onChange={handleDropdownSelect}
-                  defaultValue=""
-                  className="w-full h-[44px] px-3.5 pr-10 rounded-[12px] bg-[#2A0309]/80 border border-[#C9A55D]/40 text-[13px] font-semibold text-white outline-none cursor-pointer appearance-none shadow-inner hover:border-[#C9A55D] transition-colors"
-                >
-                  <option value="" disabled className="bg-[#2A0309] text-white/70">
-                    ⚡ Select any country...
-                  </option>
-                  {ALL_50_COUNTRIES.map((c) => (
-                    <option key={c.slug} value={c.slug} className="bg-[#2A0309] text-white py-1">
-                      {c.flag} {c.name} ({c.region})
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  size={16}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#F0CB7E] pointer-events-none"
-                />
-              </div>
-
-              <div className="text-[11px] text-white/60 text-center">
-                1-click access to complete visa &amp; tuition guides
-              </div>
-            </div>
+            <p className="text-[14px] sm:text-[16px] text-white/85 leading-relaxed max-w-[620px]">
+              Compare verified tuition fees, living costs, stay-back work permits, and admission benchmarks across 50 top countries.
+            </p>
           </div>
 
           {/* 4 Enhanced Glassmorphic Metric Stat Cards */}
