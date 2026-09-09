@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { searchUniversities } from '@/lib/search/universitySearchEngine';
 
 const FALLBACK_UNIVERSITIES = [
   // UNITED STATES
@@ -742,23 +743,12 @@ export async function GET(request: Request) {
       }));
     }
 
-    // Apply instantaneous server-side filtering
-    let filtered = parsedUniversities;
-
-    if (search) {
-      filtered = filtered.filter((u) =>
-        u.name.toLowerCase().includes(search) ||
-        u.state.toLowerCase().includes(search) ||
-        u.country.toLowerCase().includes(search) ||
-        (u.allMajors && u.allMajors.some((m: string) => m.toLowerCase().includes(search)))
-      );
-    }
-
-    if (country && country !== 'ALL') {
-      filtered = filtered.filter((u) =>
-        u.countryCode === country || u.country.toLowerCase().includes(country.toLowerCase())
-      );
-    }
+    // Apply intelligent fuzzy search, alias resolution & ranking
+    const searchResults = searchUniversities(parsedUniversities, {
+      search,
+      country,
+    });
+    const filtered = searchResults.map(r => r.item);
 
     // Paginate
     const totalCount = filtered.length;

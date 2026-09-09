@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import {
   Search,
   GraduationCap,
   MapPin,
-  DollarSign,
   ArrowRight,
   Sparkles,
   ExternalLink,
@@ -14,32 +13,17 @@ import {
   ChevronLeft,
   ChevronRight,
   Globe,
-  BookOpen,
-  TrendingUp,
-  Building2,
-  Award
+  X,
 } from 'lucide-react';
+import { searchUniversities, UniversitySearchRecord, SearchResult } from '@/lib/search/universitySearchEngine';
 
-interface University {
-  id: string;
+interface University extends UniversitySearchRecord {
   universityId: string;
-  name: string;
-  country: string;
-  countryCode: string;
-  state: string;
-  qsRanking: string;
-  tuition: string;
-  livingCosts: string;
-  acceptanceRate: string;
-  website: string;
   bannerImage?: string;
   bannerAlt: string;
   popularMajors: string[];
   slug: string;
 }
-
-// Client-side cache for instant search and pagination
-const clientUniCache = new Map<string, { universities: University[]; totalCount: number; totalPages: number }>();
 
 // Country flag emoji mapping
 function getCountryFlag(code: string): string {
@@ -65,83 +49,82 @@ function getUniversityEmoji(name: string): string {
 }
 
 export default function UniversityFinderPage() {
-  const [universities, setUniversities] = useState<University[]>([]);
+  const [allUniversities, setAllUniversities] = useState<University[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const ITEMS_PER_PAGE = 30;
 
-  // Instant snappy debounce for search input
+  // Keyboard shortcut listener (/ to search, Esc to clear)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      setCurrentPage(1); // Reset to page 1 on new search
-    }, 120);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && document.activeElement !== searchInputRef.current && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === 'Escape' && document.activeElement === searchInputRef.current) {
+        setSearchTerm('');
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
-  // Reset page on country change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedCountry]);
-
-  // Fetch universities from Wix CMS with instant cache
+  // Fetch all universities once on mount for instant real-time indexing
   const fetchUniversities = useCallback(async () => {
-    const cacheKey = `${currentPage}-${debouncedSearch}-${selectedCountry}`;
-    
-    // Serve from instant client cache if available
-    if (clientUniCache.has(cacheKey)) {
-      const cached = clientUniCache.get(cacheKey)!;
-      setUniversities(cached.universities);
-      setTotalCount(cached.totalCount);
-      setTotalPages(cached.totalPages);
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
-      });
-      if (debouncedSearch) params.set('search', debouncedSearch);
-      if (selectedCountry !== 'ALL') params.set('country', selectedCountry);
-
-      const res = await fetch(`/api/wix/universities?${params.toString()}`);
+      const res = await fetch('/api/wix/universities?limit=200');
       const data = await res.json();
 
       if (data.success && Array.isArray(data.universities)) {
-        setUniversities(data.universities);
-        setTotalCount(data.totalCount || 0);
-        setTotalPages(data.totalPages || 1);
-        clientUniCache.set(cacheKey, {
-          universities: data.universities,
-          totalCount: data.totalCount || 0,
-          totalPages: data.totalPages || 1,
-        });
+        setAllUniversities(data.universities);
       } else {
-        setUniversities([]);
-        setTotalCount(0);
+        setAllUniversities([]);
       }
     } catch (err) {
-      console.warn('Error fetching universities:', err);
-      setUniversities([]);
+      console.warn('Error fetching universities catalog:', err);
+      setAllUniversities([]);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, debouncedSearch, selectedCountry]);
+  }, []);
 
   useEffect(() => {
     fetchUniversities();
   }, [fetchUniversities]);
 
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+  // Instant real-time fuzzy search & relevance scoring (0ms execution time)
+  const searchResults: SearchResult<University>[] = useMemo(() => {
+    return searchUniversities(allUniversities, {
+      search: searchTerm,
+      country: selectedCountry,
+      minScoreThreshold: 45,
+    });
+  }, [allUniversities, searchTerm, selectedCountry]);
+
+  // Reset to page 1 whenever search query or country changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCountry]);
+
+  // Pagination slice
+  const totalCount = searchResults.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
+  const startIndex = totalCount === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1;
   const endIndex = Math.min(currentPage * ITEMS_PER_PAGE, totalCount);
+
+  const paginatedResults = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return searchResults.slice(start, start + ITEMS_PER_PAGE);
+  }, [searchResults, currentPage]);
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    searchInputRef.current?.focus();
+  };
 
   return (
     <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
@@ -158,7 +141,8 @@ export default function UniversityFinderPage() {
 
           <button
             onClick={fetchUniversities}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/90 text-[12px] font-semibold transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/90 text-[12px] font-semibold transition-all cursor-pointer shadow-2xs active:scale-95"
+            title="Refresh database"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
             <span>Refresh Catalog</span>
@@ -169,22 +153,37 @@ export default function UniversityFinderPage() {
           University Finder
         </h2>
         <p className="text-[14px] text-white/80 max-w-[700px] relative z-10 leading-relaxed">
-          Explore {totalCount > 0 ? `${totalCount.toLocaleString()}+` : ''} verified universities synced directly from our database. Search by name, state, or major to find your perfect fit.
+          Explore {allUniversities.length > 0 ? `${allUniversities.length.toLocaleString()}+` : ''} verified universities synced directly from our database. Search by acronym (MIT, CMU), abbreviations, typos, state, or major to find your perfect fit.
         </p>
       </div>
 
       {/* SEARCH AND FILTERS TOOLBAR */}
       <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-5 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999]" size={18} />
+          <div className="relative flex-1 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999] group-focus-within:text-[#690B1B] transition-colors" size={18} />
             <input
+              ref={searchInputRef}
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by university name, state, or major..."
-              className="w-full h-[48px] pl-11 pr-4 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[14px] text-[#111] placeholder:text-[#999] outline-none focus:border-[#690B1B] transition-all"
+              placeholder="Search by name, acronym (e.g. MIT, CMU, UCLA), major, state, or typo..."
+              className="w-full h-[48px] pl-11 pr-24 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[14px] text-[#111] placeholder:text-[#999] outline-none focus:border-[#690B1B] focus:ring-2 focus:ring-[#690B1B]/10 transition-all"
             />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+              {searchTerm && (
+                <button
+                  onClick={handleClearSearch}
+                  className="p-1 rounded-full text-[#999] hover:text-[#111] hover:bg-[#F0EBE6] transition-all cursor-pointer"
+                  title="Clear search (Esc)"
+                >
+                  <X size={16} />
+                </button>
+              )}
+              <span className="hidden md:inline-block px-2 py-0.5 rounded-md bg-[#F0EBE6] text-[#888] text-[11px] font-semibold border border-[#E7E2DE]">
+                /
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
@@ -199,7 +198,7 @@ export default function UniversityFinderPage() {
               <button
                 key={item.code}
                 onClick={() => setSelectedCountry(item.code)}
-                className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 active:scale-95 ${
                   selectedCountry === item.code
                     ? 'bg-[#690B1B] text-white shadow-xs'
                     : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
@@ -212,16 +211,20 @@ export default function UniversityFinderPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-t border-[#F0EBE6] pt-3">
-          <span className="text-[12px] text-[#888] font-medium flex items-center gap-1.5">
+        <div className="flex items-center justify-between border-t border-[#F0EBE6] pt-3 flex-wrap gap-2">
+          <div className="flex items-center gap-2 text-[12px] text-[#888] font-medium">
             <span className="w-2 h-2 rounded-full bg-[#16a34a]" />
             <span>
-              {loading
-                ? 'Loading universities...'
-                : `${totalCount.toLocaleString()} universities found`}
+              {loading ? (
+                'Loading universities...'
+              ) : (
+                <>
+                  <strong className="text-[#111]">{totalCount.toLocaleString()}</strong> universities found
+                </>
+              )}
             </span>
-          </span>
-          {totalCount > 0 && (
+          </div>
+          {totalCount > 0 && !loading && (
             <span className="text-[12px] text-[#888] font-medium">
               Showing {startIndex}–{endIndex} of {totalCount.toLocaleString()}
             </span>
@@ -249,29 +252,32 @@ export default function UniversityFinderPage() {
             </div>
           ))}
         </div>
-      ) : universities.length === 0 ? (
-        <div className="bg-white border border-[#E7E2DE] rounded-[24px] p-12 text-center space-y-4">
+      ) : paginatedResults.length === 0 ? (
+        <div className="bg-white border border-[#E7E2DE] rounded-[24px] p-12 text-center space-y-4 shadow-xs">
           <div className="w-16 h-16 rounded-full bg-[#F7F0F1] text-[#690B1B] mx-auto flex items-center justify-center">
             <GraduationCap size={28} />
           </div>
           <h3 className="text-[20px] font-bold text-[#111]">
-            {searchTerm ? `No universities found for "${searchTerm}"` : 'No universities found'}
+            {searchTerm ? `No universities matched "${searchTerm}"` : 'No universities found'}
           </h3>
           <p className="text-[14px] text-[#777] max-w-[460px] mx-auto leading-relaxed">
-            Try changing your search terms or clearing your filters.
+            Try checking for alternate keywords, state names, or clearing your country filter.
           </p>
-          {searchTerm && (
+          {(searchTerm || selectedCountry !== 'ALL') && (
             <button
-              onClick={() => { setSearchTerm(''); setSelectedCountry('ALL'); }}
-              className="px-5 py-2 rounded-full bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#7A1022] transition-all cursor-pointer"
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCountry('ALL');
+              }}
+              className="px-5 py-2.5 rounded-full bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#7A1022] transition-all cursor-pointer shadow-xs active:scale-95"
             >
-              Clear Search
+              Reset Search & Filters
             </button>
           )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {universities.map((u) => (
+          {paginatedResults.map(({ item: u, matchType, matchedAlias, matchedField }) => (
             <div
               key={u.id}
               className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs hover:border-[#690B1B] hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
@@ -289,7 +295,7 @@ export default function UniversityFinderPage() {
                     <div className="flex items-center gap-1.5 mt-1 text-[12px] text-[#777]">
                       <MapPin size={12} className="text-[#999] shrink-0" />
                       <span className="truncate">{u.state ? `${u.state}, ` : ''}{u.country}</span>
-                      <span className="shrink-0">{getCountryFlag(u.countryCode)}</span>
+                      <span className="shrink-0">{getCountryFlag(u.countryCode || '')}</span>
                     </div>
                   </div>
                 </div>
@@ -299,21 +305,21 @@ export default function UniversityFinderPage() {
                   <div className="text-center">
                     <div className="text-[10px] text-[#999] font-semibold uppercase tracking-wider">QS Rank</div>
                     <div className="text-[13px] font-bold text-[#690B1B] mt-0.5">
-                      {u.qsRanking === 'Unranked' ? '—' : u.qsRanking}
+                      {u.qsRanking === 'Unranked' || !u.qsRanking ? '—' : u.qsRanking}
                     </div>
                   </div>
                   <div className="text-center border-x border-[#E7E2DE]">
                     <div className="text-[10px] text-[#999] font-semibold uppercase tracking-wider">Tuition</div>
-                    <div className="text-[13px] font-bold text-[#111] mt-0.5 truncate px-1">{u.tuition}</div>
+                    <div className="text-[13px] font-bold text-[#111] mt-0.5 truncate px-1">{u.tuition || 'N/A'}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-[10px] text-[#999] font-semibold uppercase tracking-wider">Accept</div>
-                    <div className="text-[13px] font-bold text-[#16a34a] mt-0.5">{u.acceptanceRate}</div>
+                    <div className="text-[13px] font-bold text-[#16a34a] mt-0.5">{u.acceptanceRate || 'N/A'}</div>
                   </div>
                 </div>
 
                 {/* Major Tags */}
-                {u.popularMajors.length > 0 && (
+                {u.popularMajors && u.popularMajors.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {u.popularMajors.slice(0, 4).map((tag) => (
                       <span
@@ -352,7 +358,7 @@ export default function UniversityFinderPage() {
 
                 <Link
                   href={`/dashboard/schools/${u.slug}`}
-                  className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer group-hover:scale-[1.02]"
+                  className="px-4 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer group-hover:scale-[1.02] active:scale-95"
                 >
                   <span>View University</span>
                   <ArrowRight size={13} />
@@ -369,7 +375,7 @@ export default function UniversityFinderPage() {
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
               currentPage === 1
                 ? 'bg-[#F7F5F3] text-[#CCC] cursor-not-allowed'
                 : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
@@ -396,7 +402,7 @@ export default function UniversityFinderPage() {
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`w-10 h-10 rounded-[10px] text-[13px] font-bold transition-all cursor-pointer ${
+                  className={`w-10 h-10 rounded-[10px] text-[13px] font-bold transition-all cursor-pointer active:scale-95 ${
                     currentPage === pageNum
                       ? 'bg-[#690B1B] text-white shadow-xs'
                       : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
@@ -411,7 +417,7 @@ export default function UniversityFinderPage() {
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
               currentPage === totalPages
                 ? 'bg-[#F7F5F3] text-[#CCC] cursor-not-allowed'
                 : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
@@ -425,3 +431,4 @@ export default function UniversityFinderPage() {
     </div>
   );
 }
+
