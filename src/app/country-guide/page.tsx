@@ -748,22 +748,113 @@ export default function CountryGuidesHubPage() {
       </main>
 
       {/* ═══════════════════════════════════════════════════════════
-         3. CLEAN FOOTER
+         3. RICH PLATFORM FOOTER
          ═══════════════════════════════════════════════════════════ */}
-      <footer className="border-t border-[#E7E2DE] bg-white py-6 px-4 sm:px-8 mt-auto">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-[#777]">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-[#111]">Abroad Simplified</span>
-            <span>•</span>
-            <span>© 2026 All rights reserved.</span>
+      <footer className="bg-[#030303] px-4 sm:px-6 md:px-10 lg:px-16 pt-12 sm:pt-16 md:pt-20 pb-8 text-left text-white mt-14">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-14">
+            {/* BRAND */}
+            <div className="col-span-2 sm:col-span-2 lg:col-span-1 max-w-[300px]">
+              <Link href="/" className="flex items-center gap-3 text-white hover:opacity-90 transition-opacity">
+                <div className="w-[44px] h-[44px] rounded-[13px] overflow-hidden shadow-[0_6px_20px_rgba(105,11,27,0.3)] shrink-0">
+                  <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
+                </div>
+                <span className="text-[20px] font-bold tracking-[-0.03em]">Abroad Simplified</span>
+              </Link>
+              <p className="mt-5 text-[#5E6168] text-[14px] leading-relaxed">
+                Think Beyond Your Boundaries. Your ultimate AI-powered study abroad platform.
+              </p>
+            </div>
+
+            {/* STUDY ABROAD GUIDES */}
+            <div>
+              <div className="text-[#C8A15D] text-[11px] tracking-[0.22em] uppercase font-bold mb-5">
+                Country Guides
+              </div>
+              <div className="space-y-3.5">
+                {[
+                  { label: "Study in USA 🇺🇸", href: "/country-guide/usa" },
+                  { label: "Study in UK 🇬🇧", href: "/country-guide/uk" },
+                  { label: "Study in Canada 🇨🇦", href: "/country-guide/canada" },
+                  { label: "Study in Germany 🇩🇪", href: "/country-guide/germany" },
+                  { label: "Study in Australia 🇦🇺", href: "/country-guide/australia" },
+                  { label: "Study in Ireland 🇮🇪", href: "/country-guide/ireland" },
+                ].map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="block text-[#6B6F78] text-[14px] hover:text-white transition cursor-pointer"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* PLATFORM TOOLS */}
+            <div>
+              <div className="text-[#C8A15D] text-[11px] tracking-[0.22em] uppercase font-bold mb-5">
+                Platform Tools
+              </div>
+              <div className="space-y-3.5">
+                {[
+                  { label: "University Finder", href: "/dashboard/schools" },
+                  { label: "AI Chance-Me Predictor", href: "/dashboard/chance-me" },
+                  { label: "SOP & Essay Studio", href: "/dashboard/essays" },
+                  { label: "Application Tracker", href: "/dashboard/tracker" },
+                  { label: "Country Directory", href: "/country-guide" },
+                ].map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="block text-[#6B6F78] text-[14px] hover:text-white transition cursor-pointer"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* COMPANY & LEGAL */}
+            <div>
+              <div className="text-[#C8A15D] text-[11px] tracking-[0.22em] uppercase font-bold mb-5">
+                Company &amp; Legal
+              </div>
+              <div className="space-y-3.5">
+                {[
+                  { label: "Home", href: "/" },
+                  { label: "Privacy Policy", href: "/privacy" },
+                  { label: "Terms of Service", href: "/terms" },
+                  { label: "Student Login", href: "/login" },
+                ].map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="block text-[#6B6F78] text-[14px] hover:text-white transition cursor-pointer"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-4 font-medium">
-            <Link href="/country-guide" className="hover:text-[#690B1B] transition-colors">
-              Country Guides
-            </Link>
-            <Link href="/dashboard/schools" className="hover:text-[#690B1B] transition-colors">
-              University Finder
-            </Link>
+
+          {/* DIVIDER */}
+          <div className="w-full h-px bg-white/10 mt-14 md:mt-16 mb-6" />
+
+          {/* BOTTOM COPYRIGHT */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-[#5E6168] text-[13px] text-center md:text-left">
+              © 2026 Abroad Simplified. All rights reserved.
+            </div>
+            <div className="flex items-center gap-6 text-[#5E6168] text-[13px]">
+              <Link href="/privacy" className="hover:text-white transition cursor-pointer">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="hover:text-white transition cursor-pointer">
+                Terms of Service
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
