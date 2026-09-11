@@ -36,6 +36,9 @@ interface University {
   bannerAlt: string;
   popularMajors: string[];
   slug: string;
+  careerOutcomes?: string;
+  expectedSalary?: string;
+  roi?: string;
 }
 
 // Client-side cache for instant search and pagination
@@ -326,6 +329,23 @@ export default function UniversityFinderPage() {
                     {u.popularMajors.length > 4 && (
                       <span className="text-[10px] text-[#999] px-1 py-0.5 font-medium">
                         +{u.popularMajors.length - 4} more
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Value & ROI Badges */}
+                {(u.roi || u.expectedSalary) && (
+                  <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                    {u.roi && (
+                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded-full shadow-2xs">
+                        <TrendingUp size={11} className="shrink-0" />
+                        <span>ROI: {u.roi.split(' ')[0]}</span>
+                      </span>
+                    )}
+                    {u.expectedSalary && (
+                      <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-[#854D0E] bg-[#FEF9C3] border border-[#FEF08A] px-2 py-0.5 rounded-full truncate max-w-[200px]" title={u.expectedSalary}>
+                        <span>Exp. Salary: {u.expectedSalary.split('(')[0].trim()}</span>
                       </span>
                     )}
                   </div>

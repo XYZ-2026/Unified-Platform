@@ -746,6 +746,10 @@ async function fetchAllUniversitiesFromWix(wixApiKey: string, wixSiteId: string)
           allMajors: majorsArray,
           slug,
           type: 'Public',
+          careerOutcomes: d.careerOutcomes || d.career_outcomes || '',
+          expectedSalary: d.expectedSalary || d.expected_salary || '',
+          roi: d.roi || '',
+          scholarships: d.scholarships || '',
         };
       });
     }
