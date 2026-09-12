@@ -1,13 +1,28 @@
 'use client';
 
-import React, { use, useState, useEffect } from 'react';
+import React, { use, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { COUNTRY_GUIDES, CountryGuideData } from '@/data/countryGuides';
 import { useAuth } from '@/context/AuthContext';
+import {
+  FileText,
+  ShieldCheck,
+  CreditCard,
+  ArrowRight,
+  Globe,
+  AlertTriangle,
+  Clock,
+  Sparkles,
+  CheckCircle2,
+  Briefcase,
+  HelpCircle,
+  Award,
+  ChevronDown,
+} from 'lucide-react';
 
 /* ══════════════════════════════════════════════════════════════
-   BADGE HELPER
+   STATUS BADGE HELPER
 ══════════════════════════════════════════════════════════════ */
 function StatusBadge({
   text,
@@ -20,38 +35,139 @@ function StatusBadge({
 
   if (lower.includes('required') && !lower.includes('usually') && !lower.includes('not')) {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-[#E8F8F0] text-[#0E7044] border border-[#C2EBD6]">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#E8F8F0] text-[#0E7044] border border-[#C2EBD6]">
         {text}
       </span>
     );
   }
   if (lower.includes('usually') || lower.includes('typical')) {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-[#FDF0EC] text-[#B83E1B] border border-[#FADCD3]">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#FDF0EC] text-[#B83E1B] border border-[#FADCD3]">
         {text}
       </span>
     );
   }
   if (lower.includes('country') || lower.includes('competitive')) {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-[#FEF7E6] text-[#9A6B06] border border-[#FCE8B2]">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#FEF7E6] text-[#9A6B06] border border-[#FCE8B2]">
         {text}
       </span>
     );
   }
   if (lower.includes('specific')) {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-[#F5EEFB] text-[#7828A8] border border-[#E6D4F5]">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#F5EEFB] text-[#7828A8] border border-[#E6D4F5]">
         {text}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-[#F1EFEA] text-[#555555] border border-[#E2DFD8]">
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#F1EFEA] text-[#555555] border border-[#E2DFD8]">
       {text}
     </span>
   );
 }
+
+/* ══════════════════════════════════════════════════════════════
+   COUNTRY SPECIFIC VISA INSIGHTS
+══════════════════════════════════════════════════════════════ */
+const COUNTRY_VISA_INSIGHTS: Record<
+  string,
+  {
+    authority: string;
+    visaName: string;
+    processingTime: string;
+    solvencyRule: string;
+    interviewType: string;
+    spousalWork: string;
+    refusalMitigation: string[];
+  }
+> = {
+  canada: {
+    authority: 'Immigration, Refugees and Citizenship Canada (IRCC)',
+    visaName: 'Study Permit + Temporary Resident Visa (TRV) / eTA',
+    processingTime: '4–8 Weeks (Online IRCC Portal)',
+    solvencyRule: 'CAD $20,635 Guaranteed Investment Certificate (GIC) + Paid 1st-Year Tuition Receipt',
+    interviewType: 'Rare (Biometrics at VAC + Panel Medical Exam mandatory)',
+    spousalWork: 'Eligible for Spousal Open Work Permit (SOWP) for Master’s & Doctoral programs',
+    refusalMitigation: [
+      'Provincial Attestation Letter (PAL) is strictly mandatory with your Letter of Acceptance (LOA).',
+      'Ensure proof of CAD $20,635 GIC is issued by a CDIC-insured authorized financial institution.',
+      'SOP must explain clear economic return in your home country after graduation.',
+      'Upfront medical exam must be completed through an authorized IRCC e-Medical panel physician.',
+    ],
+  },
+  usa: {
+    authority: 'U.S. Department of State & USCIS',
+    visaName: 'F-1 Nonimmigrant Student Visa',
+    processingTime: '2–6 Weeks (Appointment wait times vary by consulate)',
+    solvencyRule: 'Proof of 100% of Form I-20 Total Estimated Cost for Year 1 (Tuition + Living)',
+    interviewType: 'Mandatory in-person Consular Interview at US Embassy/Consulate',
+    spousalWork: 'F-2 dependents cannot work in the US',
+    refusalMitigation: [
+      'Pay the $350 SEVIS I-901 fee at least 3 business days before the embassy interview.',
+      'Clearly articulate your study plan and post-graduation intent without mentioning immigrant intent.',
+      'Maintain strong liquid financial backing with verifiable income tax returns (ITR) from sponsors.',
+      'Demonstrate ties to home country (career opportunities, family assets, academic goals).',
+    ],
+  },
+  uk: {
+    authority: 'UK Visas and Immigration (UKVI)',
+    visaName: 'UK Student Visa (Points-Based System)',
+    processingTime: '3–4 Weeks (Priority 5-day service available)',
+    solvencyRule: 'Tuition Balance + 9 Months Living Funds (£9,207–£12,006) held unbroken for 28 consecutive days',
+    interviewType: 'Credibility Interview (Randomly selected or remote video call)',
+    spousalWork: 'Dependents permitted only for postgraduate research programs (PhD/Research Master’s)',
+    refusalMitigation: [
+      'Bank statement must never drop below required threshold even for a single day during the 28-day cycle.',
+      'Ensure Confirmation of Acceptance for Studies (CAS) reference number matches passport exactly.',
+      'Pay the Immigration Health Surcharge (IHS) £776/year during online submission.',
+      'Tuberculosis (TB) certificate required from UKVI-approved medical clinic.',
+    ],
+  },
+  germany: {
+    authority: 'Federal Foreign Office & Ausländerbehörde',
+    visaName: 'National Visa Type D (Study)',
+    processingTime: '4–12 Weeks (via German Embassy or VFS Global)',
+    solvencyRule: '€11,208 Blocked Account (Sperrkonto) with a certified provider (€934/month)',
+    interviewType: 'In-person document verification & consular interview',
+    spousalWork: 'Family reunification visa possible after securing German residence permit',
+    refusalMitigation: [
+      'APS Certificate is strictly mandatory for applicants with degrees from India, China, and Vietnam.',
+      'Provide proof of statutory German student health insurance (TK, AOK, Barmer).',
+      'Letter of Motivation must detail university selection, curriculum match, and career outlook.',
+      'Ensure Blocked Account confirmation letter is issued directly in your name.',
+    ],
+  },
+  australia: {
+    authority: 'Australian Department of Home Affairs',
+    visaName: 'Student Visa (Subclass 500)',
+    processingTime: '4–8 Weeks (ImmiAccount Online Submission)',
+    solvencyRule: 'AUD $29,710/year official living benchmark + remaining 1st-year tuition + travel costs',
+    interviewType: 'Genuine Student (GS) assessment written statement (Phone interview occasional)',
+    spousalWork: 'Dependents have work rights (unlimited for Master’s/PhD candidates)',
+    refusalMitigation: [
+      'Genuine Student (GS) responses must demonstrate clear career progression and return on investment.',
+      'Purchase Overseas Student Health Cover (OSHC) for the full duration of your visa.',
+      'Electronic Confirmation of Enrolment (CoE) is mandatory before visa lodging.',
+      'Ensure education loans or liquid deposits have clear provenance and sanctioned letters.',
+    ],
+  },
+  ireland: {
+    authority: 'Immigration Service Delivery (ISD Ireland)',
+    visaName: 'Stamp 2 Study Visa (AVATS)',
+    processingTime: '4–8 Weeks (AVATS online + VFS dossier submission)',
+    solvencyRule: '€10,000 living expenses proof (6 months unbroken bank statement) + tuition receipt',
+    interviewType: 'Document verification at VFS Global',
+    spousalWork: 'Spouses cannot work unless on individual employment permits',
+    refusalMitigation: [
+      'Tuition fee payment receipt (min €6,000 or full first year) is strictly required before appointment.',
+      'Provide private student medical insurance policy covering €25,000+ medical emergencies.',
+      '6-month bank statement must show clean history without sudden unexplained bulk deposits.',
+      'Register for Irish Residence Permit (IRP) within 90 days of landing.',
+    ],
+  },
+};
 
 /* ══════════════════════════════════════════════════════════════
    PAGE COMPONENT
@@ -64,11 +180,11 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
 
   const [guide, setGuide] = useState<CountryGuideData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [docFilter, setDocFilter] = useState<'all' | 'university' | 'visa'>('all');
 
   const countrySlug = slug?.toLowerCase() || 'usa';
 
   useEffect(() => {
-    // Attempt to fetch from API route (which queries CMS with local fallback)
     async function loadGuide() {
       try {
         const res = await fetch(`/api/wix/country-guide?slug=${countrySlug}`);
@@ -120,6 +236,22 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
     { slug: 'malaysia', name: 'Malaysia', flag: '🇲🇾' },
   ];
 
+  const visaInsights =
+    COUNTRY_VISA_INSIGHTS[countrySlug] || {
+      authority: `${activeGuide.countryName} Immigration Authority`,
+      visaName: activeGuide.quickFacts.visa || `${activeGuide.countryName} Student Visa`,
+      processingTime: '4–8 Weeks (Consular processing)',
+      solvencyRule: activeGuide.costOfStudy.proofOfFunds || 'Demonstrated living costs + first-year tuition',
+      interviewType: 'Consular interview or VFS biometrics collection',
+      spousalWork: 'Subject to local immigration regulations',
+      refusalMitigation: [
+        `Ensure unconditional letter of acceptance from an accredited ${activeGuide.countryName} institution.`,
+        'Maintain clean, verifiable financial bank statements covering full first-year costs.',
+        'Submit compelling Statement of Purpose outlining genuine academic intent.',
+        'Provide all certified academic transcripts and language certificates.',
+      ],
+    };
+
   return (
     <div className="bg-[#FAF8F5] text-[#111111] font-[Poppins] font-normal min-h-screen">
       {/* ══ TOP NAVBAR ════════════════════════════════════════════════ */}
@@ -130,83 +262,88 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
               <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
             </div>
             <div>
-              <div className="text-[15px] sm:text-[18px] font-bold tracking-[-0.03em] text-[#111]">Abroad Simplified</div>
-              <div className="hidden sm:block text-[9px] uppercase tracking-[0.16em] text-[#888] font-semibold">Study Abroad Guide</div>
+              <div className="text-[15px] sm:text-[18px] font-bold tracking-[-0.03em] text-[#111]">
+                Abroad Simplified
+              </div>
+              <div className="hidden sm:block text-[9px] uppercase tracking-[0.16em] text-[#888] font-semibold">
+                Visa &amp; Application Dossier
+              </div>
             </div>
           </Link>
           <div className="flex items-center gap-3">
             <Link
-              href="/#universities"
-              className="hidden md:flex text-[13px] font-medium text-[#666] hover:text-[#690B1B] transition-colors items-center gap-1"
+              href="/country-guide"
+              className="hidden md:flex text-[13px] font-semibold text-[#666] hover:text-[#690B1B] transition-colors items-center gap-1 cursor-pointer"
             >
-              ← All Destinations
+              ← Country Guides
             </Link>
             <Link
-              href={authTarget}
-              className="h-[38px] sm:h-[42px] px-5 sm:px-6 rounded-full bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#7A1022] transition-all shadow-[0_4px_14px_rgba(105,11,27,0.2)] flex items-center gap-1.5"
+              href="/dashboard/schools"
+              className="h-[38px] sm:h-[42px] px-5 sm:px-6 rounded-full bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#7A1022] transition-all shadow-[0_4px_14px_rgba(105,11,27,0.2)] flex items-center gap-1.5 active:scale-95 cursor-pointer"
             >
-              Get Started →
+              University Finder →
             </Link>
           </div>
         </div>
       </nav>
 
       {/* ══ MAIN CONTAINER ══════════════════════════════════════════ */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12 space-y-12 sm:space-y-16">
-        
-        {/* ══ HERO SECTION ════════════════════════════════════════════ */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12 space-y-10 sm:space-y-14">
+        {/* ══ 1. HERO SECTION (VISA & APPLICATION FOCUS) ═════════════ */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           {/* Left Hero Details */}
           <div className="lg:col-span-7 space-y-5">
             {/* Eyebrow Pill */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF0F2] border border-[#F3D5DC] text-[11px] font-bold text-[#690B1B]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#690B1B]" />
-              <span>STUDY ABROAD GUIDE · 2026 EDITION</span>
+              <span>STUDENT VISA &amp; APPLICATION DOSSIER · 2026</span>
             </div>
 
             {/* Heading */}
-            <h1 className="text-[38px] sm:text-[52px] lg:text-[58px] font-extrabold tracking-[-0.035em] text-[#111111] leading-[1.06]">
-              Study in <span className="text-[#690B1B]">{activeGuide.countryName}</span>
+            <h1 className="text-[36px] sm:text-[48px] lg:text-[54px] font-extrabold tracking-[-0.035em] text-[#111111] leading-[1.08]">
+              {activeGuide.countryName} <span className="text-[#690B1B]">Visa &amp; Application</span> Guide
             </h1>
 
             {/* Description */}
             <p className="text-[14px] sm:text-[15.5px] text-[#444444] leading-relaxed max-w-[560px]">
-              {activeGuide.heroDescription ||
-                `Explore universities, admission requirements, exams, student visa process, costs, documents and application timeline to plan your studies in ${activeGuide.countryName}.`}
+              Complete consular roadmap for {activeGuide.countryName}. Step-by-step student visa application, financial solvency rules, mandatory document checklists, and post-study stay-back rights.
             </p>
 
-            {/* 4 Concise Country-Specific Facts Micro-Cards */}
+            {/* 4 Crisp Key Facts Micro-Cards */}
             <div className="pt-2 grid grid-cols-2 sm:grid-cols-4 gap-2.5 items-stretch">
               <div className="bg-white border border-[#EAE5DF] rounded-[12px] p-3 flex flex-col justify-start h-full shadow-[0_2px_6px_rgba(0,0,0,0.02)] hover:border-[#690B1B]/40 hover:shadow-xs transition-all">
                 <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.12em] text-[#888888]">
-                  <span>🎓</span> TUITION
+                  <span>🛂</span> VISA TYPE
                 </div>
-                <div className="text-[13px] sm:text-[13.5px] font-bold text-[#111111] mt-1.5 leading-snug flex-1 flex items-start">
-                  {activeGuide.heroFacts.tuition}
-                </div>
-              </div>
-              <div className="bg-white border border-[#EAE5DF] rounded-[12px] p-3 flex flex-col justify-start h-full shadow-[0_2px_6px_rgba(0,0,0,0.02)] hover:border-[#690B1B]/40 hover:shadow-xs transition-all">
-                <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.12em] text-[#888888]">
-                  <span>🏠</span> LIVING COST
-                </div>
-                <div className="text-[13px] sm:text-[13.5px] font-bold text-[#111111] mt-1.5 leading-snug flex-1 flex items-start">
-                  {activeGuide.heroFacts.livingCost}
-                </div>
-              </div>
-              <div className="bg-white border border-[#EAE5DF] rounded-[12px] p-3 flex flex-col justify-start h-full shadow-[0_2px_6px_rgba(0,0,0,0.02)] hover:border-[#690B1B]/40 hover:shadow-xs transition-all">
-                <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.12em] text-[#888888]">
-                  <span>🗣️</span> ENGLISH
-                </div>
-                <div className="text-[13px] sm:text-[13.5px] font-bold text-[#111111] mt-1.5 leading-snug flex-1 flex items-start">
-                  {activeGuide.heroFacts.englishBenchmark}
-                </div>
-              </div>
-              <div className="bg-white border border-[#EAE5DF] rounded-[12px] p-3 flex flex-col justify-start h-full shadow-[0_2px_6px_rgba(0,0,0,0.02)] hover:border-[#690B1B]/40 hover:shadow-xs transition-all">
-                <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.12em] text-[#888888]">
-                  <span>🛂</span> VISA
-                </div>
-                <div className="text-[13px] sm:text-[13.5px] font-bold text-[#111111] mt-1.5 leading-snug flex-1 flex items-start">
+                <div className="text-[12.5px] sm:text-[13px] font-bold text-[#111111] mt-1.5 leading-snug flex-1 flex items-start">
                   {activeGuide.heroFacts.studentVisa}
+                </div>
+              </div>
+
+              <div className="bg-white border border-[#EAE5DF] rounded-[12px] p-3 flex flex-col justify-start h-full shadow-[0_2px_6px_rgba(0,0,0,0.02)] hover:border-[#690B1B]/40 hover:shadow-xs transition-all">
+                <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.12em] text-[#888888]">
+                  <span>💰</span> PROOF OF FUNDS
+                </div>
+                <div className="text-[12.5px] sm:text-[13px] font-bold text-[#690B1B] mt-1.5 leading-snug flex-1 flex items-start">
+                  {activeGuide.costOfStudy.proofOfFunds.split('(')[0].trim()}
+                </div>
+              </div>
+
+              <div className="bg-white border border-[#EAE5DF] rounded-[12px] p-3 flex flex-col justify-start h-full shadow-[0_2px_6px_rgba(0,0,0,0.02)] hover:border-[#690B1B]/40 hover:shadow-xs transition-all">
+                <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.12em] text-[#888888]">
+                  <span>⏳</span> STAY-BACK VISA
+                </div>
+                <div className="text-[12.5px] sm:text-[13px] font-bold text-[#111111] mt-1.5 leading-snug flex-1 flex items-start">
+                  {activeGuide.workAndPostStudy.postStudyWork[0]?.split('(')[0]?.trim() || 'Post-study permit'}
+                </div>
+              </div>
+
+              <div className="bg-white border border-[#EAE5DF] rounded-[12px] p-3 flex flex-col justify-start h-full shadow-[0_2px_6px_rgba(0,0,0,0.02)] hover:border-[#690B1B]/40 hover:shadow-xs transition-all">
+                <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.12em] text-[#888888]">
+                  <span>💼</span> WORK RIGHTS
+                </div>
+                <div className="text-[12.5px] sm:text-[13px] font-bold text-[#111111] mt-1.5 leading-snug flex-1 flex items-start">
+                  {activeGuide.workAndPostStudy.partTimeWork[0]?.split('(')[0]?.trim() || '20 hrs/wk'}
                 </div>
               </div>
             </div>
@@ -220,14 +357,26 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
                 alt={`Study in ${activeGuide.countryName}`}
                 className="w-full h-[280px] sm:h-[340px] lg:h-[360px] object-cover transition-transform duration-700 group-hover:scale-105"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80';
+                  (e.target as HTMLImageElement).src =
+                    'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80';
                 }}
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 text-white">
+                <div className="text-[11px] font-bold text-[#C9A55D] uppercase tracking-wider">
+                  Consular Destination Dossier
+                </div>
+                <div className="text-[20px] font-bold">{activeGuide.countryName}</div>
+                <div className="text-[12px] text-white/80 mt-0.5 flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-emerald-400" />
+                  <span>Verified 2026 Student Visa &amp; DLI Guidelines</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ══ EXPLORE ANOTHER DESTINATION (DROPDOWN BAR) ════════════════ */}
+        {/* ══ 2. EXPLORE ANOTHER DESTINATION (DROPDOWN BAR) ═══════════ */}
         <section className="bg-white border border-[#EAE5DF] rounded-[14px] px-5 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
             <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.14em] font-bold text-[#888888]">
@@ -235,10 +384,10 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
             </span>
             <span className="hidden sm:inline text-[#CCC]">·</span>
             <span className="text-[14px] sm:text-[15px] font-bold text-[#111111]">
-              Choose your country
+              Switch visa &amp; application dossier
             </span>
           </div>
-          <div className="relative min-w-[200px]">
+          <div className="relative min-w-[220px]">
             <select
               value={activeGuide.slug}
               onChange={handleCountryChange}
@@ -250,255 +399,96 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
                 </option>
               ))}
             </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#555] text-[12px]">
-              ▼
-            </div>
+            <ChevronDown
+              size={15}
+              className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#555]"
+            />
           </div>
         </section>
 
-        {/* ══ DESTINATION OVERVIEW (WHY STUDY IN COUNTRY?) ══════════════ */}
-        <section className="space-y-5">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
-              DESTINATION OVERVIEW
-            </div>
-            <h2 className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
-              Why study in {activeGuide.countryName}?
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {activeGuide.whyStudyHere.map((item) => (
-              <div
-                key={item.num}
-                className="bg-white border border-[#EAE5DF] rounded-[14px] p-5 hover:border-[#690B1B]/40 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-2"
-              >
-                <div className="text-[13px] font-bold text-[#690B1B]">{item.num}</div>
-                <p className="text-[13.5px] sm:text-[14.5px] text-[#222222] font-medium leading-snug">
-                  {item.text}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ══ QUICK COUNTRY FACTS (BLACK STRIP) ════════════════════════ */}
+        {/* ══ 3. QUICK VISA & CONSULAR PROFILE (DARK LUXURY CONTAINER) ═ */}
         <section className="bg-[#111217] rounded-[18px] text-white p-6 sm:p-7 shadow-xl space-y-4 border border-white/[0.06]">
           <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#EAB308]" />
-              <span className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-white/90">
-                QUICK COUNTRY FACTS
+              <span className="w-2 h-2 rounded-full bg-[#C9A55D]" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/90">
+                OFFICIAL VISA &amp; CONSULAR PROFILE
               </span>
             </div>
-            <span className="text-[11px] text-white/40 font-medium">
-              At a glance · {activeGuide.countryName}
+            <span className="text-[11px] text-white/50 font-medium">
+              {visaInsights.authority}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 items-stretch pt-1">
-            {/* 1. Currency */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 items-stretch pt-1">
             <div className="bg-white/[0.04] border border-white/[0.08] rounded-[12px] p-4 flex flex-col justify-start h-full hover:bg-white/[0.06] transition-all">
-              <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/50">
-                <span>🪙</span> CURRENCY
+              <div className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/50">
+                VISA CLASSIFICATION
               </div>
-              <div className="text-[14px] font-bold text-white mt-2 leading-snug">
-                {activeGuide.quickFacts.currency}
+              <div className="text-[13.5px] font-bold text-white mt-2 leading-snug">
+                {visaInsights.visaName}
               </div>
             </div>
 
-            {/* 2. Visa */}
             <div className="bg-white/[0.04] border border-white/[0.08] rounded-[12px] p-4 flex flex-col justify-start h-full hover:bg-white/[0.06] transition-all">
-              <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/50">
-                <span>🛂</span> STUDENT VISA
+              <div className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/50">
+                PROCESSING TIMELINE
               </div>
-              <div className="text-[14px] font-bold text-white mt-2 leading-snug">
-                {activeGuide.quickFacts.visa}
+              <div className="text-[13.5px] font-bold text-[#C9A55D] mt-2 leading-snug">
+                {visaInsights.processingTime}
               </div>
             </div>
 
-            {/* 3. Major Intakes */}
             <div className="bg-white/[0.04] border border-white/[0.08] rounded-[12px] p-4 flex flex-col justify-start h-full hover:bg-white/[0.06] transition-all">
-              <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/50">
-                <span>📅</span> MAJOR INTAKES
+              <div className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/50">
+                SOLVENCY BENCHMARK
               </div>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {(activeGuide.quickFacts.majorIntakes || '')
-                  .split(/[·•]/)
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-                  .map((item, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[6px] bg-white/[0.08] text-white text-[11px] font-semibold border border-white/[0.1] hover:bg-white/[0.14] transition-colors"
-                    >
-                      <span className="w-1 h-1 rounded-full bg-[#EAB308]" />
-                      {item}
-                    </span>
-                  ))}
+              <div className="text-[12.5px] font-medium text-white/90 mt-2 leading-snug">
+                {visaInsights.solvencyRule}
               </div>
             </div>
 
-            {/* 4. Popular Levels */}
             <div className="bg-white/[0.04] border border-white/[0.08] rounded-[12px] p-4 flex flex-col justify-start h-full hover:bg-white/[0.06] transition-all">
-              <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/50">
-                <span>🎓</span> POPULAR LEVELS
+              <div className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/50">
+                SPOUSAL &amp; DEPENDENT RIGHTS
               </div>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {(activeGuide.quickFacts.popularLevels || '')
-                  .split(/[·•]/)
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-                  .map((item, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[6px] bg-white/[0.08] text-white text-[11px] font-semibold border border-white/[0.1] hover:bg-white/[0.14] transition-colors"
-                    >
-                      <span className="w-1 h-1 rounded-full bg-[#EAB308]" />
-                      {item}
-                    </span>
-                  ))}
-              </div>
-            </div>
-
-            {/* 5. Popular Fields */}
-            <div className="bg-white/[0.04] border border-white/[0.08] rounded-[12px] p-4 flex flex-col justify-start h-full hover:bg-white/[0.06] transition-all">
-              <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/50">
-                <span>💼</span> POPULAR FIELDS
-              </div>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {(activeGuide.quickFacts.popularFields || '')
-                  .split(/[·•]/)
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-                  .map((item, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[6px] bg-white/[0.08] text-white text-[11px] font-semibold border border-white/[0.1] hover:bg-white/[0.14] transition-colors"
-                    >
-                      <span className="w-1 h-1 rounded-full bg-[#EAB308]" />
-                      {item}
-                    </span>
-                  ))}
+              <div className="text-[12.5px] font-medium text-white/90 mt-2 leading-snug">
+                {visaInsights.spousalWork}
               </div>
             </div>
           </div>
         </section>
 
-        {/* ══ 01 ADMISSION REQUIREMENTS ════════════════════════════════ */}
-        <section id="01-admission" className="space-y-4 scroll-mt-24">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
-              01 ADMISSION
-            </div>
-            <h2 className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
-              Admission requirements for {activeGuide.countryName}
-            </h2>
-            <p className="text-[12px] sm:text-[13px] text-[#666666] mt-1">
-              A starting point — each university and course sets its own final criteria.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 items-stretch">
-            {Object.entries(activeGuide.admissionRequirements).map(([key, item]) => {
-              const icons: Record<string, string> = {
-                academicQualification: '🎓',
-                academicBenchmark: '📊',
-                englishRequirement: '🗣️',
-                applicationRequirement: '📝',
-                majorIntakes: '📅',
-              };
-              return (
-                <div
-                  key={key}
-                  className="bg-white border border-[#EAE5DF] rounded-[14px] p-4.5 flex flex-col justify-between h-full shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:border-[#690B1B]/40 hover:shadow-md transition-all duration-200"
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[9.5px] font-bold uppercase tracking-[0.12em] text-[#777777]">
-                        {item.title}
-                      </span>
-                      <span className="text-[13px] opacity-75">{icons[key] || '📌'}</span>
-                    </div>
-                    <div className="text-[13.5px] font-bold text-[#111111] mt-2.5 leading-snug min-h-[44px]">
-                      {item.value}
-                    </div>
-                  </div>
-                  <div className="pt-3 mt-3 border-t border-[#F0EBE5] flex items-center">
-                    <StatusBadge text={item.badge} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ══ 02 TESTS & EXAMS ═════════════════════════════════════════ */}
+        {/* ══ 4. STEP-BY-STEP STUDENT VISA ROADMAP ════════════════════ */}
         <section className="space-y-4">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
-              02 TESTS & EXAMS
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
+                CONSULAR ROADMAP
+              </div>
+              <h2 className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
+                {activeGuide.countryName} Student Visa Application Process
+              </h2>
             </div>
-            <h2 className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
-              Tests you may need for {activeGuide.countryName}
-            </h2>
-            <p className="text-[12px] sm:text-[13px] text-[#666666] mt-1">
-              Standardized language, aptitude and admissions tests commonly evaluated by {activeGuide.countryName} universities.
-            </p>
-          </div>
-
-          <div className="bg-white border-t-2 border-t-[#111111] border-x border-b border-[#EAE5DF] rounded-b-[12px] overflow-x-auto shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-            <table className="w-full text-left border-collapse min-w-[580px]">
-              <thead>
-                <tr className="border-b border-[#EAE5DF] bg-[#FAF8F5]/80">
-                  <th className="py-3 px-5 text-[10.5px] font-bold uppercase tracking-wider text-[#666]">TEST</th>
-                  <th className="py-3 px-5 text-[10.5px] font-bold uppercase tracking-wider text-[#666]">TYPICAL SCORE</th>
-                  <th className="py-3 px-5 text-[10.5px] font-bold uppercase tracking-wider text-[#666]">VALIDITY</th>
-                  <th className="py-3 px-5 text-[10.5px] font-bold uppercase tracking-wider text-[#666]">REQUIREMENT</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EAE5DF]">
-                {activeGuide.testsAndExams.map((t, idx) => (
-                  <tr key={idx} className="hover:bg-[#FAF8F5]/50 transition-colors">
-                    <td className="py-3.5 px-5 text-[13px] font-bold text-[#111111]">{t.test}</td>
-                    <td className="py-3.5 px-5 text-[13px] text-[#444444] font-medium">{t.score}</td>
-                    <td className="py-3.5 px-5 text-[12.5px] text-[#666666]">{t.validity}</td>
-                    <td className="py-3.5 px-5">
-                      <StatusBadge text={t.requirement} variant={t.badgeVariant} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* ══ 03 STUDENT VISA PROCESS ══════════════════════════════════ */}
-        <section className="space-y-4">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
-              03 STUDENT VISA
-            </div>
-            <h2 className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
-              {activeGuide.countryName} student visa process
-            </h2>
-            <p className="text-[12px] sm:text-[13px] text-[#666666] mt-1">
-              A clear route from offer letter to arrival.
-            </p>
+            <span className="text-[12px] text-[#777] font-medium">
+              6 Sequential Milestones
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-stretch">
             {activeGuide.visaProcess.map((step) => (
               <div
                 key={step.step}
-                className="bg-white border border-[#EAE5DF] rounded-[12px] p-4 flex flex-col justify-start h-full shadow-[0_2px_6px_rgba(0,0,0,0.02)] relative hover:border-[#690B1B]/40 transition-all"
+                className="bg-white border border-[#EAE5DF] rounded-[14px] p-4.5 flex flex-col justify-between h-full shadow-[0_2px_6px_rgba(0,0,0,0.02)] relative hover:border-[#690B1B]/40 hover:shadow-xs transition-all"
               >
-                <div className="text-[12px] font-bold text-[#690B1B] mb-2">{step.step}</div>
-                <div className="flex-1 flex flex-col justify-start">
-                  <h3 className="text-[13px] font-bold text-[#111111] leading-tight min-h-[34px] flex items-start">
+                <div>
+                  <div className="w-7 h-7 rounded-full bg-[#FAF0F2] text-[#690B1B] font-bold text-[12px] flex items-center justify-center mb-3">
+                    {step.step}
+                  </div>
+                  <h3 className="text-[13.5px] font-bold text-[#111111] leading-snug min-h-[36px]">
                     {step.title}
                   </h3>
-                  <p className="text-[11.5px] text-[#555555] mt-2 leading-relaxed flex-1">
+                  <p className="text-[11.5px] text-[#555555] mt-2 leading-relaxed">
                     {step.desc}
                   </p>
                 </div>
@@ -507,22 +497,23 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
           </div>
         </section>
 
-        {/* ══ 04 COST OF STUDY ═════════════════════════════════════════ */}
+        {/* ══ 5. PROOF OF FUNDS & FINANCIAL SOLVENCY ══════════════════ */}
         <section className="bg-gradient-to-br from-[#FAF5F6] via-[#FAF8F5] to-[#F7EEF0] border border-[#F0DFE3] rounded-[18px] p-6 sm:p-8 space-y-5 shadow-[0_2px_12px_rgba(105,11,27,0.03)]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
-                04 COST OF STUDY
+                FINANCIAL SOLVENCY &amp; LIVING BENCHMARKS
               </div>
               <h2 className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
-                Cost of studying in {activeGuide.countryName}
+                Proof of Funds Required for {activeGuide.countryName}
               </h2>
               <p className="text-[12px] sm:text-[13px] text-[#666666] mt-1">
-                Reference figures for planning — actual costs vary by university, city, program and lifestyle.
+                Official benchmarks evaluated by visa officers during financial scrutiny.
               </p>
             </div>
             <div className="inline-flex items-center gap-1.5 bg-white border border-[#E8C4CC] px-3.5 py-1.5 rounded-full text-[11.5px] font-bold text-[#690B1B] shrink-0 shadow-xs">
-              <span>🗂️</span> Budget before you apply
+              <CreditCard size={14} />
+              <span>Mandatory Solvency Audit</span>
             </div>
           </div>
 
@@ -551,7 +542,7 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
               },
               {
                 key: 'visaApplication' as const,
-                label: 'VISA & FEES',
+                label: 'VISA & CONSULAR FEES',
                 icon: '📑',
                 iconBg: 'bg-[#EFF6FF] text-[#1D4ED8] border-[#DBEAFE]',
                 borderHover: 'hover:border-[#1D4ED8]/40',
@@ -565,7 +556,6 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
               },
             ].map((cat) => {
               const raw = activeGuide.costOfStudy[cat.key] || '';
-              // Smart parsing: separate primary monetary highlight from secondary contextual breakdown
               let primary = raw.trim();
               let secondary = '';
               const parenIdx = primary.indexOf('(');
@@ -597,19 +587,15 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
                         {cat.icon}
                       </span>
                     </div>
-                    <div className="mt-2 mb-2.5">
-                      <div className="text-[15.5px] sm:text-[16.5px] font-bold text-[#111111] tracking-[-0.02em] leading-snug">
+                    <div className="mt-2 mb-2">
+                      <div className="text-[15px] sm:text-[16px] font-bold text-[#111111] tracking-[-0.02em] leading-snug">
                         {primary || '—'}
                       </div>
                     </div>
                   </div>
-                  {secondary ? (
-                    <div className="pt-2.5 mt-2 border-t border-[#F0EBE5] text-[11px] text-[#555555] leading-relaxed">
+                  {secondary && (
+                    <div className="pt-2 mt-2 border-t border-[#F0EBE5] text-[11px] text-[#555555] leading-relaxed">
                       {secondary}
-                    </div>
-                  ) : (
-                    <div className="pt-2.5 mt-2 border-t border-[#F0EBE5] text-[11px] text-[#888888] leading-relaxed italic">
-                      Standard university & consular rate
                     </div>
                   )}
                 </div>
@@ -618,17 +604,136 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
           </div>
         </section>
 
-        {/* ══ 05 WORK & POST-STUDY OPTIONS ═════════════════════════════ */}
+        {/* ══ 6. COMPREHENSIVE APPLICATION & VISA DOCUMENT DOSSIER ═══ */}
+        <section className="space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
+                APPLICATION &amp; CONSULAR DOSSIER
+              </div>
+              <h2 className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
+                Required Document Checklists for {activeGuide.countryName}
+              </h2>
+              <p className="text-[12px] sm:text-[13px] text-[#666666] mt-1">
+                Verified portfolio of required documents for university admission and visa lodging.
+              </p>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex items-center gap-1.5 bg-[#FAF0F2] p-1 rounded-full border border-[#F3D5DC] shrink-0 self-start sm:self-auto">
+              <button
+                onClick={() => setDocFilter('all')}
+                className={`px-3 py-1 rounded-full text-[11.5px] font-bold transition-all cursor-pointer ${
+                  docFilter === 'all'
+                    ? 'bg-[#690B1B] text-white shadow-xs'
+                    : 'text-[#690B1B] hover:bg-white/60'
+                }`}
+              >
+                All Documents
+              </button>
+              <button
+                onClick={() => setDocFilter('university')}
+                className={`px-3 py-1 rounded-full text-[11.5px] font-bold transition-all cursor-pointer ${
+                  docFilter === 'university'
+                    ? 'bg-[#690B1B] text-white shadow-xs'
+                    : 'text-[#690B1B] hover:bg-white/60'
+                }`}
+              >
+                University App
+              </button>
+              <button
+                onClick={() => setDocFilter('visa')}
+                className={`px-3 py-1 rounded-full text-[11.5px] font-bold transition-all cursor-pointer ${
+                  docFilter === 'visa'
+                    ? 'bg-[#690B1B] text-white shadow-xs'
+                    : 'text-[#690B1B] hover:bg-white/60'
+                }`}
+              >
+                Visa Filing
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* University Application Column */}
+            {(docFilter === 'all' || docFilter === 'university') && (
+              <div className="bg-white border border-[#EAE5DF] rounded-[16px] p-5 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4">
+                <div className="flex items-center justify-between border-b border-[#EAE5DF] pb-3">
+                  <div className="flex items-center gap-2">
+                    <FileText size={18} className="text-[#690B1B]" />
+                    <h3 className="text-[15.5px] font-bold text-[#111111]">
+                      University Application Portfolio
+                    </h3>
+                  </div>
+                  <span className="text-[11px] text-[#777] font-semibold">
+                    {activeGuide.documents.universityApplication.length} Items
+                  </span>
+                </div>
+                <div className="space-y-2.5">
+                  {activeGuide.documents.universityApplication.map((doc, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between py-2 border-b border-[#F4F1EC] last:border-none"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                        <span className="text-[13px] font-semibold text-[#222222]">
+                          {doc.name}
+                        </span>
+                      </div>
+                      <StatusBadge text={doc.status} variant={doc.badgeVariant} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Financial & Visa Column */}
+            {(docFilter === 'all' || docFilter === 'visa') && (
+              <div className="bg-white border border-[#EAE5DF] rounded-[16px] p-5 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4">
+                <div className="flex items-center justify-between border-b border-[#EAE5DF] pb-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={18} className="text-[#690B1B]" />
+                    <h3 className="text-[15.5px] font-bold text-[#111111]">
+                      Visa &amp; Consular Filing Dossier
+                    </h3>
+                  </div>
+                  <span className="text-[11px] text-[#777] font-semibold">
+                    {activeGuide.documents.financialAndVisa.length} Items
+                  </span>
+                </div>
+                <div className="space-y-2.5">
+                  {activeGuide.documents.financialAndVisa.map((doc, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between py-2 border-b border-[#F4F1EC] last:border-none"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                        <span className="text-[13px] font-semibold text-[#222222]">
+                          {doc.name}
+                        </span>
+                      </div>
+                      <StatusBadge text={doc.status} variant={doc.badgeVariant} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ══ 7. WORK RIGHTS & POST-STUDY STAY-BACK (PGWP/OPT) ═══════ */}
         <section className="space-y-4">
           <div>
             <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
-              05 WORK & POST-STUDY
+              WORK RIGHTS &amp; STAY-BACK AUTHORIZATION
             </div>
             <h2 className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
-              Work while studying & after graduation in {activeGuide.countryName}
+              Employment Rules &amp; Post-Study Stay-Back in {activeGuide.countryName}
             </h2>
             <p className="text-[12px] sm:text-[13px] text-[#666666] mt-1">
-              Part-time student employment rules and post-graduation stay-back permits in {activeGuide.countryName}.
+              Part-time student work limits, holiday allowances, and graduate open work permit frameworks.
             </p>
           </div>
 
@@ -637,11 +742,13 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
             <div className="bg-white border border-[#EAE5DF] rounded-[16px] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#FAF4F5] border border-[#F3E2E6] flex items-center justify-center text-[#690B1B]">
-                  💼
+                  <Briefcase size={20} />
                 </div>
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-[#888]">EMPLOYMENT</div>
-                  <h3 className="text-[15px] font-bold text-[#111]">PART-TIME WORK</h3>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[#888]">
+                    STUDY PERIOD
+                  </div>
+                  <h3 className="text-[15px] font-bold text-[#111]">Part-Time Student Work</h3>
                 </div>
               </div>
               <ul className="space-y-2.5">
@@ -658,127 +765,105 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
             <div className="bg-[#111217] border border-white/10 rounded-[16px] p-6 shadow-lg text-white space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#690B1B]/40 border border-[#690B1B]/60 flex items-center justify-center text-white">
-                  🎓
+                  <Award size={20} />
                 </div>
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">STAY-BACK PERMIT</div>
-                  <h3 className="text-[15px] font-bold text-white">POST-STUDY WORK</h3>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[#C9A55D]">
+                    GRADUATE IMMIGRATION
+                  </div>
+                  <h3 className="text-[15px] font-bold text-white">
+                    Post-Study Stay-Back Rights
+                  </h3>
                 </div>
               </div>
               <ul className="space-y-2.5">
                 {activeGuide.workAndPostStudy.postStudyWork.map((psw, idx) => (
                   <li key={idx} className="flex items-start gap-2 text-[13px] text-gray-200 leading-relaxed">
-                    <span className="text-[#EAB308] font-bold mt-0.5">✓</span>
+                    <span className="text-[#C9A55D] font-bold mt-0.5">✓</span>
                     <span>{psw}</span>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-
-          <div className="text-[11.5px] text-[#777777] flex items-center gap-1.5 pt-1">
-            <span>⚖</span> Rules may change. Verify current requirements before applying.
-          </div>
         </section>
 
-        {/* ══ 06 DOCUMENTS YOU'LL NEED ═════════════════════════════════ */}
-        <section className="space-y-4">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
-              06 DOCUMENTS
-            </div>
-            <h2 className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
-              Documents you’ll need for {activeGuide.countryName}
-            </h2>
-            <p className="text-[12px] sm:text-[13px] text-[#666666] mt-1">
-              Essential academic, financial and consular document checklist for {activeGuide.countryName}.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {/* University Application Column */}
-            <div className="bg-white border border-[#EAE5DF] rounded-[16px] p-5 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4">
-              <h3 className="text-[16px] font-bold text-[#111111] border-b border-[#EAE5DF] pb-3">
-                University application
-              </h3>
-              <div className="space-y-2.5">
-                {activeGuide.documents.universityApplication.map((doc, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between py-2 border-b border-[#F4F1EC] last:border-none"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-[#888] text-[14px]">📄</span>
-                      <span className="text-[13px] font-semibold text-[#222222]">{doc.name}</span>
-                    </div>
-                    <StatusBadge text={doc.status} variant={doc.badgeVariant} />
-                  </div>
-                ))}
+        {/* ══ 8. CONSULAR OFFICER EVALUATION PILLARS ══════════════════ */}
+        <section className="bg-white border border-[#EAE5DF] rounded-[18px] p-6 sm:p-8 space-y-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+          <div className="flex items-center justify-between border-b border-[#F0EBE5] pb-3">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
+                OFFICER ASSESSMENT CRITERIA
               </div>
+              <h2 className="text-[20px] sm:text-[24px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
+                What Visa Officers Look For
+              </h2>
             </div>
-
-            {/* Financial & Visa Column */}
-            <div className="bg-white border border-[#EAE5DF] rounded-[16px] p-5 sm:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4">
-              <h3 className="text-[16px] font-bold text-[#111111] border-b border-[#EAE5DF] pb-3">
-                Financial & visa
-              </h3>
-              <div className="space-y-2.5">
-                {activeGuide.documents.financialAndVisa.map((doc, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between py-2 border-b border-[#F4F1EC] last:border-none"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-[#888] text-[14px]">📑</span>
-                      <span className="text-[13px] font-semibold text-[#222222]">{doc.name}</span>
-                    </div>
-                    <StatusBadge text={doc.status} variant={doc.badgeVariant} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ══ 07 APPLICATION TIMELINE ══════════════════════════════════ */}
-        <section className="space-y-4">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#690B1B]">
-              07 APPLICATION TIMELINE
-            </div>
-            <h2 className="text-[24px] sm:text-[30px] font-bold text-[#111111] tracking-[-0.03em] mt-0.5">
-              {activeGuide.countryName} application timeline
-            </h2>
-            <p className="text-[12px] sm:text-[13px] text-[#666666] mt-1">
-              A step-by-step preparation, testing, application and arrival roadmap for {activeGuide.countryName}.
-            </p>
+            <span className="text-[11px] font-semibold text-[#888] bg-[#FAF8F5] border border-[#EAE5DF] px-2.5 py-1 rounded-full">
+              Consular Approval Factors
+            </span>
           </div>
 
-          <div className="border-t-2 border-[#111111] pt-4 space-y-3">
-            {activeGuide.timeline.map((stage) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                num: '01',
+                title: 'Academic Intent & Fit',
+                desc: 'Logical continuation of prior studies or justifiable career pivot with clear curriculum match.',
+              },
+              {
+                num: '02',
+                title: 'Financial Capability',
+                desc: 'Verifiable liquid funds covering full tuition and living expenses with legitimate source of funds.',
+              },
+              {
+                num: '03',
+                title: 'Ties to Home Country',
+                desc: 'Demonstrated family, career, or economic reasons to return after completing foreign studies.',
+              },
+              {
+                num: '04',
+                title: 'Clarity of Study Plan',
+                desc: 'Concrete awareness of program structure, costs, DLI reputation, and measurable future ROI.',
+              },
+            ].map((pillar) => (
               <div
-                key={stage.step}
-                className="bg-white border border-[#EAE5DF] rounded-[12px] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_2px_6px_rgba(0,0,0,0.02)] hover:border-[#690B1B]/40 transition-all"
+                key={pillar.num}
+                className="bg-[#FAF8F5] border border-[#EAE5DF] rounded-[14px] p-4.5 space-y-2 hover:border-[#690B1B]/40 transition-all"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-8 h-8 rounded-full bg-[#690B1B] text-white font-bold text-[12px] flex items-center justify-center shrink-0">
-                    {stage.step}
-                  </div>
-                  <div>
-                    <h3 className="text-[14px] font-bold text-[#111111]">{stage.title}</h3>
-                    <p className="text-[12.5px] text-[#555555] mt-0.5">{stage.desc}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-[11.5px] font-semibold text-[#666666] bg-[#FAF8F5] border border-[#EAE5DF] px-3 py-1.5 rounded-[8px] shrink-0 self-start sm:self-auto">
-                  <span>⏱</span> {stage.time}
-                </div>
+                <div className="text-[12px] font-black text-[#690B1B]">{pillar.num}</div>
+                <h3 className="text-[14px] font-bold text-[#111111]">{pillar.title}</h3>
+                <p className="text-[12px] text-[#555555] leading-relaxed">{pillar.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ══ GOOD TO KNOW (IMPORTANT NOTES) ═══════════════════════════ */}
+        {/* ══ 9. VISA REFUSAL PREVENTION & COMMON PITFALLS ════════════ */}
+        <section className="bg-[#FFFBF5] border border-[#F5E6CC] rounded-[16px] p-6 sm:p-7 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle size={20} className="text-[#B83E1B]" />
+            <h3 className="text-[16px] sm:text-[17px] font-bold text-[#111111]">
+              Visa Refusal Prevention &amp; Critical Guidelines ({activeGuide.countryName})
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+            {visaInsights.refusalMitigation.map((tip, idx) => (
+              <div
+                key={idx}
+                className="bg-white border border-[#EAE5DF] rounded-[12px] p-3.5 flex items-start gap-2.5 shadow-2xs"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B83E1B] mt-2 shrink-0" />
+                <span className="text-[12.5px] text-[#333] font-medium leading-relaxed">
+                  {tip}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ══ 10. GOOD TO KNOW (ESSENTIAL TIPS) ═══════════════════════ */}
         <section className="bg-white border border-[#EAE5DF] rounded-[16px] p-6 sm:p-7 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-3.5">
           <div className="flex items-center gap-2">
             <span className="text-[16px]">💡</span>
@@ -788,7 +873,10 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
           </div>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
             {activeGuide.goodToKnow.map((note, idx) => (
-              <li key={idx} className="flex items-start gap-2.5 text-[12.5px] sm:text-[13px] text-[#444] leading-relaxed">
+              <li
+                key={idx}
+                className="flex items-start gap-2.5 text-[12.5px] sm:text-[13px] text-[#444] leading-relaxed"
+              >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#690B1B] mt-2 shrink-0" />
                 <span>{note}</span>
               </li>
@@ -796,27 +884,59 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
           </ul>
         </section>
 
-        {/* ══ SOURCES / VERIFICATION BAR ═════════════════════════════ */}
-        <div className="pt-6 border-t border-[#EAE5DF] flex flex-col sm:flex-row items-center justify-between text-[11.5px] text-[#888888] gap-3">
+        {/* ══ 11. BOTTOM ACTION BANNER ════════════════════════════════ */}
+        <section className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[20px] p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-5 shadow-xs">
+          <div className="space-y-1.5 text-center sm:text-left">
+            <h2 className="text-[20px] sm:text-[22px] font-bold leading-tight">
+              Ready to find matching universities in {activeGuide.countryName}?
+            </h2>
+            <p className="text-[12.5px] text-white/80 max-w-[520px]">
+              Explore verified universities, calculate your admit chances with AI, or build an authentic SOP.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              href="/dashboard/schools"
+              className="h-[40px] px-5 rounded-full bg-[#C9A55D] hover:bg-[#b8924b] text-black font-bold text-[12.5px] transition-all flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer"
+            >
+              <span>University Finder</span>
+              <ArrowRight size={13} />
+            </Link>
+            <Link
+              href="/country-guide"
+              className="h-[40px] px-5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-[12.5px] transition-all flex items-center gap-1.5 cursor-pointer border border-white/20"
+            >
+              <span>All Countries</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* ══ 12. SOURCES / VERIFICATION BAR ══════════════════════════ */}
+        <div className="pt-4 border-t border-[#EAE5DF] flex flex-col sm:flex-row items-center justify-between text-[11.5px] text-[#888888] gap-3">
           <div>
-            Last Verified: <span className="font-semibold text-[#555]">{activeGuide.lastVerified}</span>
+            Last Verified:{' '}
+            <span className="font-semibold text-[#555]">{activeGuide.lastVerified}</span>
           </div>
           <div>
-            Source: <span className="font-semibold text-[#555]">{activeGuide.source}</span>
+            Source:{' '}
+            <span className="font-semibold text-[#555]">{activeGuide.source}</span>
           </div>
         </div>
-
       </main>
 
       {/* ═══════════════════════════════════════════════════════════════
-         FOOTER — Abroad Simplified Brand Footer
+         FOOTER — Official Dark Luxury Platform Footer
          ═══════════════════════════════════════════════════════════════ */}
       <footer className="bg-[#030303] px-4 sm:px-6 md:px-10 lg:px-16 pt-12 sm:pt-16 md:pt-20 pb-8 text-left text-white mt-16">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-14">
             {/* BRAND */}
             <div className="col-span-2 sm:col-span-2 lg:col-span-1 max-w-[300px]">
-              <Link href="/" className="flex items-center gap-3 text-white hover:opacity-90 transition-opacity">
+              <Link
+                href="/"
+                className="flex items-center gap-3 text-white hover:opacity-90 transition-opacity"
+              >
                 <div className="w-[44px] h-[44px] rounded-[13px] overflow-hidden shadow-[0_6px_20px_rgba(105,11,27,0.3)] shrink-0">
                   <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
                 </div>
@@ -834,12 +954,12 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
               </div>
               <div className="space-y-3.5">
                 {[
-                  { label: "Study in USA 🇺🇸", href: "/country-guide/usa" },
-                  { label: "Study in UK 🇬🇧", href: "/country-guide/uk" },
-                  { label: "Study in Canada 🇨🇦", href: "/country-guide/canada" },
-                  { label: "Study in Germany 🇩🇪", href: "/country-guide/germany" },
-                  { label: "Study in Australia 🇦🇺", href: "/country-guide/australia" },
-                  { label: "Study in Ireland 🇮🇪", href: "/country-guide/ireland" },
+                  { label: 'Study in USA 🇺🇸', href: '/country-guide/usa' },
+                  { label: 'Study in UK 🇬🇧', href: '/country-guide/uk' },
+                  { label: 'Study in Canada 🇨🇦', href: '/country-guide/canada' },
+                  { label: 'Study in Germany 🇩🇪', href: '/country-guide/germany' },
+                  { label: 'Study in Australia 🇦🇺', href: '/country-guide/australia' },
+                  { label: 'Study in Ireland 🇮🇪', href: '/country-guide/ireland' },
                 ].map((item) => (
                   <Link
                     key={item.label}
@@ -859,11 +979,11 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
               </div>
               <div className="space-y-3.5">
                 {[
-                  { label: "University Finder", href: "/#universities" },
-                  { label: "AI Chance-Me Predictor", href: "/#chance-me" },
-                  { label: "SOP & Essay Studio", href: "/dashboard/essays" },
-                  { label: "Application Tracker", href: "/dashboard/tracker" },
-                  { label: "Scholarship Matcher", href: "/#scholarships" },
+                  { label: 'University Finder', href: '/dashboard/schools' },
+                  { label: 'AI Chance-Me Predictor', href: '/dashboard/chance-me' },
+                  { label: 'SOP & Essay Studio', href: '/dashboard/essays' },
+                  { label: 'Application Tracker', href: '/dashboard/tracker' },
+                  { label: 'Country Directory', href: '/country-guide' },
                 ].map((item) => (
                   <Link
                     key={item.label}
@@ -879,14 +999,14 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
             {/* COMPANY & LEGAL */}
             <div>
               <div className="text-[#C8A15D] text-[11px] tracking-[0.22em] uppercase font-bold mb-5">
-                Company & Legal
+                Company &amp; Legal
               </div>
               <div className="space-y-3.5">
                 {[
-                  { label: "Home", href: "/" },
-                  { label: "Privacy Policy", href: "/privacy" },
-                  { label: "Terms of Service", href: "/terms" },
-                  { label: "Student Login", href: "/login" },
+                  { label: 'Home', href: '/' },
+                  { label: 'Privacy Policy', href: '/privacy' },
+                  { label: 'Terms of Service', href: '/terms' },
+                  { label: 'Student Login', href: '/login' },
                 ].map((item) => (
                   <Link
                     key={item.label}
