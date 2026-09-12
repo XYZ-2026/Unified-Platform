@@ -597,7 +597,7 @@ export const COUNTRY_GUIDES: Record<string, CountryGuideData> = {
     "slug": "canada",
     "countryName": "Canada",
     "heroDescription": "Experience globally ranked higher education, affordable living standards, and clear post-graduation work permit pathways.",
-    "heroImage": "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=1200&q=80",
+    "heroImage": "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80",
     "heroBadgeText": "Plan with clarity · Canada edition",
     "heroFacts": {
       "tuition": "CAD $18,000–$40,000 / yr",

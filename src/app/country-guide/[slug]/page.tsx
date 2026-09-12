@@ -219,6 +219,9 @@ export default function CountryGuidePage({ params }: { params: Promise<{ slug: s
                 src={activeGuide.heroImage}
                 alt={`Study in ${activeGuide.countryName}`}
                 className="w-full h-[280px] sm:h-[340px] lg:h-[360px] object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80';
+                }}
               />
             </div>
           </div>
