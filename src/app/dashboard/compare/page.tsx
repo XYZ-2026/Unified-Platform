@@ -959,18 +959,18 @@ function CompareContent() {
                               {list.map((s, sIdx) => (
                                 <div
                                   key={sIdx}
-                                  className="p-3 rounded-[12px] bg-[#FAF8F6] border border-[#EAE6E2] space-y-1.5 shadow-2xs"
+                                  className="p-3.5 rounded-[14px] bg-white border border-[#E7E2DE] hover:border-[#690B1B]/40 hover:shadow-xs transition-all space-y-2 shadow-2xs group"
                                 >
-                                  <div className="font-bold text-[14.5px] text-[#111111] leading-snug">
+                                  <div className="font-bold text-[13.5px] text-[#111111] leading-snug group-hover:text-[#690B1B] transition-colors">
                                     {s.title}
                                   </div>
                                   <div>
-                                    <span className="inline-block text-[#16a34a] font-black text-[13px] bg-[#16a34a]/10 px-2.5 py-1 rounded-full border border-[#16a34a]/20 max-w-full break-words leading-tight">
+                                    <span className="inline-block text-[#15803d] font-bold text-[12px] bg-[#16a34a]/10 px-2.5 py-1 rounded-[8px] border border-[#16a34a]/20 max-w-full break-words leading-snug">
                                       {s.amount}
                                     </span>
                                   </div>
                                   {s.description && (
-                                    <p className="text-[12.5px] text-[#555555] leading-relaxed">
+                                    <p className="text-[12px] text-[#555555] leading-relaxed">
                                       {s.description}
                                     </p>
                                   )}
@@ -1229,30 +1229,36 @@ function CompareContent() {
         {/* Mode switcher & college selector when 3+ universities */}
         {selectedUnis.length > 2 && (
           <div className="bg-[#FAF8F6] p-3 rounded-[18px] border border-[#E7E2DE] space-y-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[13.5px] font-bold text-[#111111]">Mobile View:</span>
-              <div className="flex items-center bg-white border border-[#E7E2DE] rounded-full p-0.5 text-[12.5px] font-bold">
+            <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+              <span className="text-[13px] font-bold text-[#111111] whitespace-nowrap shrink-0">Mobile View:</span>
+              <div className="inline-flex items-center bg-white border border-[#E7E2DE] rounded-full p-1 text-[11.5px] sm:text-[12px] font-bold shrink-0 shadow-2xs">
                 <button
                   type="button"
                   onClick={() => setMobileCompareMode('h2h')}
-                  className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap inline-flex items-center gap-1 shrink-0 leading-none ${
                     mobileCompareMode === 'h2h'
                       ? 'bg-[#690B1B] text-white shadow-xs'
-                      : 'text-[#666666]'
+                      : 'text-[#666666] hover:text-[#111111]'
                   }`}
                 >
-                  ⚡ Head-to-Head (2)
+                  <span>⚡ Head-to-Head</span>
+                  <span className={mobileCompareMode === 'h2h' ? 'text-white/80 text-[11px]' : 'text-[#888888] text-[11px]'}>
+                    (2)
+                  </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setMobileCompareMode('stacked')}
-                  className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap inline-flex items-center gap-1 shrink-0 leading-none ${
                     mobileCompareMode === 'stacked'
                       ? 'bg-[#690B1B] text-white shadow-xs'
-                      : 'text-[#666666]'
+                      : 'text-[#666666] hover:text-[#111111]'
                   }`}
                 >
-                  📋 Stacked ({selectedUnis.length})
+                  <span>📋 Stacked</span>
+                  <span className={mobileCompareMode === 'stacked' ? 'text-white/80 text-[11px]' : 'text-[#888888] text-[11px]'}>
+                    ({selectedUnis.length})
+                  </span>
                 </button>
               </div>
             </div>

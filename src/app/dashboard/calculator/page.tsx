@@ -812,7 +812,7 @@ function NetPriceCalculatorContent() {
                         {opp.title}
                       </div>
                       <div>
-                        <span className="inline-block text-[#16a34a] font-extrabold text-[11px] bg-[#16a34a]/10 px-2 py-0.5 rounded-full border border-[#16a34a]/20 max-w-full break-words leading-tight">
+                        <span className="inline-block text-[#15803d] font-bold text-[11.5px] bg-[#16a34a]/10 px-2.5 py-1 rounded-[8px] border border-[#16a34a]/20 max-w-full break-words leading-snug">
                           {opp.estimatedAmount}
                         </span>
                       </div>
@@ -1806,30 +1806,36 @@ function NetPriceCalculatorContent() {
                   {/* Mode switch & selector when 3+ universities */}
                   {compareUniversities.length > 2 && (
                     <div className="bg-[#FAF8F6] p-3 rounded-[18px] border border-[#E7E2DE] space-y-2.5">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[12px] font-bold text-[#111111]">Mobile View:</span>
-                        <div className="flex items-center bg-white border border-[#E7E2DE] rounded-full p-0.5 text-[11px] font-bold">
+                      <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+                        <span className="text-[12px] font-bold text-[#111111] whitespace-nowrap shrink-0">Mobile View:</span>
+                        <div className="inline-flex items-center bg-white border border-[#E7E2DE] rounded-full p-1 text-[11px] font-bold shrink-0 shadow-2xs">
                           <button
                             type="button"
                             onClick={() => setMobileCompareMode('h2h')}
-                            className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                            className={`px-2.5 sm:px-3 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap inline-flex items-center gap-1 shrink-0 leading-none ${
                               mobileCompareMode === 'h2h'
                                 ? 'bg-[#690B1B] text-white shadow-xs'
-                                : 'text-[#666666]'
+                                : 'text-[#666666] hover:text-[#111111]'
                             }`}
                           >
-                            ⚡ Head-to-Head (2)
+                            <span>⚡ Head-to-Head</span>
+                            <span className={mobileCompareMode === 'h2h' ? 'text-white/80 text-[10.5px]' : 'text-[#888888] text-[10.5px]'}>
+                              (2)
+                            </span>
                           </button>
                           <button
                             type="button"
                             onClick={() => setMobileCompareMode('stacked')}
-                            className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                            className={`px-2.5 sm:px-3 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap inline-flex items-center gap-1 shrink-0 leading-none ${
                               mobileCompareMode === 'stacked'
                                 ? 'bg-[#690B1B] text-white shadow-xs'
                                 : 'text-[#666666]'
                             }`}
                           >
-                            📋 Stacked ({compareUniversities.length})
+                            <span>📋 Stacked</span>
+                            <span className={mobileCompareMode === 'stacked' ? 'text-white/80 text-[10.5px]' : 'text-[#888888] text-[10.5px]'}>
+                              ({compareUniversities.length})
+                            </span>
                           </button>
                         </div>
                       </div>
