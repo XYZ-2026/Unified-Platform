@@ -597,7 +597,7 @@ export const COUNTRY_GUIDES: Record<string, CountryGuideData> = {
     "slug": "canada",
     "countryName": "Canada",
     "heroDescription": "Experience globally ranked higher education, affordable living standards, and clear post-graduation work permit pathways.",
-    "heroImage": "https://images.unsplash.com/photo-1517935703635-2717090c2210?auto=format&fit=crop&w=1200&q=80",
+    "heroImage": "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=1200&q=80",
     "heroBadgeText": "Plan with clarity · Canada edition",
     "heroFacts": {
       "tuition": "CAD $18,000–$40,000 / yr",
@@ -6022,7 +6022,7 @@ export const COUNTRY_GUIDES: Record<string, CountryGuideData> = {
     "slug": "belgium",
     "countryName": "Belgium",
     "heroDescription": "Study at the diplomatic heart of the European Union with world-ranked research institutions, affordable tuition, and rich multiculturalism.",
-    "heroImage": "https://images.unsplash.com/photo-1572979203492-c14491745480?auto=format&fit=crop&w=1200&q=80",
+    "heroImage": "https://images.unsplash.com/photo-1491557345352-5929e343eb89?auto=format&fit=crop&w=1200&q=80",
     "heroBadgeText": "Plan with clarity · Belgium edition",
     "heroFacts": {
       "tuition": "€1,000–€7,000 / yr",
@@ -7569,7 +7569,7 @@ export const COUNTRY_GUIDES: Record<string, CountryGuideData> = {
     "slug": "taiwan",
     "countryName": "Taiwan",
     "heroDescription": "Study in Asia’s high-tech semiconductor capital with world-ranked universities, affordable tuition, and generous government scholarships.",
-    "heroImage": "https://images.unsplash.com/photo-1508248017083-1628d0225d36?auto=format&fit=crop&w=1200&q=80",
+    "heroImage": "https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?auto=format&fit=crop&w=1200&q=80",
     "heroBadgeText": "Plan with clarity · Taiwan edition",
     "heroFacts": {
       "tuition": "NTD 50,000–120,000 / yr",
@@ -11965,7 +11965,7 @@ export const COUNTRY_GUIDES: Record<string, CountryGuideData> = {
     "slug": "mexico",
     "countryName": "Mexico",
     "heroDescription": "Study in Latin America’s cultural powerhouse with top-ranked universities (UNAM, Tec de Monterrey), low tuition, and vibrant student lifestyle.",
-    "heroImage": "https://images.unsplash.com/photo-1512815767263-ef5a02e64817?auto=format&fit=crop&w=1200&q=80",
+    "heroImage": "https://images.unsplash.com/photo-1518638150340-f706e86654de?auto=format&fit=crop&w=1200&q=80",
     "heroBadgeText": "Plan with clarity · Mexico edition",
     "heroFacts": {
       "tuition": "$2,000–$7,000 / yr",
