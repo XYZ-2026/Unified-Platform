@@ -17,7 +17,8 @@ import {
   Share2,
   BookOpen,
   UserCheck,
-  FileText
+  FileText,
+  Calculator
 } from 'lucide-react';
 import { calculateDeadlineInfo } from '@/lib/deadlineUtils';
 
@@ -138,7 +139,7 @@ export default function DashboardHomePage() {
   return (
     <main className="p-3.5 sm:p-5 md:p-8 space-y-4 sm:space-y-5 md:space-y-6 max-w-7xl mx-auto w-full">
       {/* PROMOTIONAL TOP BANNER */}
-      <div className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[14px] sm:rounded-[18px] p-3.5 sm:p-5 text-white flex items-center justify-between gap-3 shadow-sm border border-white/10">
+      <div className="bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] rounded-[14px] sm:rounded-[18px] p-3.5 sm:p-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm border border-white/10">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
             <Sparkles size={16} className="text-[#C9A55D]" />
@@ -150,7 +151,7 @@ export default function DashboardHomePage() {
             </div>
           </div>
         </div>
-        <button className="shrink-0 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full bg-[#C9A55D] hover:bg-[#b8924b] text-black font-bold text-[11px] sm:text-[13px] transition-all flex items-center gap-1.5 shadow-xs whitespace-nowrap cursor-pointer active:scale-95">
+        <button className="shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#C9A55D] hover:bg-[#b8924b] text-black font-bold text-[11px] sm:text-[13px] transition-all flex items-center justify-center gap-1.5 shadow-xs whitespace-nowrap cursor-pointer active:scale-95 w-full sm:w-auto text-center">
           <span>30% Off</span>
           <ArrowRight size={12} />
         </button>
@@ -360,7 +361,7 @@ export default function DashboardHomePage() {
       {/* RECOMMENDED FOR YOU GRID (4 ACTION CARDS) */}
       <div className="pt-1 sm:pt-2 md:pt-4">
         <h3 className="text-[15px] sm:text-[18px] font-bold text-[#111111] mb-3 sm:mb-4">Recommended Actions for You</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-4">
           {[
             {
               title: "See your real admission chances",
@@ -370,6 +371,15 @@ export default function DashboardHomePage() {
               btnBg: "bg-[#690B1B] text-white",
               icon: BarChart3,
               badge: "RECOMMENDED"
+            },
+            {
+              title: "Net Price Calculator",
+              desc: "Estimate tuition, aid & true out-of-pocket costs.",
+              action: "Calculate →",
+              href: "/dashboard/calculator",
+              btnBg: "bg-[#690B1B] text-white",
+              icon: Calculator,
+              badge: "FINANCIAL AID"
             },
             {
               title: "Explore Admitted SOPs",

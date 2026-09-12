@@ -23,6 +23,9 @@ interface University extends UniversitySearchRecord {
   bannerAlt: string;
   popularMajors: string[];
   slug: string;
+  careerOutcomes?: string;
+  expectedSalary?: string;
+  roi?: string;
 }
 
 // Country flag emoji mapping
@@ -336,6 +339,23 @@ export default function UniversityFinderPage() {
                     )}
                   </div>
                 )}
+
+                {/* Value & ROI Badges */}
+                {(u.roi || u.expectedSalary) && (
+                  <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                    {u.roi && (
+                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded-full shadow-2xs">
+                        <TrendingUp size={11} className="shrink-0" />
+                        <span>ROI: {u.roi.split(' ')[0]}</span>
+                      </span>
+                    )}
+                    {u.expectedSalary && (
+                      <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-[#854D0E] bg-[#FEF9C3] border border-[#FEF08A] px-2 py-0.5 rounded-full truncate max-w-[200px]" title={u.expectedSalary}>
+                        <span>Exp. Salary: {u.expectedSalary.split('(')[0].trim()}</span>
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Footer */}
@@ -371,21 +391,21 @@ export default function UniversityFinderPage() {
 
       {/* PAGINATION */}
       {totalPages > 1 && !loading && (
-        <div className="flex items-center justify-center gap-2 pt-4">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pt-4 px-1 w-full">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-[12px] text-[12px] sm:text-[13px] font-bold transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer shrink-0 whitespace-nowrap active:scale-95 ${
               currentPage === 1
                 ? 'bg-[#F7F5F3] text-[#CCC] cursor-not-allowed'
                 : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
             }`}
           >
-            <ChevronLeft size={14} />
-            <span>Previous</span>
+            <ChevronLeft size={14} className="shrink-0" />
+            <span className="whitespace-nowrap">Previous</span>
           </button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-wrap justify-center">
             {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => {
               let pageNum: number;
               if (totalPages <= 7) {
@@ -402,7 +422,7 @@ export default function UniversityFinderPage() {
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`w-10 h-10 rounded-[10px] text-[13px] font-bold transition-all cursor-pointer active:scale-95 ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-[8px] sm:rounded-[10px] text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer shrink-0 active:scale-95 ${
                     currentPage === pageNum
                       ? 'bg-[#690B1B] text-white shadow-xs'
                       : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
@@ -417,14 +437,14 @@ export default function UniversityFinderPage() {
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-[12px] text-[12px] sm:text-[13px] font-bold transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer shrink-0 whitespace-nowrap active:scale-95 ${
               currentPage === totalPages
                 ? 'bg-[#F7F5F3] text-[#CCC] cursor-not-allowed'
                 : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
             }`}
           >
-            <span>Next</span>
-            <ChevronRight size={14} />
+            <span className="whitespace-nowrap">Next</span>
+            <ChevronRight size={14} className="shrink-0" />
           </button>
         </div>
       )}

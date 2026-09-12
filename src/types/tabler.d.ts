@@ -48,6 +48,8 @@ declare module '@tabler/icons-react' {
   export const IconSuperscript: any;
   export const IconTable: any;
   export const IconCheck: any;
+  export const IconEdit: any;
+  export const IconPencil: any;
   export const IconAlertTriangle: any;
   export const IconAlertCircle: any;
   export const IconInfoCircle: any;

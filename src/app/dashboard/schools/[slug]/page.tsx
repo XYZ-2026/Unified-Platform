@@ -25,6 +25,7 @@ import {
   AlertCircle,
   TrendingUp,
   PenTool,
+  Briefcase,
 } from 'lucide-react';
 
 /* ─── Types ───────────────────────────────────────────────── */
@@ -41,6 +42,7 @@ interface UniversityDetail {
   livingCosts: string;
   acceptanceRate: string;
   website: string;
+  bannerImage?: string;
   bannerAlt: string;
   popularMajors: string[];
   slug: string;
@@ -49,9 +51,30 @@ interface UniversityDetail {
   avgNeedBasedGrant: string;
   requiredEssayPromptsDetails: string;
   writingRequirements: string;
+  careerOutcomes?: string;
+  expectedSalary?: string;
+  roi?: string;
+  scholarships?: string;
 }
 
 /* ─── Helpers ─────────────────────────────────────────────── */
+
+function formatWixImageUrl(url: any): string {
+  if (!url) return '';
+  if (typeof url !== 'string') {
+    if (url.url) return formatWixImageUrl(url.url);
+    if (url.src) return formatWixImageUrl(url.src);
+    return '';
+  }
+  const trimmed = url.trim();
+  if (trimmed.startsWith('wix:image://v1/')) {
+    const match = trimmed.match(/^wix:image:\/\/v1\/([^\/#]+)/);
+    if (match && match[1]) {
+      return `https://static.wixstatic.com/media/${match[1]}`;
+    }
+  }
+  return trimmed;
+}
 
 function getCountryFlag(code: string): string {
   const flags: Record<string, string> = {
@@ -147,6 +170,50 @@ function getUniversityType(name: string): string {
   return 'Higher Education';
 }
 
+function parseRoi(roiStr?: string) {
+  if (!roiStr) return { percentage: '', rating: '' };
+  const match = roiStr.match(/^([\d,]+%)\s*(?:\((.*?)\))?/i);
+  if (match) {
+    return {
+      percentage: match[1],
+      rating: match[2]?.trim() || '',
+    };
+  }
+  return { percentage: roiStr, rating: '' };
+}
+
+function parseSalary(salaryStr?: string) {
+  if (!salaryStr) return { hero: '', range: '', full: '' };
+  const medianMatch = salaryStr.match(/median\s*~?\s*(\$[\d,]+)/i);
+  const median = medianMatch ? medianMatch[1] : '';
+
+  let range = salaryStr.replace(/\(.*?\)/g, '').replace(/\/yr/gi, '').trim();
+  range = range.replace(/–|-/g, ' – ');
+
+  return {
+    hero: median || range,
+    isMedian: Boolean(median),
+    range: median ? range : '',
+    full: salaryStr,
+  };
+}
+
+function parseCareerOutcomes(outcomesStr?: string) {
+  if (!outcomesStr) return { rate: '', timeline: '', label: '' };
+  const rateMatch = outcomesStr.match(/(\d+[\s–\-]+\d+%)|(\d+%\+?)/);
+  const rate = rateMatch ? rateMatch[0].replace(/\s+/g, '').replace(/–|-/g, ' – ') : '';
+
+  const timeMatch = outcomesStr.match(/(?:within|in)\s+(\d+\s+(?:months?|years?))/i);
+  const timeline = timeMatch ? `Within ${timeMatch[1]}` : 'Post-Graduation';
+
+  return {
+    rate: rate || outcomesStr,
+    timeline,
+    label: 'Placement / Grad School',
+    full: outcomesStr,
+  };
+}
+
 /* ─── Component ───────────────────────────────────────────── */
 
 export default function UniversityDetailPage() {
@@ -155,6 +222,7 @@ export default function UniversityDetailPage() {
   const slug = (params?.slug as string) || '';
 
   const [university, setUniversity] = useState<UniversityDetail | null>(null);
+  const [bannerError, setBannerError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -172,6 +240,7 @@ export default function UniversityDetailPage() {
 
         if (data.success && data.university) {
           setUniversity(data.university);
+          setBannerError(false);
         } else {
           setError(data.error || 'University not found');
         }
@@ -192,7 +261,7 @@ export default function UniversityDetailPage() {
       <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
         {/* Skeleton hero */}
         <div className="relative rounded-[24px] overflow-hidden border border-[#E7E2DE] bg-white animate-pulse">
-          <div className="h-[220px] md:h-[260px] bg-gradient-to-r from-gray-200 to-gray-300" />
+          <div className="h-[250px] sm:h-[320px] md:h-[370px] lg:h-[400px] bg-gradient-to-r from-gray-200 to-gray-300" />
           <div className="p-6 md:p-8 -mt-16 mx-4 md:mx-8 rounded-[20px] bg-white border border-[#E7E2DE] space-y-4 relative">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-[18px] bg-gray-200" />
@@ -271,6 +340,7 @@ export default function UniversityDetailPage() {
   const location = [u.state, u.country].filter(Boolean).join(', ');
   const essaySections = parseEssayPrompts(u.requiredEssayPromptsDetails);
   const uniType = getUniversityType(u.name);
+  const bannerSrc = formatWixImageUrl(u.bannerImage);
 
   // Compute total cost
   const parseCurrency = (s: string) => {
@@ -280,6 +350,10 @@ export default function UniversityDetailPage() {
   const tuitionVal = parseCurrency(u.tuition);
   const livingVal = parseCurrency(u.livingCosts);
   const totalCost = tuitionVal + livingVal;
+
+  const roiData = parseRoi(u.roi);
+  const salaryData = parseSalary(u.expectedSalary);
+  const outcomeData = parseCareerOutcomes(u.careerOutcomes);
 
   // ─── RENDER ────────────────────────────────────────────────
   return (
@@ -299,18 +373,36 @@ export default function UniversityDetailPage() {
          HERO COVER BANNER & OVERLAY CARD
          ═══════════════════════════════════════════════════════ */}
       <div className="relative rounded-[24px] overflow-hidden shadow-sm border border-[#E7E2DE] bg-white">
-        {/* TOP GRADIENT BANNER */}
-        <div className="h-[190px] sm:h-[230px] md:h-[260px] bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] relative p-3.5 sm:p-6 flex flex-wrap items-start justify-between gap-2.5 text-white">
-          <div className="absolute right-0 top-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-          <div className="absolute left-1/2 bottom-0 w-60 h-60 bg-white/3 rounded-full blur-2xl -mb-32 pointer-events-none" />
+        {/* TOP MAROON BANNER CONTAINER */}
+        <div className="h-[250px] sm:h-[320px] md:h-[370px] lg:h-[400px] bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] relative p-3.5 sm:p-6 flex flex-wrap items-start justify-between gap-2.5 text-white overflow-hidden">
+          {/* University Banner Image from CMS (if available & valid) */}
+          {bannerSrc && !bannerError ? (
+            <>
+              <img
+                src={bannerSrc}
+                alt={u.bannerAlt || `${u.name} campus banner`}
+                onError={() => setBannerError(true)}
+                className="absolute inset-0 w-full h-full object-cover object-center z-0 select-none transition-opacity duration-300"
+              />
+              {/* Refined gradient overlays to ensure badge/button readability and sleek visual depth */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/35 z-[1] pointer-events-none" />
+              <div className="absolute inset-0 bg-[#690B1B]/15 mix-blend-multiply z-[1] pointer-events-none" />
+            </>
+          ) : (
+            /* Fallback maroon ambient lights when no image is present in CMS */
+            <>
+              <div className="absolute right-0 top-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+              <div className="absolute left-1/2 bottom-0 w-60 h-60 bg-white/3 rounded-full blur-2xl -mb-32 pointer-events-none" />
+            </>
+          )}
 
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 h-[32px] sm:h-[36px] px-3 sm:px-3.5 rounded-full bg-white/10 backdrop-blur-md text-[#C9A55D] text-[11px] sm:text-[12px] font-bold relative z-10 shrink-0">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 h-[32px] sm:h-[36px] px-3 sm:px-3.5 rounded-full bg-black/25 backdrop-blur-md border border-white/15 text-[#C9A55D] text-[11px] sm:text-[12px] font-bold relative z-10 shrink-0 shadow-xs">
             <Sparkles size={14} className="shrink-0" />
             <span>Verified University Profile</span>
           </div>
 
           <div className="flex items-center gap-2 relative z-10 shrink-0">
-            <button className="h-[32px] sm:h-[36px] px-3.5 sm:px-4 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-[11.5px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 shrink-0">
+            <button className="h-[32px] sm:h-[36px] px-3.5 sm:px-4 rounded-full bg-black/25 hover:bg-black/40 backdrop-blur-md border border-white/15 text-white text-[11.5px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 shrink-0 shadow-xs">
               <Bookmark size={14} className="shrink-0" />
               <span>Add to My List</span>
             </button>
@@ -318,7 +410,7 @@ export default function UniversityDetailPage() {
         </div>
 
         {/* FLOATING DETAILS OVERLAY CARD */}
-        <div className="p-4 sm:p-6 md:p-8 bg-white relative -mt-14 sm:-mt-16 mx-3 sm:mx-6 md:mx-8 rounded-[18px] sm:rounded-[20px] shadow-lg border border-[#E7E2DE] space-y-4">
+        <div className="p-4 sm:p-6 md:p-8 bg-white relative -mt-14 sm:-mt-16 mx-3 sm:mx-6 md:mx-8 rounded-[18px] sm:rounded-[20px] shadow-lg border border-[#E7E2DE] space-y-4 z-10">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
               <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-[14px] sm:rounded-[18px] bg-[#F7F0F1] border border-[#690B1B]/20 flex items-center justify-center text-[26px] sm:text-[36px] shrink-0 aspect-square">
@@ -348,6 +440,12 @@ export default function UniversityDetailPage() {
               <span className="text-[11px] sm:text-[12px] font-bold bg-[#FFF8EB] text-[#9E731A] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
                 {uniType}
               </span>
+              {u.roi && (
+                <span className="text-[11px] sm:text-[12px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full whitespace-nowrap inline-flex items-center gap-1.5 shadow-2xs">
+                  <TrendingUp size={13} className="text-[#059669] shrink-0" />
+                  <span>ROI: {u.roi}</span>
+                </span>
+              )}
             </div>
           </div>
 
@@ -395,6 +493,7 @@ export default function UniversityDetailPage() {
             { id: 'overview', label: 'Overview' },
             { id: 'admissions', label: 'Admissions & Requirements' },
             { id: 'cost', label: 'Cost & Scholarships' },
+            { id: 'careers', label: 'Career & ROI' },
             { id: 'essays', label: 'SOP & Essays' },
             { id: 'majors', label: 'Popular Majors' },
           ].map((tab) => (
@@ -538,6 +637,172 @@ export default function UniversityDetailPage() {
             </div>
           )}
 
+          {/* ─── CAREER OUTCOMES, EXPECTED SALARY & ROI SECTION ───────────── */}
+          {(activeTab === 'overview' || activeTab === 'careers') && (u.careerOutcomes || u.expectedSalary || u.roi) && (
+            <div className="bg-white border border-[#E7E2DE] rounded-[22px] p-5 sm:p-7 shadow-xs space-y-6 relative overflow-hidden">
+              {/* Subtle decorative ambient lights */}
+              <div className="absolute right-0 top-0 w-80 h-80 bg-emerald-50/40 rounded-full blur-3xl pointer-events-none -mr-24 -mt-24" />
+              <div className="absolute left-1/3 bottom-0 w-72 h-72 bg-amber-50/30 rounded-full blur-3xl pointer-events-none -mb-24" />
+
+              {/* Section Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#F0EBE6] pb-4 relative z-10">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-[14px] bg-gradient-to-br from-[#ECFDF5] to-[#D1FAE5] text-[#059669] flex items-center justify-center border border-[#A7F3D0] shrink-0 shadow-2xs">
+                    <TrendingUp size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-[20px] sm:text-[22px] font-bold text-[#111111] leading-tight">
+                      Career Outcomes &amp; Return on Investment (ROI)
+                    </h3>
+                    <p className="text-[13px] text-[#666666] mt-0.5 leading-normal">
+                      Post-graduation earnings potential, placement metrics, and long-term education value
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Metric Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+                {/* 1. Return on Investment Card */}
+                {u.roi ? (
+                  <div className="group relative bg-white border border-[#E7E2DE] hover:border-[#10B981]/50 rounded-[18px] p-5 flex flex-col justify-between transition-all duration-200 shadow-2xs hover:shadow-sm">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 min-w-0">
+                        <span className="text-[11px] font-bold text-[#059669] uppercase tracking-wider bg-[#ECFDF5] px-2.5 py-1 rounded-full border border-[#A7F3D0]/60 whitespace-nowrap shrink-0">
+                          10-Year ROI
+                        </span>
+                        <div className="w-8 h-8 rounded-full bg-[#ECFDF5] text-[#059669] flex items-center justify-center border border-[#A7F3D0] shrink-0">
+                          <TrendingUp size={15} />
+                        </div>
+                      </div>
+
+                      <div className="my-4">
+                        <div className="text-[30px] sm:text-[34px] font-black text-[#111111] leading-none tracking-tight whitespace-nowrap">
+                          {roiData.percentage}
+                        </div>
+                        {roiData.rating && (
+                          <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11.5px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] whitespace-nowrap">
+                            <Sparkles size={11} className="shrink-0" />
+                            <span>{roiData.rating} Rating</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-[12px] text-[#666666] leading-relaxed pt-3 border-t border-[#F5F2EF]">
+                      Projected earnings premium relative to the total cost of attendance.
+                    </p>
+                  </div>
+                ) : null}
+
+                {/* 2. Expected Salary Range Card */}
+                {u.expectedSalary ? (
+                  <div className="group relative bg-white border border-[#E7E2DE] hover:border-[#F59E0B]/50 rounded-[18px] p-5 flex flex-col justify-between transition-all duration-200 shadow-2xs hover:shadow-sm">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 min-w-0">
+                        <span className="text-[11px] font-bold text-[#B45309] uppercase tracking-wider bg-[#FEF3C7] px-2.5 py-1 rounded-full border border-[#FDE68A]/60 whitespace-nowrap shrink-0">
+                          Expected Salary
+                        </span>
+                        <div className="w-8 h-8 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center border border-[#FDE68A] shrink-0">
+                          <Briefcase size={15} />
+                        </div>
+                      </div>
+
+                      <div className="my-4">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-[28px] sm:text-[32px] font-black text-[#111111] leading-none tracking-tight whitespace-nowrap">
+                            {salaryData.hero}
+                          </span>
+                          <span className="text-[13px] font-bold text-[#888888] whitespace-nowrap">/ yr</span>
+                        </div>
+                        {salaryData.range && (
+                          <div className="mt-2.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11.5px] font-semibold text-[#92400E] bg-[#FFFBEB] border border-[#FDE68A] whitespace-nowrap">
+                            <span>Range: {salaryData.range}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-[12px] text-[#666666] leading-relaxed pt-3 border-t border-[#F5F2EF]">
+                      Starting to early-career compensation reported across academic programs.
+                    </p>
+                  </div>
+                ) : null}
+
+                {/* 3. Career Placement Outcomes Card */}
+                {u.careerOutcomes ? (
+                  <div className="group relative bg-white border border-[#E7E2DE] hover:border-[#6366F1]/50 rounded-[18px] p-5 flex flex-col justify-between transition-all duration-200 shadow-2xs hover:shadow-sm">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 min-w-0">
+                        <span className="text-[11px] font-bold text-[#4338CA] uppercase tracking-wider bg-[#EEF2FF] px-2.5 py-1 rounded-full border border-[#C7D2FE]/60 whitespace-nowrap shrink-0">
+                          Placement Rate
+                        </span>
+                        <div className="w-8 h-8 rounded-full bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center border border-[#C7D2FE] shrink-0">
+                          <GraduationCap size={15} />
+                        </div>
+                      </div>
+
+                      <div className="my-4">
+                        <div className="text-[28px] sm:text-[32px] font-black text-[#111111] leading-none tracking-tight whitespace-nowrap">
+                          {outcomeData.rate}
+                        </div>
+                        {outcomeData.timeline && (
+                          <div className="mt-2.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11.5px] font-semibold text-[#4338CA] bg-[#EEF2FF] border border-[#C7D2FE] whitespace-nowrap">
+                            <span>{outcomeData.timeline}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-[12px] text-[#666666] leading-relaxed pt-3 border-t border-[#F5F2EF]">
+                      Employed full-time in industry or pursuing advanced master's/doctoral study.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Financial Investment vs Payoff Overview */}
+              {(u.expectedSalary || u.roi) && (
+                <div className="bg-[#FAF8F6] border border-[#E7E2DE] rounded-[18px] p-4 sm:p-5 space-y-3.5 relative z-10">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <span className="text-[11.5px] font-bold text-[#690B1B] uppercase tracking-wider">
+                      Education Investment vs. Career Earning Power
+                    </span>
+                    {roiData.rating && (
+                      <span className="text-[12px] font-bold text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] px-2.5 py-0.5 rounded-full w-fit">
+                        ★ {roiData.rating} Return Tier
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="bg-white border border-[#E7E2DE] rounded-[14px] p-3.5 flex flex-col justify-center">
+                      <div className="text-[11px] font-bold text-[#777] uppercase tracking-wider">Annual Tuition</div>
+                      <div className="text-[18px] sm:text-[20px] font-bold text-[#111] mt-0.5">{u.tuition}</div>
+                      <div className="text-[11px] text-[#999] mt-0.5">Base investment / yr</div>
+                    </div>
+
+                    <div className="bg-white border border-[#E7E2DE] rounded-[14px] p-3.5 flex flex-col justify-center">
+                      <div className="text-[11px] font-bold text-[#777] uppercase tracking-wider">Projected Starting Comp</div>
+                      <div className="text-[18px] sm:text-[20px] font-bold text-[#15803d] mt-0.5">
+                        {salaryData.hero || u.expectedSalary}
+                      </div>
+                      <div className="text-[11px] text-[#999] mt-0.5">Early-career baseline</div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-white to-[#F0FDF4] border border-[#BBF7D0] rounded-[14px] p-3.5 flex flex-col justify-center">
+                      <div className="text-[11px] font-bold text-[#15803d] uppercase tracking-wider">10-Year ROI Multiple</div>
+                      <div className="text-[18px] sm:text-[20px] font-black text-[#15803d] mt-0.5">
+                        {roiData.percentage || u.roi}
+                      </div>
+                      <div className="text-[11px] text-[#15803d]/80 mt-0.5">Estimated net career surplus</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ─── COST & SCHOLARSHIPS TAB ──────────────────────── */}
           {(activeTab === 'overview' || activeTab === 'cost') && (
             <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-4">
@@ -580,6 +845,39 @@ export default function UniversityDetailPage() {
                       <span className="text-[14px] font-bold text-[#16a34a]">
                         ${Math.max(0, totalCost - parseCurrency(u.avgNeedBasedGrant)).toLocaleString()} / yr
                       </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Scholarships from CMS */}
+              {u.scholarships && (
+                <div className="mt-3 p-4 rounded-[14px] bg-[#F0FDF4] border border-[#BBF7D0] space-y-2">
+                  <div className="flex items-center gap-2 text-[13px] font-bold text-[#15803d]">
+                    <Award size={16} />
+                    <span>Scholarship &amp; Financial Aid Opportunities</span>
+                  </div>
+                  <p className="text-[13px] text-[#166534] leading-relaxed">
+                    {u.scholarships}
+                  </p>
+                </div>
+              )}
+
+              {/* Career Salary & ROI Payoff summary */}
+              {(u.expectedSalary || u.roi) && (
+                <div className="mt-3 p-3.5 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] flex flex-wrap items-center justify-between gap-3 text-[12.5px]">
+                  {u.expectedSalary && (
+                    <div className="flex items-center gap-2">
+                      <Briefcase size={14} className="text-[#690B1B]" />
+                      <span className="text-[#777]">Expected Career Salary:</span>
+                      <span className="font-bold text-[#111]">{u.expectedSalary}</span>
+                    </div>
+                  )}
+                  {u.roi && (
+                    <div className="flex items-center gap-2">
+                      <TrendingUp size={14} className="text-[#059669]" />
+                      <span className="text-[#777]">Projected ROI:</span>
+                      <span className="font-bold text-[#059669]">{u.roi}</span>
                     </div>
                   )}
                 </div>
@@ -629,7 +927,7 @@ export default function UniversityDetailPage() {
             </Link>
           </div>
 
-          {/* QUICK SUMMARY CARD - Cost */}
+          {/* QUICK SUMMARY CARD - Cost & Value */}
           <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-4">
             <h4 className="text-[16px] font-bold text-[#111] border-b border-[#F0EBE6] pb-3">
               Cost &amp; Financial Aid Summary
@@ -647,6 +945,18 @@ export default function UniversityDetailPage() {
                 <div className="flex justify-between">
                   <span className="text-[#777]">Avg Need-Based Grant</span>
                   <span className="font-bold text-[#16a34a]">{u.avgNeedBasedGrant}</span>
+                </div>
+              )}
+              {u.expectedSalary && (
+                <div className="flex justify-between items-start gap-2 pt-2 border-t border-[#F0EBE6]">
+                  <span className="text-[#777] shrink-0">Expected Salary</span>
+                  <span className="font-bold text-[#111] text-right">{u.expectedSalary}</span>
+                </div>
+              )}
+              {u.roi && (
+                <div className="flex justify-between items-center">
+                  <span className="text-[#777]">Estimated ROI</span>
+                  <span className="font-bold text-[#059669] text-right">{u.roi}</span>
                 </div>
               )}
             </div>
@@ -686,6 +996,18 @@ export default function UniversityDetailPage() {
                 <div className="flex justify-between">
                   <span className="text-[#777]">SAT Range</span>
                   <span className="font-bold text-[#111]">{u.satScore}</span>
+                </div>
+              )}
+              {u.roi && (
+                <div className="flex justify-between items-center pt-2 border-t border-[#F0EBE6]">
+                  <span className="text-[#777]">ROI Rating</span>
+                  <span className="font-bold text-[#059669]">{u.roi}</span>
+                </div>
+              )}
+              {u.careerOutcomes && (
+                <div className="flex flex-col gap-1 pt-2 border-t border-[#F0EBE6]">
+                  <span className="text-[#777]">Placement Outcomes</span>
+                  <span className="font-semibold text-[#222] text-[12px] leading-relaxed">{u.careerOutcomes}</span>
                 </div>
               )}
             </div>

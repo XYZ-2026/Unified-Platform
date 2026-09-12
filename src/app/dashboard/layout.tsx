@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getCachedUserDetails, subscribeToUserDetails } from '@/lib/userDetailsCache';
 import {
@@ -22,17 +22,28 @@ import {
   Menu,
   Activity,
   User,
-  X
+  X,
+  Calculator,
+  ArrowLeftRight
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, userData } = useAuth();
+  const router = useRouter();
+  const { user, userData, loading } = useAuth();
   const [initial, setInitial] = useState('S');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const pathname = usePathname();
 
   const isStudio = pathname === '/dashboard/essays/studio';
+
+  // ── STRICT AUTH GUARD ──
+  // If authentication check completes and no user is signed in, redirect to /login immediately
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [loading, user, router]);
 
   useEffect(() => {
     const userKey = user?.uid || user?.email || userData?.email || 'default';
@@ -52,6 +63,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => unsub();
   }, [user, userData]);
 
+  // Lock body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (mobileSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileSidebarOpen]);
+
+  // If loading or unauthenticated, DO NOT render ANY element of the dashboard
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-[#F6F4F2] flex flex-col items-center justify-center p-6 font-[Poppins]">
+        <div className="flex flex-col items-center gap-4 text-center max-w-sm">
+          <div className="w-10 h-10 rounded-full border-3 border-[#690B1B]/20 border-t-[#690B1B] animate-spin" />
+          <div className="space-y-1">
+            <h3 className="text-[15px] font-bold text-[#111111]">
+              {loading ? 'Checking authentication...' : 'Redirecting to sign up...'}
+            </h3>
+            <p className="text-[12.5px] text-[#777777]">
+              Please sign up or log in to access the dashboard.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (isStudio) {
     return <>{children}</>;
   }
@@ -61,6 +103,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { id: 'college-list', label: 'My College List', icon: GraduationCap, href: '/dashboard/college-list' },
     { id: 'tracker', label: 'Application Tracker', icon: Calendar, href: '/dashboard/tracker' },
     { id: 'schools', label: 'University Finder', icon: Compass, href: '/dashboard/schools' },
+    { id: 'calculator', label: 'Net Price Calculator', icon: Calculator, href: '/dashboard/calculator' },
+    { id: 'compare', label: 'Compare Universities', icon: ArrowLeftRight, href: '/dashboard/compare' },
   ];
 
   const applicationItems = [
@@ -72,7 +116,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const resourceItems = [
     { id: 'admits', label: 'Admitted Profiles', icon: BookOpen, href: '/dashboard/past-admits' },
-    { id: 'exemplars', label: 'SOP Examples', icon: Award, href: '/dashboard/exemplar-essays' },
+    { id: 'exemplars', label: 'Admitted Essays', icon: Award, href: '/dashboard/exemplar-essays' },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/dashboard/settings' },
   ];
 
@@ -88,173 +132,213 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="bg-[#F6F4F2] text-[#111111] font-[Poppins] min-h-screen flex flex-col md:flex-row antialiased selection:bg-[#690B1B] selection:text-white">
       {/* ═══════════════════════════════════════════════════════════════
-         LEFT SIDEBAR — Unified Dashboard Navigation
+         LEFT SIDEBAR — Unified Dashboard Navigation (LOCKED & STATIONARY)
          ═══════════════════════════════════════════════════════════════ */}
       <aside
-        className={`fixed md:sticky top-0 z-40 h-screen bg-white border-r border-[#E7E2DE] transition-all duration-300 ease-in-out flex flex-col justify-between shadow-[4px_0_24px_rgba(0,0,0,0.06)] ${
-          sidebarCollapsed ? 'w-[80px]' : 'w-[270px]'
-        } ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+        className={`fixed top-0 left-0 bottom-0 h-screen max-h-screen z-40 bg-white border-r border-[#E7E2DE] transition-all duration-300 ease-in-out flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.06)] overflow-hidden select-none ${
+          sidebarCollapsed ? 'w-[80px]' : 'w-[280px] max-w-[85vw] md:max-w-none'
+        } ${mobileSidebarOpen ? 'translate-x-0 !z-50' : '-translate-x-full md:translate-x-0'}`}
       >
-        {/* SIDEBAR HEADER */}
-        <div>
-          <div className="h-[76px] px-4 flex items-center justify-between border-b border-[#F0EBE6]">
-            <Link href="/" className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
-              <div className="w-[40px] h-[40px] rounded-[12px] shadow-[0_4px_16px_rgba(105,11,27,0.2)] overflow-hidden shrink-0">
-                <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
+        {/* SIDEBAR HEADER - PINNED AT TOP */}
+        <div className={`h-[64px] sm:h-[68px] flex items-center border-b border-[#F0EBE6] shrink-0 bg-white z-10 ${
+          sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-4'
+        }`}>
+          {sidebarCollapsed ? (
+            <button
+              onClick={() => setSidebarCollapsed(false)}
+              className="w-[42px] h-[42px] rounded-[12px] flex items-center justify-center hover:bg-[#F7F0F1] transition-all cursor-pointer group relative shadow-2xs"
+              title="Click to expand sidebar"
+            >
+              <div className="w-[36px] h-[36px] rounded-[10px] shadow-xs overflow-hidden shrink-0">
+                <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover group-hover:opacity-10 transition-opacity" />
               </div>
-              {!sidebarCollapsed && (
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[#690B1B]">
+                <Menu size={20} />
+              </div>
+            </button>
+          ) : (
+            <>
+              <Link href="/" className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
+                <div className="w-[38px] h-[38px] rounded-[11px] shadow-[0_4px_16px_rgba(105,11,27,0.2)] overflow-hidden shrink-0">
+                  <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-[15px] font-bold tracking-[-0.02em] leading-tight text-[#111] truncate">
                     Abroad Simplified
                   </div>
                   <div className="mt-0.5 flex items-center gap-1.5 whitespace-nowrap">
                     <span className="w-[4px] h-[4px] rounded-full bg-[#C9A55D] shrink-0" />
-                    <span className="text-[9px] uppercase tracking-[0.18em] font-semibold text-[#A3A3A3]">
+                    <span className="text-[9.5px] uppercase tracking-[0.18em] font-semibold text-[#A3A3A3]">
                       Admissions Hub
                     </span>
                   </div>
                 </div>
-              )}
-            </Link>
+              </Link>
 
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden md:flex p-1.5 text-[#999999] hover:text-[#690B1B] hover:bg-[#F7F0F1] rounded-lg transition-colors shrink-0"
-              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              <Menu size={18} />
-            </button>
+              <button
+                onClick={() => setSidebarCollapsed(true)}
+                className="hidden md:flex p-1.5 text-[#999999] hover:text-[#690B1B] hover:bg-[#F7F0F1] rounded-lg transition-colors shrink-0 cursor-pointer"
+                title="Collapse sidebar"
+              >
+                <Menu size={18} />
+              </button>
 
-            {/* Mobile close button */}
-            <button
-              onClick={() => setMobileSidebarOpen(false)}
-              className="md:hidden p-1.5 text-[#999999] hover:text-[#690B1B] hover:bg-[#F7F0F1] rounded-lg transition-colors shrink-0"
-              title="Close sidebar"
-            >
-              <X size={20} />
-            </button>
+              {/* Mobile close button */}
+              <button
+                onClick={() => setMobileSidebarOpen(false)}
+                className="md:hidden p-1.5 text-[#999999] hover:text-[#690B1B] hover:bg-[#F7F0F1] rounded-lg transition-colors shrink-0 cursor-pointer"
+                title="Close sidebar"
+              >
+                <X size={20} />
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* SIDEBAR NAVIGATION ITEMS (SCROLLABLE INDEPENDENTLY WHEN HOVERED) */}
+        <div
+          onWheel={(e) => e.stopPropagation()}
+          className={`flex-1 py-3 sm:py-4 flex flex-col justify-start overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:#E3DDD9_transparent] ${
+            sidebarCollapsed ? 'px-2 space-y-3 items-center' : 'px-3 sm:px-3.5 space-y-4 sm:space-y-5'
+          }`}
+        >
+          {/* MAIN NAVIGATION */}
+          <div className={sidebarCollapsed ? 'space-y-1.5 w-full flex flex-col items-center' : 'space-y-1 sm:space-y-1.5'}>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  title={item.label}
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className={`rounded-[12px] transition-all flex items-center ${
+                    sidebarCollapsed
+                      ? 'w-[44px] h-[44px] justify-center p-0'
+                      : 'w-full gap-3 px-3.5 py-2.5 text-[14px] sm:text-[14.5px] font-semibold'
+                  } ${
+                    isActive
+                      ? 'bg-[#F7F0F1] text-[#690B1B] font-bold shadow-2xs'
+                      : 'text-[#444444] hover:bg-[#F9F7F5] hover:text-[#111111]'
+                  }`}
+                >
+                  <Icon size={sidebarCollapsed ? 20 : 19} className={isActive ? 'text-[#690B1B]' : 'text-[#777777]'} />
+                  {!sidebarCollapsed && (
+                    <span className="flex-1 text-left truncate">{item.label}</span>
+                  )}
+                  {isActive && !sidebarCollapsed && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#690B1B] shrink-0" />
+                  )}
+                </Link>
+              );
+            })}
           </div>
 
-          {/* SIDEBAR NAVIGATION ITEMS */}
-          <div className="px-3 py-4 space-y-6 overflow-y-auto max-h-[calc(100vh-170px)] custom-scrollbar">
-            {/* MAIN NAVIGATION */}
-            <div className="space-y-1">
-              {navItems.map((item) => {
+          {/* MY APPLICATION */}
+          <div className={sidebarCollapsed ? 'w-full flex flex-col items-center' : ''}>
+            {!sidebarCollapsed && (
+              <div className="px-3.5 text-[10px] sm:text-[10.5px] font-bold text-[#9A9A9A] uppercase tracking-[0.16em] mb-1.5">
+                My Application
+              </div>
+            )}
+            <div className={sidebarCollapsed ? 'space-y-1.5 w-full flex flex-col items-center' : 'space-y-1 sm:space-y-1.5'}>
+              {applicationItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.id}
                     href={item.href}
+                    title={item.label}
                     onClick={() => setMobileSidebarOpen(false)}
-                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-[12px] text-[14px] font-medium transition-all ${
+                    className={`rounded-[12px] transition-all flex items-center ${
+                      sidebarCollapsed
+                        ? 'w-[44px] h-[44px] justify-center p-0'
+                        : 'w-full gap-3 px-3.5 py-2.5 text-[14px] sm:text-[14.5px] font-semibold'
+                    } ${
                       isActive
-                        ? 'bg-[#F7F0F1] text-[#690B1B] font-bold shadow-xs'
-                        : 'text-[#555555] hover:bg-[#F9F7F5] hover:text-[#111111]'
+                        ? 'bg-[#F7F0F1] text-[#690B1B] font-bold shadow-2xs'
+                        : 'text-[#444444] hover:bg-[#F9F7F5] hover:text-[#111111]'
                     }`}
                   >
-                    <Icon size={19} className={isActive ? 'text-[#690B1B]' : 'text-[#777777]'} />
+                    <Icon size={sidebarCollapsed ? 20 : 19} className={isActive ? 'text-[#690B1B]' : 'text-[#777777]'} />
                     {!sidebarCollapsed && (
                       <span className="flex-1 text-left truncate">{item.label}</span>
                     )}
-                    {isActive && !sidebarCollapsed && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#690B1B] shrink-0" />
+                    {!sidebarCollapsed && item.badge && (
+                      <span className="text-[9px] font-bold bg-[#690B1B] text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {item.badge}
+                      </span>
                     )}
                   </Link>
                 );
               })}
             </div>
+          </div>
 
-            {/* MY APPLICATION */}
-            <div>
-              {!sidebarCollapsed && (
-                <div className="px-3 text-[10px] font-bold text-[#A3A3A3] uppercase tracking-[0.2em] mb-2">
-                  My Application
-                </div>
-              )}
-              <div className="space-y-1">
-                {applicationItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      onClick={() => setMobileSidebarOpen(false)}
-                      className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-[12px] text-[14px] font-medium transition-all ${
-                        isActive
-                          ? 'bg-[#F7F0F1] text-[#690B1B] font-bold'
-                          : 'text-[#555555] hover:bg-[#F9F7F5] hover:text-[#111111]'
-                      }`}
-                    >
-                      <Icon size={18} className={isActive ? 'text-[#690B1B]' : 'text-[#888888]'} />
-                      {!sidebarCollapsed && (
-                        <span className="flex-1 text-left truncate">{item.label}</span>
-                      )}
-                      {!sidebarCollapsed && item.badge && (
-                        <span className="text-[9px] font-bold bg-[#690B1B] text-white px-1.5 py-0.5 rounded-full uppercase">
-                          {item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
+          {/* RESOURCES */}
+          <div className={sidebarCollapsed ? 'w-full flex flex-col items-center' : ''}>
+            {!sidebarCollapsed && (
+              <div className="px-3.5 text-[10px] sm:text-[10.5px] font-bold text-[#9A9A9A] uppercase tracking-[0.16em] mb-1.5">
+                Resources
               </div>
-            </div>
-
-            {/* RESOURCES */}
-            <div>
-              {!sidebarCollapsed && (
-                <div className="px-3 text-[10px] font-bold text-[#A3A3A3] uppercase tracking-[0.2em] mb-2">
-                  Resources
-                </div>
-              )}
-              <div className="space-y-1">
-                {resourceItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      onClick={() => setMobileSidebarOpen(false)}
-                      className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-[12px] text-[14px] font-medium transition-all ${
-                        isActive
-                          ? 'bg-[#F7F0F1] text-[#690B1B] font-bold'
-                          : 'text-[#555555] hover:bg-[#F9F7F5] hover:text-[#111111]'
-                      }`}
-                    >
-                      <Icon size={18} className={isActive ? 'text-[#690B1B]' : 'text-[#888888]'} />
-                      {!sidebarCollapsed && (
-                        <span className="flex-1 text-left truncate">{item.label}</span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
+            )}
+            <div className={sidebarCollapsed ? 'space-y-1.5 w-full flex flex-col items-center' : 'space-y-1 sm:space-y-1.5'}>
+              {resourceItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    title={item.label}
+                    onClick={() => setMobileSidebarOpen(false)}
+                    className={`rounded-[12px] transition-all flex items-center ${
+                      sidebarCollapsed
+                        ? 'w-[44px] h-[44px] justify-center p-0'
+                        : 'w-full gap-3 px-3.5 py-2.5 text-[14px] sm:text-[14.5px] font-semibold'
+                    } ${
+                      isActive
+                        ? 'bg-[#F7F0F1] text-[#690B1B] font-bold shadow-2xs'
+                        : 'text-[#444444] hover:bg-[#F9F7F5] hover:text-[#111111]'
+                    }`}
+                  >
+                    <Icon size={sidebarCollapsed ? 20 : 19} className={isActive ? 'text-[#690B1B]' : 'text-[#777777]'} />
+                    {!sidebarCollapsed && (
+                      <span className="flex-1 text-left truncate">{item.label}</span>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {/* SIDEBAR FOOTER — PRO UPGRADE CTA */}
-        <div className="p-3 pb-5 border-t border-[#F0EBE6] bg-white">
+        {/* SIDEBAR FOOTER — PINNED AT BOTTOM */}
+        <div className={`border-t border-[#F0EBE6] bg-white shrink-0 z-10 ${
+          sidebarCollapsed ? 'p-2 pb-3 flex justify-center' : 'p-3 sm:p-3.5 pb-4 sm:pb-5'
+        }`}>
           <Link
             href="/dashboard"
-            className={`w-full flex items-center justify-between p-3 rounded-[14px] bg-gradient-to-r from-[#690B1B] to-[#8A1226] text-white shadow-sm hover:opacity-95 transition-all ${
-              sidebarCollapsed ? 'justify-center' : ''
+            title="Upgrade to Pro — Unlimited SOP Reviews (30% OFF)"
+            className={`rounded-[14px] sm:rounded-[15px] bg-gradient-to-r from-[#690B1B] to-[#8A1226] text-white shadow-sm hover:opacity-95 transition-all flex items-center ${
+              sidebarCollapsed
+                ? 'w-[44px] h-[44px] justify-center p-0'
+                : 'w-full justify-between p-3 sm:p-3.5'
             }`}
           >
-            <div className="flex items-center gap-2.5 min-w-0">
+            <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-2.5 min-w-0'}`}>
               <Zap size={18} className="text-[#C9A55D] fill-[#C9A55D] shrink-0" />
               {!sidebarCollapsed && (
                 <div className="text-left leading-tight truncate">
-                  <div className="text-[13px] font-bold">Upgrade Pro</div>
-                  <div className="text-[10px] text-[#E0C080] truncate">Unlimited SOP Reviews</div>
+                  <div className="text-[13px] sm:text-[13.5px] font-bold">Upgrade Pro</div>
+                  <div className="text-[10px] sm:text-[10.5px] text-[#E0C080] truncate">Unlimited SOP Reviews</div>
                 </div>
               )}
             </div>
             {!sidebarCollapsed && (
-              <span className="text-[10px] font-bold bg-[#C9A55D] text-black px-2 py-0.5 rounded-full uppercase shrink-0">
+              <span className="text-[9.5px] sm:text-[10px] font-bold bg-[#C9A55D] text-black px-2 py-0.5 rounded-full uppercase shrink-0">
                 30% OFF
               </span>
             )}
@@ -266,14 +350,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {mobileSidebarOpen && (
         <div
           onClick={() => setMobileSidebarOpen(false)}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-45 md:hidden"
         />
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
-         MAIN CONTENT AREA
+         MAIN CONTENT AREA (OFFSET BY FIXED SIDEBAR ON DESKTOP)
          ═══════════════════════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+      <div className={`flex-1 flex flex-col min-w-0 overflow-x-hidden transition-all duration-300 ${
+        sidebarCollapsed ? 'md:pl-[80px]' : 'md:pl-[280px]'
+      }`}>
         {/* TOP HEADER BAR */}
         <header className="h-[60px] sm:h-[76px] px-3 sm:px-5 md:px-8 bg-white border-b border-[#E7E2DE] flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -341,7 +427,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* PAGE CONTENT ROUTE */}
-        <div className="pb-36 sm:pb-40 md:pb-10 flex-1">
+        <div className="pb-20 sm:pb-24 md:pb-8 flex-1">
           {children}
         </div>
 

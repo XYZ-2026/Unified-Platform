@@ -2,13 +2,57 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Home() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, userData, logout } = useAuth();
+  const { user, userData, logout, googleSignIn } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalError, setModalError] = useState('');
+  const pendingRedirectRef = React.useRef<string | null>(null);
 
   const authTarget = user ? '/dashboard' : '/login';
+
+  const handleProtectedLink = (dashboardHref: string) => {
+    if (user) {
+      router.push(dashboardHref);
+    } else {
+      pendingRedirectRef.current = dashboardHref;
+      setModalError('');
+      setShowAuthModal(true);
+    }
+  };
+
+  const handleModalGoogleSignIn = async () => {
+    setModalLoading(true);
+    setModalError('');
+    try {
+      await googleSignIn();
+      setShowAuthModal(false);
+      if (pendingRedirectRef.current) {
+        router.push(pendingRedirectRef.current);
+        pendingRedirectRef.current = null;
+      }
+    } catch (err: any) {
+      setModalError(err?.message || 'Sign in failed. Please try again.');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    const element = document.getElementById(targetId);
+    if (element) {
+      const yOffset = -90;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="bg-[#F6F4F2] text-[#111111] overflow-x-hidden font-[Poppins] font-normal min-h-screen flex flex-col">
@@ -39,19 +83,39 @@ export default function Home() {
           <div className="hidden lg:flex items-center absolute left-1/2 -translate-x-1/2">
             <div className="flex items-center gap-2 bg-white/70 border border-[#E7E1DD] rounded-full px-3 py-2 shadow-sm backdrop-blur-md">
               {[
-                { label: "Universities", href: "#universities" },
-                { label: "AI Chance-Me", href: "#chance-me" },
-                { label: "SOP Builder", href: "#features" },
-                { label: "Scholarships", href: "#features" },
-                { label: "Visa Help", href: "#features" },
+                { label: "Universities", targetId: "universities", href: "#universities", dashboardHref: "/dashboard/schools" },
+                { label: "AI Chance-Me", targetId: "chance-me", href: "#chance-me", dashboardHref: "/dashboard/chance-me" },
+                { label: "SOP Builder", targetId: "features", href: "#features", dashboardHref: "/dashboard/essays" },
+                { label: "Scholarships", targetId: "scholarships", href: "https://scholarship.abroadsimplified.com", isExternal: true },
+                { label: "Visa Help", targetId: "features", href: "#features", dashboardHref: "/dashboard/visa" },
               ].map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="px-5 h-[42px] rounded-full flex items-center justify-center text-[15px] font-medium text-[#5F5F5F] hover:bg-[#690B1B] hover:text-white transition-all duration-300"
-                >
-                  {item.label}
-                </a>
+                item.isExternal ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 h-[42px] rounded-full flex items-center justify-center text-[15px] font-medium text-[#5F5F5F] hover:bg-[#690B1B] hover:text-white transition-all duration-300 cursor-pointer"
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={(e) => {
+                      if (user && item.dashboardHref) {
+                        e.preventDefault();
+                        router.push(item.dashboardHref);
+                      } else {
+                        handleScrollTo(e, item.targetId);
+                      }
+                    }}
+                    className="px-5 h-[42px] rounded-full flex items-center justify-center text-[15px] font-medium text-[#5F5F5F] hover:bg-[#690B1B] hover:text-white transition-all duration-300 cursor-pointer"
+                  >
+                    {item.label}
+                  </a>
+                )
               ))}
             </div>
           </div>
@@ -123,7 +187,9 @@ export default function Home() {
               {[
                 {
                   label: "Universities",
+                  targetId: "universities",
                   href: "#universities",
+                  dashboardHref: "/dashboard/schools",
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
@@ -133,7 +199,9 @@ export default function Home() {
                 },
                 {
                   label: "AI Chance-Me",
+                  targetId: "chance-me",
                   href: "#chance-me",
+                  dashboardHref: "/dashboard/chance-me",
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -142,7 +210,9 @@ export default function Home() {
                 },
                 {
                   label: "SOP Builder",
+                  targetId: "features",
                   href: "#features",
+                  dashboardHref: "/dashboard/essays",
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -151,7 +221,9 @@ export default function Home() {
                 },
                 {
                   label: "Scholarships",
-                  href: "#features",
+                  targetId: "scholarships",
+                  href: "https://scholarship.abroadsimplified.com",
+                  isExternal: true,
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4a5 5 0 005 5h4a5 5 0 005-5V3M5 3h14M5 3H3v2a4 4 0 004 4h1M19 3h2v2a4 4 0 01-4 4h-1M12 12v6m-4 3h8" />
@@ -160,7 +232,9 @@ export default function Home() {
                 },
                 {
                   label: "Visa Help",
+                  targetId: "features",
                   href: "#features",
+                  dashboardHref: "/dashboard/visa",
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -168,17 +242,41 @@ export default function Home() {
                   ),
                 },
               ].map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center gap-3.5 py-2.5 px-3 rounded-[14px] text-[15px] font-semibold text-[#111111] hover:bg-[#F7F0F1] hover:text-[#690B1B] transition-all group"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <div className="w-9 h-9 rounded-xl bg-[#F7F0F1] border border-[#E8C4CC] text-[#690B1B] flex items-center justify-center shrink-0 group-hover:bg-[#690B1B] group-hover:text-white transition-colors">
-                    {item.icon}
-                  </div>
-                  <span>{item.label}</span>
-                </a>
+                item.isExternal ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3.5 py-2.5 px-3 rounded-[14px] text-[15px] font-semibold text-[#111111] hover:bg-[#F7F0F1] hover:text-[#690B1B] transition-all group"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-[#F7F0F1] border border-[#E8C4CC] text-[#690B1B] flex items-center justify-center shrink-0 group-hover:bg-[#690B1B] group-hover:text-white transition-colors">
+                      {item.icon}
+                    </div>
+                    <span>{item.label}</span>
+                  </a>
+                ) : (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={(e) => {
+                      if (user && item.dashboardHref) {
+                        e.preventDefault();
+                        setMobileMenuOpen(false);
+                        router.push(item.dashboardHref);
+                      } else {
+                        handleScrollTo(e, item.targetId);
+                      }
+                    }}
+                    className="flex items-center gap-3.5 py-2.5 px-3 rounded-[14px] text-[15px] font-semibold text-[#111111] hover:bg-[#F7F0F1] hover:text-[#690B1B] transition-all group"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-[#F7F0F1] border border-[#E8C4CC] text-[#690B1B] flex items-center justify-center shrink-0 group-hover:bg-[#690B1B] group-hover:text-white transition-colors">
+                      {item.icon}
+                    </div>
+                    <span>{item.label}</span>
+                  </a>
+                )
               ))}
               <div className="pt-4 border-t border-[#F0EBE6] mt-3">
                 {user ? (
@@ -215,7 +313,7 @@ export default function Home() {
             AI-POWERED COLLEGE ADMISSIONS
           </div>
 
-          <h1 className="text-[34px] sm:text-[42px] md:text-[56px] lg:text-[64px] leading-[1.02] tracking-[-0.05em] font-bold text-[#0D0D0D]">
+          <h1 className="text-[28px] xs:text-[34px] sm:text-[42px] md:text-[56px] lg:text-[64px] leading-[1.05] tracking-[-0.05em] font-bold text-[#0D0D0D] break-words">
             Get Into Your
             <br />
             <span className="text-[#690B1B]">
@@ -231,19 +329,19 @@ export default function Home() {
           </p>
 
           {/* BUTTONS */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 w-full">
             <Link
               href={authTarget}
-              className="h-[54px] px-7 rounded-[10px] bg-[#690B1B] text-white text-[15px] font-bold inline-flex items-center justify-center shadow-[0_10px_30px_rgba(105,11,27,0.22)] hover:bg-[#7A1022] hover:scale-[1.01] transition-all"
+              className="h-[52px] sm:h-[54px] px-7 rounded-[10px] bg-[#690B1B] text-white text-[15px] font-bold inline-flex items-center justify-center shadow-[0_10px_30px_rgba(105,11,27,0.22)] hover:bg-[#7A1022] hover:scale-[1.01] transition-all w-full sm:w-auto text-center"
             >
               Start Free Today →
             </Link>
-            <a
-              href="#universities"
-              className="h-[54px] px-7 rounded-[10px] border border-[#690B1B]/20 text-[#690B1B] text-[15px] font-semibold inline-flex items-center justify-center hover:bg-[#690B1B]/5 transition-all"
+            <Link
+              href="/dashboard/schools"
+              className="h-[52px] sm:h-[54px] px-7 rounded-[10px] border border-[#690B1B]/20 text-[#690B1B] text-[15px] font-semibold inline-flex items-center justify-center hover:bg-[#690B1B]/5 transition-all w-full sm:w-auto text-center"
             >
               Explore Universities
-            </a>
+            </Link>
           </div>
 
           {/* STATS UNDER HERO */}
@@ -407,15 +505,26 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
          TOP STUDY DESTINATIONS — Grid layout
          ═══════════════════════════════════════════════════════════════ */}
-      <section id="universities" className="px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 bg-[#F6F4F2]">
+      <section id="universities" className="scroll-mt-24 sm:scroll-mt-28 px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 bg-[#F6F4F2]">
         <div className="max-w-7xl mx-auto">
-          <div className="text-[#C9A55D] text-[12px] tracking-[0.2em] font-bold uppercase mb-3">
-            GLOBAL REACH
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-3">
+            <div>
+              <div className="text-[#C9A55D] text-[12px] tracking-[0.2em] font-bold uppercase mb-3">
+                GLOBAL REACH
+              </div>
+              <h2 className="text-[28px] sm:text-[36px] md:text-[48px] font-bold tracking-[-0.04em] text-[#111]">
+                Top Study Destinations &amp; Universities
+              </h2>
+            </div>
+            <Link
+              href="/dashboard/schools"
+              className="px-5 py-2.5 rounded-full bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#7A1022] transition-all shadow-xs inline-flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
+            >
+              <span>University Finder</span>
+              <span>→</span>
+            </Link>
           </div>
-          <h2 className="text-[28px] sm:text-[36px] md:text-[48px] font-bold tracking-[-0.04em] text-[#111]">
-            Top Study Destinations
-          </h2>
-          <p className="mt-3 text-[16px] text-[#727272] max-w-[600px]">
+          <p className="text-[16px] text-[#727272] max-w-[600px]">
             Compare programs across premier global hubs with verified tuition, rankings, and visa options.
           </p>
 
@@ -453,8 +562,8 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
          PLATFORM FEATURES — Grid matching Research AS
          ═══════════════════════════════════════════════════════════════ */}
-      <section id="features" className="px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 bg-[#F7F5F3]">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between gap-8 border-b border-[#E7E1DE] pb-10">
+      <section id="features" className="scroll-mt-24 sm:scroll-mt-28 px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 bg-[#F7F5F3]">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between gap-8 border-b border-[#E7E1DD] pb-10">
           <div>
             <div className="text-[#C9A55D] text-[12px] tracking-[0.2em] font-bold uppercase mb-4">
               PLATFORM FEATURES
@@ -472,26 +581,50 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto mt-8 sm:mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-[#DDD7D3] rounded-[20px] overflow-hidden">
           {[
-            { num: "01", title: "University Matcher", desc: "Filter 500+ global universities by budget, acceptance rate, and major." },
-            { num: "02", title: "AI Chance-Me Predictor", desc: "Estimate real odds by comparing your stats against past admitted students." },
-            { num: "03", title: "AI SOP Feedback", desc: "Ethical, real-time essay analysis grounded in thousands of successful SOPs." },
-            { num: "04", title: "Scholarship Finder", desc: "Discover merit and need-based grants matched to your student profile." },
-            { num: "05", title: "Application Tracker", desc: "Never miss deadlines, document requirements, or portal submissions." },
-            { num: "06", title: "Visa & Document Guide", desc: "Tailored checklists, financial proof guides, and mock visa interview tools." },
+            { num: "01", title: "University Matcher", desc: "Filter 500+ global universities by budget, acceptance rate, and major.", link: "/dashboard/schools", linkText: "Explore Universities →" },
+            { num: "02", title: "AI Chance-Me Predictor", desc: "Estimate real odds by comparing your stats against past admitted students.", link: "/dashboard/chance-me", linkText: "Test Admit Odds →" },
+            { num: "03", title: "AI SOP Feedback", desc: "Ethical, real-time essay analysis grounded in thousands of successful SOPs.", link: "/dashboard/essays", linkText: "SOP Analyzer →" },
+            { num: "04", id: "scholarships", title: "Scholarship Finder", desc: "Discover merit and need-based grants matched to your student profile.", link: "https://scholarship.abroadsimplified.com", linkText: "Browse Scholarships ↗", isExternal: true },
+            { num: "05", title: "Application Tracker", desc: "Never miss deadlines, document requirements, or portal submissions.", link: "/dashboard/tracker", linkText: "Open Tracker →" },
+            { num: "06", title: "Visa & Document Guide", desc: "Tailored checklists, financial proof guides, and mock visa interview tools.", link: "/dashboard/visa", linkText: "Visa Guide →" },
           ].map((feature) => (
             <div
               key={feature.num}
-              className="bg-[#F7F5F3] min-h-[200px] sm:min-h-[260px] p-5 sm:p-8 border-r border-b border-[#DDD7D3] hover:bg-white transition-colors"
+              id={feature.id}
+              className="bg-[#F7F5F3] min-h-[200px] sm:min-h-[260px] p-5 sm:p-8 border-r border-b border-[#DDD7D3] hover:bg-white transition-colors scroll-mt-28 flex flex-col justify-between"
             >
-              <div className="text-[#D8C1C6] text-[16px] font-bold">
-                {feature.num}
+              <div>
+                <div className="text-[#D8C1C6] text-[16px] font-bold">
+                  {feature.num}
+                </div>
+                <h3 className="mt-6 text-[22px] font-bold tracking-[-0.03em] text-[#111]">
+                  {feature.title}
+                </h3>
+                <p className="mt-3 text-[14px] leading-7 text-[#777777]">
+                  {feature.desc}
+                </p>
               </div>
-              <h3 className="mt-6 text-[22px] font-bold tracking-[-0.03em] text-[#111]">
-                {feature.title}
-              </h3>
-              <p className="mt-3 text-[14px] leading-7 text-[#777777]">
-                {feature.desc}
-              </p>
+              {feature.link && (
+                <div className="mt-6 pt-4 border-t border-[#EAE4DF]">
+                  {feature.isExternal ? (
+                    <a
+                      href={feature.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[13px] font-bold text-[#690B1B] hover:underline inline-flex items-center gap-1"
+                    >
+                      {feature.linkText}
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => handleProtectedLink(feature.link)}
+                      className="text-[13px] font-bold text-[#690B1B] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      {feature.linkText}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -500,7 +633,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
          DARK SECTION — AI Advisor Interactive Feature Showcase
          ═══════════════════════════════════════════════════════════════ */}
-      <section id="chance-me" className="w-full bg-[#050505] px-4 sm:px-6 md:px-10 lg:px-16 py-14 sm:py-24 lg:py-28 overflow-hidden">
+      <section id="chance-me" className="scroll-mt-24 sm:scroll-mt-28 w-full bg-[#050505] px-4 sm:px-6 md:px-10 lg:px-16 py-14 sm:py-24 lg:py-28 overflow-hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
           {/* LEFT */}
           <div className="max-w-[540px]">
@@ -623,8 +756,8 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
             {
-              q: "How does the AI University Finder predict my admit chances?",
-              a: "Our algorithm compares your academic profile (GPA, GRE/GMAT, IELTS/TOEFL) and target budget against actual historical admission data to categorize schools into Safety, Target, and Reach."
+              q: "How does the Net Price Calculator estimate my true college costs?",
+              a: "Our Net Price Calculator combines official university tuition, realistic room & board, travel expenses, and your family's financial profile to estimate expected merit scholarships and need-based aid — revealing your true annual out-of-pocket cost."
             },
             {
               q: "Can I find tuition-free universities in Germany & Europe?",
@@ -709,7 +842,7 @@ export default function Home() {
               </div>
               <div className="space-y-4">
                 {[
-                  { label: "University Finder", href: "#universities" },
+                  { label: "Net Price Calculator", href: "/dashboard/calculator" },
                   { label: "AI Chance-Me Predictor", href: "#chance-me" },
                   { label: "SOP Builder", href: "#features" },
                   { label: "Scholarship Matcher", href: "#features" },
@@ -793,6 +926,90 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* ═══════════════════════════════════════════════════════════════
+         AUTH MODAL — Sign in to access dashboard features
+         ═══════════════════════════════════════════════════════════════ */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => { setShowAuthModal(false); setModalError(''); }}
+          />
+          {/* Modal Card */}
+          <div className="relative bg-white rounded-[24px] w-full max-w-[420px] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
+            {/* Close */}
+            <button
+              onClick={() => { setShowAuthModal(false); setModalError(''); }}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-[#AAAAAA] hover:bg-[#F5F5F5] hover:text-[#111] transition-all text-base cursor-pointer"
+            >
+              ✕
+            </button>
+
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+              <div className="w-[52px] h-[52px] rounded-[16px] shadow-[0_6px_20px_rgba(105,11,27,0.22)] overflow-hidden">
+                <img src="/logo.png" alt="Abroad Simplified" className="w-full h-full object-cover" />
+              </div>
+            </div>
+
+            {/* Heading */}
+            <div className="text-center mb-7">
+              <h2 className="text-[22px] font-bold text-[#111] tracking-tight mb-2">Sign in to continue</h2>
+              <p className="text-[14px] text-[#777] leading-relaxed">
+                Create your free account or sign in to access all of Abroad Simplified's features.
+              </p>
+            </div>
+
+            {/* Error */}
+            {modalError && (
+              <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-[10px] text-[13px] text-red-600 text-center">
+                {modalError}
+              </div>
+            )}
+
+            {/* Google Sign In */}
+            <button
+              onClick={handleModalGoogleSignIn}
+              disabled={modalLoading}
+              className="w-full h-[50px] flex items-center justify-center gap-3 rounded-[12px] border border-[#E0E0E0] bg-white hover:bg-[#F9F9F9] transition-all text-[15px] font-semibold text-[#333] shadow-sm disabled:opacity-60 mb-4 cursor-pointer"
+            >
+              {modalLoading ? (
+                <span className="w-5 h-5 border-2 border-[#690B1B]/30 border-t-[#690B1B] rounded-full animate-spin" />
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+              )}
+              {modalLoading ? 'Signing in...' : 'Continue with Google'}
+            </button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-[#EEEEEE]" />
+              <span className="text-[12px] text-[#BBBBBB] font-medium">or</span>
+              <div className="flex-1 h-px bg-[#EEEEEE]" />
+            </div>
+
+            {/* Email Sign In */}
+            <Link
+              href="/login"
+              className="w-full h-[50px] flex items-center justify-center rounded-[12px] bg-[#690B1B] text-white text-[15px] font-bold hover:bg-[#7A1022] transition-all"
+              onClick={() => setShowAuthModal(false)}
+            >
+              Sign in with Email →
+            </Link>
+
+            <p className="mt-5 text-center text-[12px] text-[#AAAAAA]">
+              Free forever · No credit card required
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

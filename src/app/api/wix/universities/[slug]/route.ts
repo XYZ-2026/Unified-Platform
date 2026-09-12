@@ -1,5 +1,62 @@
 import { NextResponse } from 'next/server';
 
+function formatWixImageUrl(url: any): string {
+  if (!url) return '';
+  if (typeof url !== 'string') {
+    if (url.url) return formatWixImageUrl(url.url);
+    if (url.src) return formatWixImageUrl(url.src);
+    return '';
+  }
+  const trimmed = url.trim();
+  if (trimmed.startsWith('wix:image://v1/')) {
+    const match = trimmed.match(/^wix:image:\/\/v1\/([^\/#]+)/);
+    if (match && match[1]) {
+      return `https://static.wixstatic.com/media/${match[1]}`;
+    }
+  }
+  return trimmed;
+}
+
+function extractBannerAndAlt(d: any): { bannerImage: string; bannerAlt: string } {
+  if (!d) return { bannerImage: '', bannerAlt: '' };
+
+  const rawImage =
+    d.bannerImage ??
+    d.universityBanner ??
+    d['university banner'] ??
+    d['university-banner'] ??
+    d.university_banner ??
+    d.universityBanner_1 ??
+    d.banner ??
+    d.university_image ??
+    '';
+
+  let rawUrl = '';
+  let embeddedAlt = '';
+
+  if (typeof rawImage === 'string') {
+    rawUrl = rawImage;
+  } else if (rawImage && typeof rawImage === 'object') {
+    rawUrl = rawImage.url || rawImage.src || '';
+    embeddedAlt = rawImage.altText || rawImage.alt || rawImage.description || '';
+  }
+
+  const rawAlt =
+    d.bannerImageAltText ||
+    d.bannerAlt ||
+    d.universityBannerAltText ||
+    d['university banner alt'] ||
+    d.university_banner_alt_text ||
+    d.altText ||
+    embeddedAlt ||
+    (d.university_name || d.name ? `${d.university_name || d.name} Campus Banner` : 'University Campus Banner');
+
+  return {
+    bannerImage: formatWixImageUrl(rawUrl),
+    bannerAlt: typeof rawAlt === 'string' ? rawAlt.trim() : 'University Campus Banner',
+  };
+}
+
 const FALLBACK_UNIVERSITIES: Record<string, any> = {
   'massachusetts-institute-of-technology': {
     id: 'mit-us',
@@ -21,6 +78,9 @@ const FALLBACK_UNIVERSITIES: Record<string, any> = {
     avgNeedBasedGrant: '$53,400',
     requiredEssayPromptsDetails: 'MIT Short Answers (225 words each):\n1. Describe the world you come from; for example, your family, clubs, school, or community.\n2. How has your experience shaped your dreams and aspirations?\n3. Tell us about a time when you had to deal with a challenge or setback.\n4. Describe a topic, idea, or concept that you find so engaging that it makes you lose all track of time.',
     writingRequirements: 'MIT requires 5 short answer essays (200-250 words each) in place of the Common App personal statement.',
+    careerOutcomes: 'Employment/Grad Placement: 95% within 6 months of graduation',
+    expectedSalary: '$115,000–$165,000/yr (median ~$130,000)',
+    roi: '840% (Exceptional)',
   },
   'stanford-university': {
     id: 'stanford-us',
@@ -42,6 +102,9 @@ const FALLBACK_UNIVERSITIES: Record<string, any> = {
     avgNeedBasedGrant: '$58,000',
     requiredEssayPromptsDetails: 'Stanford Short Essays (250 words max):\n1. The Stanford community is deeply curious and driven to learn. What idea or topic excites you?\n2. Virtually all of Stanford undergraduates live on campus. Write a note to your future roommate.\n3. Tell us about something that is meaningful to you and why.',
     writingRequirements: '3 short essays (100-250 words) + 5 short answer questions (50 words max).',
+    careerOutcomes: 'Employment/Grad Placement: 94% within 6 months of graduation',
+    expectedSalary: '$112,000–$160,000/yr (median ~$128,000)',
+    roi: '820% (Exceptional)',
   },
   'harvard-university': {
     id: 'harvard-us',
@@ -63,6 +126,9 @@ const FALLBACK_UNIVERSITIES: Record<string, any> = {
     avgNeedBasedGrant: '$62,000',
     requiredEssayPromptsDetails: 'Harvard Supplemental Prompts (200 words each):\n1. How will your experiences at Harvard contribute to your future goals?\n2. Describe a personal experience that has shaped your perspective.\n3. Briefly describe any intellectual experience that has meant the most to you.',
     writingRequirements: 'Harvard Supplemental Essays: 5 short prompts (200 words max each).',
+    careerOutcomes: 'Employment/Grad Placement: 93% within 6 months of graduation',
+    expectedSalary: '$105,000–$155,000/yr (median ~$122,000)',
+    roi: '790% (Exceptional)',
   },
   'imperial-college-london': {
     id: 'imperial-uk',
@@ -84,6 +150,9 @@ const FALLBACK_UNIVERSITIES: Record<string, any> = {
     avgNeedBasedGrant: '£5,000',
     requiredEssayPromptsDetails: 'UCAS Personal Statement (4,000 characters max):\n1. Why are you applying for this course at Imperial?\n2. What academic skills or research projects have prepared you?\n3. What relevant super-curricular activities have you undertaken?',
     writingRequirements: 'UCAS Personal Statement required for all UK applications.',
+    careerOutcomes: 'Employment/Grad Placement: 92% within 6 months of graduation',
+    expectedSalary: '£45,000–£70,000/yr (median ~£55,000)',
+    roi: '520% (Very Good)',
   },
   'university-of-oxford': {
     id: 'oxford-uk',
@@ -105,6 +174,9 @@ const FALLBACK_UNIVERSITIES: Record<string, any> = {
     avgNeedBasedGrant: '£6,500',
     requiredEssayPromptsDetails: 'UCAS Personal Statement + Written Work:\n1. 80% focus on academic interest and reading in your chosen subject.\n2. 20% focus on relevant extracurricular achievements.',
     writingRequirements: 'UCAS Personal Statement + Subject-specific written tests (MAT, TSA, LNAT).',
+    careerOutcomes: 'Employment/Grad Placement: 91% within 6 months of graduation',
+    expectedSalary: '£42,000–£68,000/yr (median ~£52,000)',
+    roi: '510% (Very Good)',
   },
   'university-of-toronto': {
     id: 'toronto-ca',
@@ -126,6 +198,9 @@ const FALLBACK_UNIVERSITIES: Record<string, any> = {
     avgNeedBasedGrant: 'CA$12,000',
     requiredEssayPromptsDetails: 'U of T Supplemental Applications (Rotman & Engineering):\n1. Describe a project or activity where you demonstrated leadership.\n2. Video response: 2 timed video questions on problem-solving.',
     writingRequirements: 'Online supplemental portal for Engineering and Rotman Commerce.',
+    careerOutcomes: 'Employment/Grad Placement: 89% within 6 months of graduation',
+    expectedSalary: 'CA$68,000–CA$95,000/yr (median ~CA$82,000)',
+    roi: '480% (Very Good)',
   },
   'technical-university-of-munich': {
     id: 'tum-de',
@@ -147,6 +222,9 @@ const FALLBACK_UNIVERSITIES: Record<string, any> = {
     avgNeedBasedGrant: '€0',
     requiredEssayPromptsDetails: 'Motivation Letter (1-2 pages):\n1. Why do you wish to study this specific program at TUM?\n2. What academic background qualifies you for advanced study in Munich?',
     writingRequirements: 'Statement of Motivation in English/German + Aptitude assessment.',
+    careerOutcomes: 'Employment/Grad Placement: 93% within 6 months of graduation',
+    expectedSalary: '€55,000–€80,000/yr (median ~€65,000)',
+    roi: '920% (Exceptional)',
   },
   'university-of-melbourne': {
     id: 'melbourne-au',
@@ -168,6 +246,9 @@ const FALLBACK_UNIVERSITIES: Record<string, any> = {
     avgNeedBasedGrant: 'AUD$10,000',
     requiredEssayPromptsDetails: 'Personal Statement (500 words):\n1. Outline your academic background and professional aspirations in Australia.',
     writingRequirements: 'Statement of Purpose for international applicants.',
+    careerOutcomes: 'Employment/Grad Placement: 88% within 6 months of graduation',
+    expectedSalary: 'AUD$75,000–AUD$105,000/yr (median ~AUD$88,000)',
+    roi: '460% (Very Good)',
   },
 };
 
@@ -225,7 +306,13 @@ export async function GET(
               .replace(/[^a-z0-9]+/g, '-')
               .replace(/^-|-$/g, '');
 
-            if (generatedSlug === slug) {
+            if (
+              generatedSlug === slug ||
+              d.university_id === slug ||
+              d._id === slug ||
+              item.id === slug ||
+              (d.slug && d.slug === slug)
+            ) {
               found = d;
               found.id = d._id || item.id;
               break;
@@ -277,6 +364,10 @@ export async function GET(
         avgNeedBasedGrant: '$20,000',
         requiredEssayPromptsDetails: 'Personal Statement (500 words):\n1. Why are you applying to this program and how will it fulfill your academic goals?',
         writingRequirements: 'Standard Statement of Purpose (SOP) required.',
+        careerOutcomes: '',
+        expectedSalary: '',
+        roi: '',
+        scholarships: '',
       };
     }
 
@@ -285,6 +376,8 @@ export async function GET(
     const majorsArray = Array.isArray(majorsRaw)
       ? majorsRaw
       : majorsRaw.split(',').map((m: string) => m.trim()).filter(Boolean);
+
+    const { bannerImage, bannerAlt } = extractBannerAndAlt(found);
 
     const university = {
       id: found.id || found._id || slug,
@@ -298,7 +391,8 @@ export async function GET(
       livingCosts: found.livingCosts || '$1,800/mo',
       acceptanceRate: found.acceptanceRate || '25%',
       website: found.official_website || found.website || '',
-      bannerAlt: found.bannerImageAltText || found.name || '',
+      bannerImage,
+      bannerAlt,
       popularMajors: majorsArray,
       slug,
       avgGpa: found.avgGpa ?? 3.7,
@@ -306,6 +400,10 @@ export async function GET(
       avgNeedBasedGrant: found.avgNeedBasedGrant || '$15,000',
       requiredEssayPromptsDetails: found.requiredEssayPromptsDetails || '',
       writingRequirements: found.writingRequirements || '',
+      careerOutcomes: found.careerOutcomes || found.career_outcomes || '',
+      expectedSalary: found.expectedSalary || found.expected_salary || '',
+      roi: found.roi || '',
+      scholarships: found.scholarships || '',
     };
 
     return NextResponse.json({

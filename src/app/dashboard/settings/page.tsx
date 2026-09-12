@@ -9,7 +9,6 @@ import {
   User,
   Mail,
   ShieldAlert,
-  Moon,
   CheckCircle2,
   LogOut,
   Zap,
@@ -24,7 +23,6 @@ export default function SettingsPage() {
   const [displayName, setDisplayName] = useState('');
   const [transactionalEmails, setTransactionalEmails] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const userKey = user?.uid || user?.email || userData?.email || 'default';
@@ -59,8 +57,8 @@ export default function SettingsPage() {
 
   return (
     <div className="p-4 sm:p-5 md:p-8 max-w-[1400px] mx-auto w-full space-y-6">
-      <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs">
-        <h2 className="text-[26px] font-bold text-[#111111] tracking-[-0.03em]">Account Settings &amp; Preferences</h2>
+      <div className="bg-white dark:bg-[#1A1D27] border border-[#E7E2DE] dark:border-[#2A2D3A] rounded-[20px] p-6 shadow-xs">
+        <h2 className="text-[26px] font-bold text-[#111111] dark:text-[#E8E6E3] tracking-[-0.03em]">Account Settings &amp; Preferences</h2>
         <p className="text-[13px] text-[#777777]">Manage your profile details, notification preferences, and subscription plan</p>
       </div>
 
@@ -68,7 +66,7 @@ export default function SettingsPage() {
         {/* LEFT COLUMN: PROFILE OVERVIEW & CURRENT PLAN */}
         <div className="space-y-6">
           {/* PROFILE CARD */}
-          <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-5">
+          <div className="bg-white dark:bg-[#1A1D27] border border-[#E7E2DE] dark:border-[#2A2D3A] rounded-[20px] p-6 shadow-xs space-y-5">
             <div className="flex flex-col items-center text-center space-y-3 pb-4 border-b border-[#F0EBE6]">
               <div className="w-20 h-20 rounded-full bg-[#690B1B] text-white flex items-center justify-center font-bold text-[32px] shadow-sm">
                 {initial}
@@ -108,7 +106,7 @@ export default function SettingsPage() {
           </div>
 
           {/* CURRENT PLAN CARD */}
-          <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#1A1D27] border border-[#E7E2DE] dark:border-[#2A2D3A] rounded-[20px] p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-[16px] font-bold text-[#111]">Current Plan</h4>
               <span className="text-[11px] font-bold bg-[#C9A55D]/20 text-[#9E731A] px-2.5 py-0.5 rounded-full">
@@ -128,7 +126,7 @@ export default function SettingsPage() {
         {/* RIGHT COLUMN: PREFERENCES & DANGER ZONE */}
         <div className="lg:col-span-2 space-y-6">
           {/* PREFERENCES CARD */}
-          <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-6 shadow-xs space-y-6">
+          <div className="bg-white dark:bg-[#1A1D27] border border-[#E7E2DE] dark:border-[#2A2D3A] rounded-[20px] p-6 shadow-xs space-y-6">
             <h3 className="text-[20px] font-bold text-[#111] border-b border-[#F0EBE6] pb-4">
               Notification &amp; Display Preferences
             </h3>
@@ -179,34 +177,11 @@ export default function SettingsPage() {
                   />
                 </button>
               </div>
-
-              {/* TOGGLE 3: DARK MODE */}
-              <div className="flex items-start sm:items-center justify-between gap-4 border-t border-[#F0EBE6] pt-4">
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-[15px] font-bold text-[#111]">Dark Mode</h4>
-                  <p className="text-[13px] text-[#777] leading-relaxed">Switch between light and dark appearance themes.</p>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={darkMode}
-                  onClick={() => setDarkMode(!darkMode)}
-                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-                    darkMode ? 'bg-[#690B1B]' : 'bg-[#E5E0DC]'
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                      darkMode ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
             </div>
           </div>
 
           {/* DANGER ZONE CARD */}
-          <div className="bg-white border border-red-200 rounded-[20px] p-6 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#1A1D27] border border-red-200 dark:border-[#4A1520] rounded-[16px] sm:rounded-[20px] p-4 sm:p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2 text-red-600 font-bold text-[16px]">
               <ShieldAlert size={20} />
               <span>Danger Zone</span>
@@ -216,7 +191,7 @@ export default function SettingsPage() {
                 <h4 className="text-[15px] font-bold text-[#111]">Delete Account</h4>
                 <p className="text-[13px] text-[#777]">Permanently delete your account and all associated application data. This cannot be undone.</p>
               </div>
-              <button className="px-5 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-[13px] font-bold transition-all shrink-0">
+              <button className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-[13px] font-bold transition-all shrink-0 cursor-pointer text-center">
                 Delete account
               </button>
             </div>
