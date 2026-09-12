@@ -472,7 +472,7 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto mt-8 sm:mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-[#DDD7D3] rounded-[20px] overflow-hidden">
           {[
-            { num: "01", title: "University Matcher", desc: "Filter 500+ global universities by budget, acceptance rate, and major." },
+            { num: "01", title: "Net Price Calculator", desc: "Estimate real out-of-pocket costs with tuition, living expenses, need-based aid, and merit grants." },
             { num: "02", title: "AI Chance-Me Predictor", desc: "Estimate real odds by comparing your stats against past admitted students." },
             { num: "03", title: "AI SOP Feedback", desc: "Ethical, real-time essay analysis grounded in thousands of successful SOPs." },
             { num: "04", title: "Scholarship Finder", desc: "Discover merit and need-based grants matched to your student profile." },
@@ -623,8 +623,8 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
             {
-              q: "How does the AI University Finder predict my admit chances?",
-              a: "Our algorithm compares your academic profile (GPA, GRE/GMAT, IELTS/TOEFL) and target budget against actual historical admission data to categorize schools into Safety, Target, and Reach."
+              q: "How does the Net Price Calculator estimate my true college costs?",
+              a: "Our Net Price Calculator combines official university tuition, realistic room & board, travel expenses, and your family's financial profile to estimate expected merit scholarships and need-based aid — revealing your true annual out-of-pocket cost."
             },
             {
               q: "Can I find tuition-free universities in Germany & Europe?",
@@ -709,7 +709,7 @@ export default function Home() {
               </div>
               <div className="space-y-4">
                 {[
-                  { label: "University Finder", href: "#universities" },
+                  { label: "Net Price Calculator", href: "/dashboard/calculator" },
                   { label: "AI Chance-Me Predictor", href: "#chance-me" },
                   { label: "SOP Builder", href: "#features" },
                   { label: "Scholarship Matcher", href: "#features" },

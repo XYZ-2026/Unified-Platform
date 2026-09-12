@@ -22,7 +22,9 @@ import {
   Menu,
   Activity,
   User,
-  X
+  X,
+  Calculator,
+  ArrowLeftRight
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -73,6 +75,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { id: 'college-list', label: 'My College List', icon: GraduationCap, href: '/dashboard/college-list' },
     { id: 'tracker', label: 'Application Tracker', icon: Calendar, href: '/dashboard/tracker' },
     { id: 'schools', label: 'University Finder', icon: Compass, href: '/dashboard/schools' },
+    { id: 'calculator', label: 'Net Price Calculator', icon: Calculator, href: '/dashboard/calculator' },
+    { id: 'compare', label: 'Compare Universities', icon: ArrowLeftRight, href: '/dashboard/compare' },
   ];
 
   const applicationItems = [

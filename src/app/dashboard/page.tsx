@@ -17,7 +17,8 @@ import {
   Share2,
   BookOpen,
   UserCheck,
-  FileText
+  FileText,
+  Calculator
 } from 'lucide-react';
 import { calculateDeadlineInfo } from '@/lib/deadlineUtils';
 
@@ -360,7 +361,7 @@ export default function DashboardHomePage() {
       {/* RECOMMENDED FOR YOU GRID (4 ACTION CARDS) */}
       <div className="pt-1 sm:pt-2 md:pt-4">
         <h3 className="text-[15px] sm:text-[18px] font-bold text-[#111111] mb-3 sm:mb-4">Recommended Actions for You</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-4">
           {[
             {
               title: "See your real admission chances",
@@ -370,6 +371,15 @@ export default function DashboardHomePage() {
               btnBg: "bg-[#690B1B] text-white",
               icon: BarChart3,
               badge: "RECOMMENDED"
+            },
+            {
+              title: "Net Price Calculator",
+              desc: "Estimate tuition, aid & true out-of-pocket costs.",
+              action: "Calculate →",
+              href: "/dashboard/calculator",
+              btnBg: "bg-[#690B1B] text-white",
+              icon: Calculator,
+              badge: "FINANCIAL AID"
             },
             {
               title: "Explore Admitted SOPs",
