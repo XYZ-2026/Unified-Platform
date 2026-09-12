@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -15,6 +15,7 @@ import {
   GraduationCap,
   ExternalLink,
   ChevronRight,
+  ChevronLeft,
   CheckCircle2,
   Bookmark,
   Check,
@@ -390,6 +391,73 @@ function NetPriceCalculatorContent() {
     const idSet = new Set(selectedForCompare);
     return calculatedCatalog.filter(({ university }) => idSet.has(university.id));
   }, [calculatedCatalog, selectedForCompare]);
+
+  // Horizontal Scroll & Drag Navigation for Calculator Comparison Table
+  const calcTableContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeftCalc, setCanScrollLeftCalc] = useState(false);
+  const [canScrollRightCalc, setCanScrollRightCalc] = useState(false);
+  const [isDraggingCalc, setIsDraggingCalc] = useState(false);
+  const startXCalcRef = useRef(0);
+  const scrollLeftCalcRef = useRef(0);
+
+  const checkCalcScrollState = useCallback(() => {
+    const el = calcTableContainerRef.current;
+    if (el) {
+      setCanScrollLeftCalc(el.scrollLeft > 15);
+      setCanScrollRightCalc(el.scrollLeft < el.scrollWidth - el.clientWidth - 15);
+    }
+  }, []);
+
+  useEffect(() => {
+    const el = calcTableContainerRef.current;
+    if (!el) return;
+    checkCalcScrollState();
+
+    const handleScroll = () => checkCalcScrollState();
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+
+    return () => {
+      el.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [checkCalcScrollState, compareUniversities]);
+
+  const scrollCalcColumns = (direction: 'left' | 'right') => {
+    const el = calcTableContainerRef.current;
+    if (el) {
+      const scrollAmount = Math.max(280, Math.floor(el.clientWidth * 0.65));
+      el.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handleCalcMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('button, a, select, input')) return;
+    const el = calcTableContainerRef.current;
+    if (!el) return;
+    setIsDraggingCalc(true);
+    startXCalcRef.current = e.pageX - el.offsetLeft;
+    scrollLeftCalcRef.current = el.scrollLeft;
+  };
+
+  const handleCalcMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingCalc) return;
+    const el = calcTableContainerRef.current;
+    if (!el) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startXCalcRef.current) * 1.5;
+    el.scrollLeft = scrollLeftCalcRef.current - walk;
+  };
+
+  const handleCalcMouseUpOrLeave = () => {
+    setIsDraggingCalc(false);
+  };
 
   /* ─── Reset All Search & Filters ─── */
   const resetFilters = () => {
@@ -1436,7 +1504,46 @@ function NetPriceCalculatorContent() {
                   {/* ══════════════════════════════════════════════════════════
                      DESKTOP TABLE (VISIBLE ON MD+ SCREENS)
                    ══════════════════════════════════════════════════════════ */}
-                <div className="hidden md:block overflow-x-auto rounded-[20px] border border-[#E7E2DE] bg-white shadow-xs [scrollbar-width:thin]">
+                {/* ─── HORIZONTAL SCROLL CONTROLLER BAR (DESKTOP & TABLET) ─── */}
+                {compareUniversities.length > 1 && (
+                  <div className="hidden md:flex items-center justify-between bg-white border border-[#E7E2DE] px-4 py-2.5 rounded-[18px] text-[12.5px] shadow-2xs mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#690B1B] animate-pulse" />
+                      <span className="font-bold text-[#111111]">Comparing {compareUniversities.length} of 4 Schools</span>
+                      <span className="text-[#888888] text-[11.5px] hidden lg:inline">• Click arrows or drag to view hidden columns horizontally</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => scrollCalcColumns('left')}
+                        disabled={!canScrollLeftCalc}
+                        className="px-3 py-1 rounded-full bg-[#FAF8F6] border border-[#E7E2DE] text-[#111111] font-bold text-[11px] hover:bg-[#690B1B] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
+                      >
+                        <ChevronLeft size={13} />
+                        <span>Left</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => scrollCalcColumns('right')}
+                        disabled={!canScrollRightCalc}
+                        className="px-3 py-1 rounded-full bg-[#690B1B] text-white font-bold text-[11px] hover:bg-[#530816] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Right</span>
+                        <ChevronRight size={13} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  ref={calcTableContainerRef}
+                  onMouseDown={handleCalcMouseDown}
+                  onMouseMove={handleCalcMouseMove}
+                  onMouseUp={handleCalcMouseUpOrLeave}
+                  onMouseLeave={handleCalcMouseUpOrLeave}
+                  className={`hidden md:block overflow-x-auto select-none touch-pan-x rounded-[20px] border border-[#E7E2DE] bg-white shadow-xs ${
+                    isDraggingCalc ? 'cursor-grabbing' : 'cursor-default'
+                  } [scrollbar-width:auto] [scrollbar-color:#C9A55D_#EAE4DF] [&::-webkit-scrollbar]:h-3.5 [&::-webkit-scrollbar-track]:bg-[#F0EBE6] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#C9A55D] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-[#690B1B]`}>
                   <table className="w-full text-left border-collapse min-w-[700px]">
                     <thead>
                       <tr className="border-b border-[#E7E2DE] bg-[#FAF8F6]">

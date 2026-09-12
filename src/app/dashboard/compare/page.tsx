@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -15,6 +15,7 @@ import {
   Building2,
   Share2,
   ChevronRight,
+  ChevronLeft,
   GraduationCap,
   DollarSign,
   Award,
@@ -88,6 +89,7 @@ function CompareContent() {
   const [mobileH2HIndices, setMobileH2HIndices] = useState<[number, number]>([0, 1]);
   const [mobileCompareMode, setMobileCompareMode] = useState<'h2h' | 'stacked'>('h2h');
 
+
   // Sync to URL query params
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -104,6 +106,73 @@ function CompareContent() {
       .map(id => allUnis.find(u => u.id === id))
       .filter(Boolean) as University[];
   }, [selectedIds, allUnis]);
+
+  // Horizontal Scroll & Drag Navigation for Table
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+
+  const checkScrollState = useCallback(() => {
+    const el = tableContainerRef.current;
+    if (el) {
+      setCanScrollLeft(el.scrollLeft > 15);
+      setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 15);
+    }
+  }, []);
+
+  useEffect(() => {
+    const el = tableContainerRef.current;
+    if (!el) return;
+    checkScrollState();
+
+    const handleScroll = () => checkScrollState();
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+
+    return () => {
+      el.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [checkScrollState, selectedUnis]);
+
+  const scrollColumns = (direction: 'left' | 'right') => {
+    const el = tableContainerRef.current;
+    if (el) {
+      const scrollAmount = Math.max(300, Math.floor(el.clientWidth * 0.65));
+      el.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('button, a, select, input')) return;
+    const el = tableContainerRef.current;
+    if (!el) return;
+    setIsDragging(true);
+    startXRef.current = e.pageX - el.offsetLeft;
+    scrollLeftRef.current = el.scrollLeft;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const el = tableContainerRef.current;
+    if (!el) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startXRef.current) * 1.5;
+    el.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    setIsDragging(false);
+  };
 
   // Unique list of states for filter
   const stateList = useMemo(() => {
@@ -526,18 +595,97 @@ function CompareContent() {
       </div>
 
       {/* ── COMPARISON MATRIX CARD & TABLE ── */}
+            {/* ─── HORIZONTAL SCROLL CONTROLLER BAR (DESKTOP & TABLET) ─── */}
+      {selectedUnis.length > 1 && (
+        <div className="hidden md:flex items-center justify-between bg-white border border-[#E7E2DE] px-5 py-3 rounded-[20px] text-[12.5px] shadow-xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#690B1B] shrink-0 animate-pulse" />
+            <span className="font-bold text-[#111111]">
+              Comparing {selectedUnis.length} of 4 Universities
+            </span>
+            <span className="text-[#888888] font-medium hidden lg:inline">
+              • Click arrows or drag to view hidden columns horizontally
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-bold text-[#888888] uppercase tracking-wider hidden sm:inline">
+              Column Controls:
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => scrollColumns('left')}
+                disabled={!canScrollLeft}
+                className="px-3.5 py-1.5 rounded-full bg-[#FAF8F6] border border-[#E7E2DE] text-[#111111] font-bold text-[11.5px] hover:bg-[#690B1B] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                title="Scroll Columns Left"
+              >
+                <ChevronLeft size={14} />
+                <span>Scroll Left</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollColumns('right')}
+                disabled={!canScrollRight}
+                className="px-3.5 py-1.5 rounded-full bg-[#690B1B] text-white font-bold text-[11.5px] hover:bg-[#530816] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                title="Scroll Columns Right"
+              >
+                <span>Scroll Right</span>
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── COMPARISON MATRIX CARD & TABLE ─── */}
       <div className="hidden md:block bg-white rounded-[24px] border border-[#E7E2DE] shadow-[0_4px_24px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="overflow-x-auto">
+        <div
+          ref={tableContainerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={handleMouseUpOrLeave}
+          className={`overflow-x-auto select-none touch-pan-x transition-colors ${
+            isDragging ? 'cursor-grabbing' : 'cursor-default'
+          } [scrollbar-width:auto] [scrollbar-color:#C9A55D_#EAE4DF] [&::-webkit-scrollbar]:h-3.5 [&::-webkit-scrollbar-track]:bg-[#F0EBE6] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#C9A55D] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-[#690B1B]`}
+        >
           <table className="w-full border-collapse text-left">
             {/* ════ STICKY TABLE HEADER (COLLEGE CARDS) ════ */}
             <thead>
               <tr className="border-b border-[#E7E2DE] bg-[#FAF8F6]">
                 <th className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] text-[12px] font-extrabold uppercase tracking-wider text-[#888888] align-bottom bg-[#FAF8F6] sticky left-0 z-30 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <div className="text-[#111111] font-bold text-[14px]">Compared Colleges</div>
                     <div className="text-[11px] text-[#888888] normal-case font-medium">
                       {selectedUnis.length} of 4 selected
                     </div>
+                    {/* Sticky header quick navigation arrows */}
+                    {selectedUnis.length > 2 && (
+                      <div className="pt-2 border-t border-[#EAE6E2] flex items-center justify-between">
+                        <span className="text-[10.5px] text-[#777777] font-bold normal-case">Scroll cols:</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => scrollColumns('left')}
+                            disabled={!canScrollLeft}
+                            className="p-1 rounded-[6px] bg-white border border-[#D9D2CB] text-[#111111] hover:bg-[#690B1B] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer shadow-2xs"
+                            title="Scroll Left"
+                          >
+                            <ChevronLeft size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => scrollColumns('right')}
+                            disabled={!canScrollRight}
+                            className="p-1 rounded-[6px] bg-[#690B1B] text-white hover:bg-[#530816] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer shadow-2xs"
+                            title="Scroll Right"
+                          >
+                            <ChevronRight size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </th>
 
@@ -796,7 +944,7 @@ function CompareContent() {
                   ───────────────────────────────────────────── */}
               {(activeCategory === 'all' || activeCategory === 'scholarships') && (
                 <>
-                  {renderSectionHeader('🎓 Key Scholarships (Authentic)', 'Verified Programs from University.xlsx Column 22')}
+                  {renderSectionHeader('🎓 Key Scholarships (Authentic)', 'Verified Institutional & Merit Scholarship Programs')}
 
                   <tr>
                     <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
