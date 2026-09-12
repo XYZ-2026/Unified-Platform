@@ -10,6 +10,17 @@ export default function Home() {
 
   const authTarget = user ? '/dashboard' : '/login';
 
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    const element = document.getElementById(targetId);
+    if (element) {
+      const yOffset = -90;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="bg-[#F6F4F2] text-[#111111] overflow-x-hidden font-[Poppins] font-normal min-h-screen flex flex-col">
       {/* ═══════════════════════════════════════════════════════════════
@@ -39,19 +50,32 @@ export default function Home() {
           <div className="hidden lg:flex items-center absolute left-1/2 -translate-x-1/2">
             <div className="flex items-center gap-2 bg-white/70 border border-[#E7E1DD] rounded-full px-3 py-2 shadow-sm backdrop-blur-md">
               {[
-                { label: "Universities", href: "#universities" },
-                { label: "AI Chance-Me", href: "#chance-me" },
-                { label: "SOP Builder", href: "#features" },
-                { label: "Scholarships", href: "#features" },
-                { label: "Visa Help", href: "#features" },
+                { label: "Universities", targetId: "universities", href: "#universities" },
+                { label: "AI Chance-Me", targetId: "chance-me", href: "#chance-me" },
+                { label: "SOP Builder", targetId: "features", href: "#features" },
+                { label: "Scholarships", targetId: "scholarships", href: "https://scholarship.abroadsimplified.com", isExternal: true },
+                { label: "Visa Help", targetId: "features", href: "#features" },
               ].map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="px-5 h-[42px] rounded-full flex items-center justify-center text-[15px] font-medium text-[#5F5F5F] hover:bg-[#690B1B] hover:text-white transition-all duration-300"
-                >
-                  {item.label}
-                </a>
+                item.isExternal ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 h-[42px] rounded-full flex items-center justify-center text-[15px] font-medium text-[#5F5F5F] hover:bg-[#690B1B] hover:text-white transition-all duration-300 cursor-pointer"
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={(e) => handleScrollTo(e, item.targetId)}
+                    className="px-5 h-[42px] rounded-full flex items-center justify-center text-[15px] font-medium text-[#5F5F5F] hover:bg-[#690B1B] hover:text-white transition-all duration-300 cursor-pointer"
+                  >
+                    {item.label}
+                  </a>
+                )
               ))}
             </div>
           </div>
@@ -123,6 +147,7 @@ export default function Home() {
               {[
                 {
                   label: "Universities",
+                  targetId: "universities",
                   href: "#universities",
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -133,6 +158,7 @@ export default function Home() {
                 },
                 {
                   label: "AI Chance-Me",
+                  targetId: "chance-me",
                   href: "#chance-me",
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -142,6 +168,7 @@ export default function Home() {
                 },
                 {
                   label: "SOP Builder",
+                  targetId: "features",
                   href: "#features",
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -151,7 +178,9 @@ export default function Home() {
                 },
                 {
                   label: "Scholarships",
-                  href: "#features",
+                  targetId: "scholarships",
+                  href: "https://scholarship.abroadsimplified.com",
+                  isExternal: true,
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4a5 5 0 005 5h4a5 5 0 005-5V3M5 3h14M5 3H3v2a4 4 0 004 4h1M19 3h2v2a4 4 0 01-4 4h-1M12 12v6m-4 3h8" />
@@ -160,6 +189,7 @@ export default function Home() {
                 },
                 {
                   label: "Visa Help",
+                  targetId: "features",
                   href: "#features",
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -168,17 +198,33 @@ export default function Home() {
                   ),
                 },
               ].map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center gap-3.5 py-2.5 px-3 rounded-[14px] text-[15px] font-semibold text-[#111111] hover:bg-[#F7F0F1] hover:text-[#690B1B] transition-all group"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <div className="w-9 h-9 rounded-xl bg-[#F7F0F1] border border-[#E8C4CC] text-[#690B1B] flex items-center justify-center shrink-0 group-hover:bg-[#690B1B] group-hover:text-white transition-colors">
-                    {item.icon}
-                  </div>
-                  <span>{item.label}</span>
-                </a>
+                item.isExternal ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3.5 py-2.5 px-3 rounded-[14px] text-[15px] font-semibold text-[#111111] hover:bg-[#F7F0F1] hover:text-[#690B1B] transition-all group"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-[#F7F0F1] border border-[#E8C4CC] text-[#690B1B] flex items-center justify-center shrink-0 group-hover:bg-[#690B1B] group-hover:text-white transition-colors">
+                      {item.icon}
+                    </div>
+                    <span>{item.label}</span>
+                  </a>
+                ) : (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={(e) => handleScrollTo(e, item.targetId)}
+                    className="flex items-center gap-3.5 py-2.5 px-3 rounded-[14px] text-[15px] font-semibold text-[#111111] hover:bg-[#F7F0F1] hover:text-[#690B1B] transition-all group"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-[#F7F0F1] border border-[#E8C4CC] text-[#690B1B] flex items-center justify-center shrink-0 group-hover:bg-[#690B1B] group-hover:text-white transition-colors">
+                      {item.icon}
+                    </div>
+                    <span>{item.label}</span>
+                  </a>
+                )
               ))}
               <div className="pt-4 border-t border-[#F0EBE6] mt-3">
                 {user ? (
@@ -238,12 +284,12 @@ export default function Home() {
             >
               Start Free Today →
             </Link>
-            <a
-              href="#universities"
+            <Link
+              href="/dashboard/schools"
               className="h-[54px] px-7 rounded-[10px] border border-[#690B1B]/20 text-[#690B1B] text-[15px] font-semibold inline-flex items-center justify-center hover:bg-[#690B1B]/5 transition-all"
             >
               Explore Universities
-            </a>
+            </Link>
           </div>
 
           {/* STATS UNDER HERO */}
@@ -407,15 +453,26 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
          TOP STUDY DESTINATIONS — Grid layout
          ═══════════════════════════════════════════════════════════════ */}
-      <section id="universities" className="px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 bg-[#F6F4F2]">
+      <section id="universities" className="scroll-mt-24 sm:scroll-mt-28 px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 bg-[#F6F4F2]">
         <div className="max-w-7xl mx-auto">
-          <div className="text-[#C9A55D] text-[12px] tracking-[0.2em] font-bold uppercase mb-3">
-            GLOBAL REACH
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-3">
+            <div>
+              <div className="text-[#C9A55D] text-[12px] tracking-[0.2em] font-bold uppercase mb-3">
+                GLOBAL REACH
+              </div>
+              <h2 className="text-[28px] sm:text-[36px] md:text-[48px] font-bold tracking-[-0.04em] text-[#111]">
+                Top Study Destinations &amp; Universities
+              </h2>
+            </div>
+            <Link
+              href="/dashboard/schools"
+              className="px-5 py-2.5 rounded-full bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#7A1022] transition-all shadow-xs inline-flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
+            >
+              <span>University Finder</span>
+              <span>→</span>
+            </Link>
           </div>
-          <h2 className="text-[28px] sm:text-[36px] md:text-[48px] font-bold tracking-[-0.04em] text-[#111]">
-            Top Study Destinations
-          </h2>
-          <p className="mt-3 text-[16px] text-[#727272] max-w-[600px]">
+          <p className="text-[16px] text-[#727272] max-w-[600px]">
             Compare programs across premier global hubs with verified tuition, rankings, and visa options.
           </p>
 
@@ -453,8 +510,8 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
          PLATFORM FEATURES — Grid matching Research AS
          ═══════════════════════════════════════════════════════════════ */}
-      <section id="features" className="px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 bg-[#F7F5F3]">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between gap-8 border-b border-[#E7E1DE] pb-10">
+      <section id="features" className="scroll-mt-24 sm:scroll-mt-28 px-4 sm:px-5 md:px-8 py-8 sm:py-12 lg:py-16 bg-[#F7F5F3]">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between gap-8 border-b border-[#E7E1DD] pb-10">
           <div>
             <div className="text-[#C9A55D] text-[12px] tracking-[0.2em] font-bold uppercase mb-4">
               PLATFORM FEATURES
@@ -472,26 +529,50 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto mt-8 sm:mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-[#DDD7D3] rounded-[20px] overflow-hidden">
           {[
-            { num: "01", title: "Net Price Calculator", desc: "Estimate real out-of-pocket costs with tuition, living expenses, need-based aid, and merit grants." },
-            { num: "02", title: "AI Chance-Me Predictor", desc: "Estimate real odds by comparing your stats against past admitted students." },
-            { num: "03", title: "AI SOP Feedback", desc: "Ethical, real-time essay analysis grounded in thousands of successful SOPs." },
-            { num: "04", title: "Scholarship Finder", desc: "Discover merit and need-based grants matched to your student profile." },
-            { num: "05", title: "Application Tracker", desc: "Never miss deadlines, document requirements, or portal submissions." },
-            { num: "06", title: "Visa & Document Guide", desc: "Tailored checklists, financial proof guides, and mock visa interview tools." },
+            { num: "01", title: "University Matcher", desc: "Filter 500+ global universities by budget, acceptance rate, and major.", link: "/dashboard/schools", linkText: "Explore Universities →" },
+            { num: "02", title: "AI Chance-Me Predictor", desc: "Estimate real odds by comparing your stats against past admitted students.", link: "/dashboard/chance-me", linkText: "Test Admit Odds →" },
+            { num: "03", title: "AI SOP Feedback", desc: "Ethical, real-time essay analysis grounded in thousands of successful SOPs.", link: "/dashboard/essays", linkText: "SOP Analyzer →" },
+            { num: "04", id: "scholarships", title: "Scholarship Finder", desc: "Discover merit and need-based grants matched to your student profile.", link: "https://scholarship.abroadsimplified.com", linkText: "Browse Scholarships ↗", isExternal: true },
+            { num: "05", title: "Application Tracker", desc: "Never miss deadlines, document requirements, or portal submissions.", link: "/dashboard/tracker", linkText: "Open Tracker →" },
+            { num: "06", title: "Visa & Document Guide", desc: "Tailored checklists, financial proof guides, and mock visa interview tools.", link: "/dashboard/visa", linkText: "Visa Guide →" },
           ].map((feature) => (
             <div
               key={feature.num}
-              className="bg-[#F7F5F3] min-h-[200px] sm:min-h-[260px] p-5 sm:p-8 border-r border-b border-[#DDD7D3] hover:bg-white transition-colors"
+              id={feature.id}
+              className="bg-[#F7F5F3] min-h-[200px] sm:min-h-[260px] p-5 sm:p-8 border-r border-b border-[#DDD7D3] hover:bg-white transition-colors scroll-mt-28 flex flex-col justify-between"
             >
-              <div className="text-[#D8C1C6] text-[16px] font-bold">
-                {feature.num}
+              <div>
+                <div className="text-[#D8C1C6] text-[16px] font-bold">
+                  {feature.num}
+                </div>
+                <h3 className="mt-6 text-[22px] font-bold tracking-[-0.03em] text-[#111]">
+                  {feature.title}
+                </h3>
+                <p className="mt-3 text-[14px] leading-7 text-[#777777]">
+                  {feature.desc}
+                </p>
               </div>
-              <h3 className="mt-6 text-[22px] font-bold tracking-[-0.03em] text-[#111]">
-                {feature.title}
-              </h3>
-              <p className="mt-3 text-[14px] leading-7 text-[#777777]">
-                {feature.desc}
-              </p>
+              {feature.link && (
+                <div className="mt-6 pt-4 border-t border-[#EAE4DF]">
+                  {feature.isExternal ? (
+                    <a
+                      href={feature.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[13px] font-bold text-[#690B1B] hover:underline inline-flex items-center gap-1"
+                    >
+                      {feature.linkText}
+                    </a>
+                  ) : (
+                    <Link
+                      href={feature.link}
+                      className="text-[13px] font-bold text-[#690B1B] hover:underline inline-flex items-center gap-1"
+                    >
+                      {feature.linkText}
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -500,7 +581,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
          DARK SECTION — AI Advisor Interactive Feature Showcase
          ═══════════════════════════════════════════════════════════════ */}
-      <section id="chance-me" className="w-full bg-[#050505] px-4 sm:px-6 md:px-10 lg:px-16 py-14 sm:py-24 lg:py-28 overflow-hidden">
+      <section id="chance-me" className="scroll-mt-24 sm:scroll-mt-28 w-full bg-[#050505] px-4 sm:px-6 md:px-10 lg:px-16 py-14 sm:py-24 lg:py-28 overflow-hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
           {/* LEFT */}
           <div className="max-w-[540px]">
