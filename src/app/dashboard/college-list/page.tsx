@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { getCachedUserDetails } from '@/lib/userDetailsCache';
+import { getCachedUserDetails, subscribeToUserDetails } from '@/lib/userDetailsCache';
 import {
   Search,
   Star,
@@ -51,53 +51,20 @@ function getUniversityEmoji(name: string): string {
   return '🏛️';
 }
 
-const DEFAULT_DREAM: CollegeListItem[] = [
-  {
-    id: 'upenn',
-    name: 'University of Pennsylvania',
-    location: 'Philadelphia, PA',
-    deadline: 'ED: Nov 1',
-    acceptanceRate: '5.4%',
-    qsRank: '#15 QS World',
-    logo: '🏛️'
-  }
-];
+const DEFAULT_DREAM: CollegeListItem[] = [];
+const DEFAULT_REACH: CollegeListItem[] = [];
+const DEFAULT_TARGET: CollegeListItem[] = [];
+const DEFAULT_SAFETY: CollegeListItem[] = [];
 
-const DEFAULT_REACH: CollegeListItem[] = [
-  {
-    id: 'harvard',
-    name: 'Harvard University',
-    location: 'Cambridge, MA',
-    deadline: 'REA: Nov 1',
-    acceptanceRate: '3.4%',
-    qsRank: '#4 QS World',
-    logo: '🎓'
-  }
-];
-
-const DEFAULT_TARGET: CollegeListItem[] = [
-  {
-    id: 'gatech',
-    name: 'Georgia Institute of Technology',
-    location: 'Atlanta, GA',
-    deadline: 'EA: Oct 15',
-    acceptanceRate: '16.0%',
-    qsRank: '#88 QS World',
-    logo: '🔬'
-  }
-];
-
-const DEFAULT_SAFETY: CollegeListItem[] = [
-  {
-    id: 'purdue',
-    name: 'Purdue University',
-    location: 'West Lafayette, IN',
-    deadline: 'EA: Nov 1',
-    acceptanceRate: '52.7%',
-    qsRank: '#99 QS World',
-    logo: '⚙️'
-  }
-];
+const formatDreamSchool = (schoolName: string): CollegeListItem => ({
+  id: schoolName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+  name: schoolName.trim(),
+  location: 'Selected at Signup',
+  deadline: 'RD: Jan 01',
+  acceptanceRate: 'Competitive',
+  qsRank: 'Dream Choice',
+  logo: getUniversityEmoji(schoolName)
+});
 
 export default function CollegeListPage() {
   const { user, userData } = useAuth();
@@ -122,18 +89,67 @@ export default function CollegeListPage() {
   const [targetSchools, setTargetSchools] = useState<CollegeListItem[]>(DEFAULT_TARGET);
   const [safetySchools, setSafetySchools] = useState<CollegeListItem[]>(DEFAULT_SAFETY);
 
-  // Load saved custom college lists and prefetch CMS universities instantly on mount
+  // Load saved custom college lists or initialize with signup dream school only
   useEffect(() => {
     try {
+      const userKey = user?.uid || user?.email || userData?.email || 'default';
+      const cached = getCachedUserDetails(userKey);
+
       // 1. Load saved college list from localStorage
       const savedList = localStorage.getItem('unified_college_list_data');
+      let loadedFromStorage = false;
+
       if (savedList) {
-        const parsed = JSON.parse(savedList);
-        if (parsed.dream) setDreamSchools(parsed.dream);
-        if (parsed.reach) setReachSchools(parsed.reach);
-        if (parsed.target) setTargetSchools(parsed.target);
-        if (parsed.safety) setSafetySchools(parsed.safety);
+        try {
+          const parsed = JSON.parse(savedList);
+          // Check if this was the old hardcoded mock data containing harvard, gatech, purdue
+          const isOldMockTemplate =
+            parsed.reach?.some((s: any) => s.id === 'harvard') &&
+            parsed.target?.some((s: any) => s.id === 'gatech') &&
+            parsed.safety?.some((s: any) => s.id === 'purdue');
+
+          if (!isOldMockTemplate && (parsed.dream?.length || parsed.reach?.length || parsed.target?.length || parsed.safety?.length)) {
+            if (Array.isArray(parsed.dream)) setDreamSchools(parsed.dream);
+            if (Array.isArray(parsed.reach)) setReachSchools(parsed.reach);
+            if (Array.isArray(parsed.target)) setTargetSchools(parsed.target);
+            if (Array.isArray(parsed.safety)) setSafetySchools(parsed.safety);
+            loadedFromStorage = true;
+          }
+        } catch (e) {
+          console.warn('Failed to parse saved college list:', e);
+        }
       }
+
+      // If no custom saved list, initialize strictly: only signup dream university in Dream tier, rest empty!
+      if (!loadedFromStorage) {
+        const signupDream = cached?.dreamSchool || (userData as any)?.dreamSchool || '';
+        if (signupDream && signupDream.trim()) {
+          const dreamItem = formatDreamSchool(signupDream);
+          setDreamSchools([dreamItem]);
+          saveCollegeLists([dreamItem], [], [], []);
+        } else {
+          setDreamSchools([]);
+          saveCollegeLists([], [], [], []);
+        }
+        setReachSchools([]);
+        setTargetSchools([]);
+        setSafetySchools([]);
+      }
+
+      // Listen for user details updates (e.g. when auth loads or dreamSchool syncs)
+      const unsubscribe = subscribeToUserDetails((updated) => {
+        const schoolName = updated?.dreamSchool;
+        if (schoolName && schoolName.trim()) {
+          setDreamSchools((prev) => {
+            if (prev.length === 0) {
+              const dreamItem = formatDreamSchool(schoolName);
+              saveCollegeLists([dreamItem], [], [], []);
+              return [dreamItem];
+            }
+            return prev;
+          });
+        }
+      });
 
       // 2. Load cached universities from localStorage for 0ms instant search
       const cachedUnis = localStorage.getItem('cached_cms_universities');
@@ -154,10 +170,14 @@ export default function CollegeListPage() {
           }
         })
         .catch((err) => console.warn('Background universities fetch error:', err));
+
+      return () => {
+        unsubscribe();
+      };
     } catch (e) {
       console.warn('Initialization error in college list:', e);
     }
-  }, []);
+  }, [user, userData]);
 
   // Save college list to localStorage
   const saveCollegeLists = (d: CollegeListItem[], r: CollegeListItem[], t: CollegeListItem[], s: CollegeListItem[]) => {

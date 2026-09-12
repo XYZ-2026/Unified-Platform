@@ -301,12 +301,12 @@ function CompareContent() {
   // Section Header Helper
   const renderSectionHeader = (title: string, subtitle: string) => (
     <tr className="bg-[#F7F4F0] border-y border-[#EAE6E2]">
-      <td className="py-2.5 px-5 font-black text-[12px] uppercase tracking-wider text-[#690B1B] bg-[#F7F4F0] sticky left-0 z-20 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+      <td className="py-3.5 px-5 font-black text-[14.5px] uppercase tracking-wider text-[#690B1B] bg-[#F7F4F0] sticky left-0 z-20 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
         {title}
       </td>
       <td
         colSpan={selectedUnis.length + (selectedUnis.length < 4 ? 1 : 0)}
-        className="py-2.5 px-5 font-bold text-[11px] text-[#888888] bg-[#F7F4F0] uppercase tracking-wider"
+        className="py-3.5 px-5 font-bold text-[13px] text-[#666666] bg-[#F7F4F0] uppercase tracking-wider"
       >
         {subtitle}
       </td>
@@ -358,7 +358,7 @@ function CompareContent() {
           <div className="bg-white/10 backdrop-blur-md rounded-[16px] p-3.5 sm:p-4 border border-white/15 space-y-1">
             <div className="flex items-center gap-2 text-[#C9A55D]">
               <Building2 size={16} />
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-white/75">Coverage</span>
+              <span className="text-[13px] font-extrabold uppercase tracking-wider text-white/75">Coverage</span>
             </div>
             <div className="text-[18px] sm:text-[22px] font-black text-white">2,328+</div>
             <div className="text-[11px] text-white/70">Institutions across all 50 states</div>
@@ -367,7 +367,7 @@ function CompareContent() {
           <div className="bg-white/10 backdrop-blur-md rounded-[16px] p-3.5 sm:p-4 border border-white/15 space-y-1">
             <div className="flex items-center gap-2 text-[#C9A55D]">
               <Award size={16} />
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-white/75">Authentic Aid</span>
+              <span className="text-[13px] font-extrabold uppercase tracking-wider text-white/75">Authentic Aid</span>
             </div>
             <div className="text-[18px] sm:text-[22px] font-black text-white">Verified</div>
             <div className="text-[11px] text-white/70">Institutional, tribal & state awards</div>
@@ -376,7 +376,7 @@ function CompareContent() {
           <div className="bg-white/10 backdrop-blur-md rounded-[16px] p-3.5 sm:p-4 border border-white/15 space-y-1">
             <div className="flex items-center gap-2 text-[#C9A55D]">
               <DollarSign size={16} />
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-white/75">Financials</span>
+              <span className="text-[13px] font-extrabold uppercase tracking-wider text-white/75">Financials</span>
             </div>
             <div className="text-[18px] sm:text-[22px] font-black text-white">Net vs. Sticker</div>
             <div className="text-[11px] text-white/70">Tuition, housing & direct grants</div>
@@ -385,7 +385,7 @@ function CompareContent() {
           <div className="bg-white/10 backdrop-blur-md rounded-[16px] p-3.5 sm:p-4 border border-white/15 space-y-1">
             <div className="flex items-center gap-2 text-[#C9A55D]">
               <Layers size={16} />
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-white/75">Parameters</span>
+              <span className="text-[13px] font-extrabold uppercase tracking-wider text-white/75">Parameters</span>
             </div>
             <div className="text-[18px] sm:text-[22px] font-black text-white">30+ Metrics</div>
             <div className="text-[11px] text-white/70">Admissions, TOEFL, essays & majors</div>
@@ -569,7 +569,7 @@ function CompareContent() {
       ) : (
         <>
       {/* ── CATEGORY ANCHOR TABS ── */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[12.5px] font-bold scrollbar-none">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[14px] font-bold scrollbar-none">
         {[
           { id: 'all', label: 'All Parameters' },
           { id: 'overview', label: '🏛️ Overview & Ranking' },
@@ -609,7 +609,7 @@ function CompareContent() {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-[11px] font-bold text-[#888888] uppercase tracking-wider hidden sm:inline">
+            <span className="text-[12.5px] font-bold text-[#777777] uppercase tracking-wider hidden sm:inline">
               Column Controls:
             </span>
             <div className="flex items-center gap-1.5">
@@ -617,21 +617,21 @@ function CompareContent() {
                 type="button"
                 onClick={() => scrollColumns('left')}
                 disabled={!canScrollLeft}
-                className="px-3.5 py-1.5 rounded-full bg-[#FAF8F6] border border-[#E7E2DE] text-[#111111] font-bold text-[11.5px] hover:bg-[#690B1B] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="px-4 py-2 rounded-full bg-[#FAF8F6] border border-[#E7E2DE] text-[#111111] font-bold text-[13px] hover:bg-[#690B1B] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 title="Scroll Columns Left"
               >
-                <ChevronLeft size={14} />
+                <ChevronLeft size={15} />
                 <span>Scroll Left</span>
               </button>
               <button
                 type="button"
                 onClick={() => scrollColumns('right')}
                 disabled={!canScrollRight}
-                className="px-3.5 py-1.5 rounded-full bg-[#690B1B] text-white font-bold text-[11.5px] hover:bg-[#530816] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="px-4 py-2 rounded-full bg-[#690B1B] text-white font-bold text-[13px] hover:bg-[#530816] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 title="Scroll Columns Right"
               >
                 <span>Scroll Right</span>
-                <ChevronRight size={14} />
+                <ChevronRight size={15} />
               </button>
             </div>
           </div>
@@ -654,16 +654,16 @@ function CompareContent() {
             {/* ════ STICKY TABLE HEADER (COLLEGE CARDS) ════ */}
             <thead>
               <tr className="border-b border-[#E7E2DE] bg-[#FAF8F6]">
-                <th className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] text-[12px] font-extrabold uppercase tracking-wider text-[#888888] align-bottom bg-[#FAF8F6] sticky left-0 z-30 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                <th className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] text-[13.5px] font-extrabold uppercase tracking-wider text-[#888888] align-bottom bg-[#FAF8F6] sticky left-0 z-30 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                   <div className="space-y-2">
-                    <div className="text-[#111111] font-bold text-[14px]">Compared Colleges</div>
-                    <div className="text-[11px] text-[#888888] normal-case font-medium">
+                    <div className="text-[#111111] font-black text-[16px]">Compared Colleges</div>
+                    <div className="text-[13px] text-[#666666] normal-case font-bold">
                       {selectedUnis.length} of 4 selected
                     </div>
                     {/* Sticky header quick navigation arrows */}
                     {selectedUnis.length > 2 && (
                       <div className="pt-2 border-t border-[#EAE6E2] flex items-center justify-between">
-                        <span className="text-[10.5px] text-[#777777] font-bold normal-case">Scroll cols:</span>
+                        <span className="text-[12px] text-[#666666] font-bold normal-case">Scroll cols:</span>
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
@@ -702,9 +702,9 @@ function CompareContent() {
                             setModalSlotIndex(idx);
                             setSearchModalOpen(true);
                           }}
-                          className="text-[10.5px] font-bold text-[#690B1B] hover:underline flex items-center gap-1 cursor-pointer"
+                          className="text-[12.5px] font-extrabold text-[#690B1B] hover:underline flex items-center gap-1 cursor-pointer"
                         >
-                          <ArrowLeftRight size={11} />
+                          <ArrowLeftRight size={13} />
                           <span>Swap</span>
                         </button>
                         <button
@@ -712,16 +712,16 @@ function CompareContent() {
                           className="p-1 rounded-full text-[#888888] hover:text-[#e11d48] hover:bg-[#ffe4e6] transition-colors cursor-pointer"
                           title="Remove college"
                         >
-                          <X size={15} />
+                          <X size={16} />
                         </button>
                       </div>
 
                       {/* College Name & State */}
                       <div className="space-y-1">
-                        <div className="text-[16px] font-extrabold text-[#111111] leading-snug line-clamp-2">
+                        <div className="text-[18px] font-black text-[#111111] leading-snug line-clamp-2">
                           {uni.name}
                         </div>
-                        <div className="text-[12px] text-[#666666] flex items-center gap-1.5 font-medium">
+                        <div className="text-[14px] text-[#555555] flex items-center gap-1.5 font-semibold">
                           <span>📍 {uni.state}</span>
                           <span className="text-[#C9A55D]">•</span>
                           <span className="font-bold text-[#690B1B]">{uni.qsRanking}</span>
@@ -729,21 +729,21 @@ function CompareContent() {
                       </div>
 
                       {/* Quick Snapshot: Tuition & Net Price Badge */}
-                      <div className="pt-2 border-t border-[#EAE6E2] flex items-center justify-between text-[11.5px]">
+                      <div className="pt-2 border-t border-[#EAE6E2] flex items-center justify-between text-[13px]">
                         <div>
-                          <div className="text-[#888888] text-[10px] uppercase font-bold">Sticker Tuition</div>
-                          <div className="text-[14px] font-black text-[#111111]">
+                          <div className="text-[#777777] text-[11.5px] uppercase font-extrabold">Sticker Tuition</div>
+                          <div className="text-[18px] font-black text-[#111111]">
                             {formatCurrency(uni.tuition)}
-                            <span className="text-[10px] font-medium text-[#777777]">/yr</span>
+                            <span className="text-[12px] font-medium text-[#777777]">/yr</span>
                           </div>
                         </div>
 
                         <Link
                           href={`/dashboard/calculator`}
-                          className="px-2.5 py-1 rounded-[8px] bg-[#690B1B]/10 hover:bg-[#690B1B]/20 text-[#690B1B] font-bold text-[11px] transition-colors flex items-center gap-1"
+                          className="px-3 py-1.5 rounded-[10px] bg-[#690B1B]/10 hover:bg-[#690B1B]/20 text-[#690B1B] font-bold text-[12.5px] transition-colors flex items-center gap-1.5 shadow-2xs"
                           title="Simulate in Net Price Calculator"
                         >
-                          <Calculator size={12} />
+                          <Calculator size={13} />
                           <span>Simulate</span>
                         </Link>
                       </div>
@@ -764,8 +764,8 @@ function CompareContent() {
                       <div className="w-10 h-10 rounded-full bg-[#EAE4DF] group-hover:bg-[#690B1B]/10 flex items-center justify-center transition-colors">
                         <Plus size={20} className="group-hover:text-[#690B1B]" />
                       </div>
-                      <span className="text-[12.5px] font-extrabold">Add Another College</span>
-                      <span className="text-[11px] text-[#999999]">Compare up to 4 side-by-side</span>
+                      <span className="text-[14.5px] font-black text-[#111111]">Add Another College</span>
+                      <span className="text-[12.5px] text-[#777777]">Compare up to 4 side-by-side</span>
                     </button>
                   </th>
                 )}
@@ -773,7 +773,7 @@ function CompareContent() {
             </thead>
 
             {/* ════ TABLE BODY: DETAILED PARAMETERS MATRIX ════ */}
-            <tbody className="divide-y divide-[#F0EBE6] text-[12.5px]">
+            <tbody className="divide-y divide-[#F0EBE6] text-[14px]">
               {/* ─────────────────────────────────────────────
                   SECTION 1: 🏛️ OVERVIEW & RANKING
                   ───────────────────────────────────────────── */}
@@ -782,7 +782,7 @@ function CompareContent() {
                   {renderSectionHeader('🏛️ Institutional Standing', 'Identity, State Location, and Digital Portals')}
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Location / State
                     </td>
                     {selectedUnis.map(u => (
@@ -794,7 +794,7 @@ function CompareContent() {
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Ranking Standing
                     </td>
                     {selectedUnis.map(u => (
@@ -808,7 +808,7 @@ function CompareContent() {
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Official Portal
                     </td>
                     {selectedUnis.map(u => (
@@ -817,7 +817,7 @@ function CompareContent() {
                           href={u.website?.startsWith('http') ? u.website : `https://${u.website}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[#690B1B] hover:underline font-bold inline-flex items-center gap-1"
+                          className="text-[#690B1B] hover:underline font-bold text-[14.5px] inline-flex items-center gap-1"
                         >
                           <span>{u.website || 'Visit Website'}</span>
                           <ExternalLink size={12} />
@@ -837,7 +837,7 @@ function CompareContent() {
                   {renderSectionHeader('💰 Costs & Financial Aid', 'Tuition, Room & Board, Direct Grants & Net Out-of-Pocket')}
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Published Tuition & Fees
                     </td>
                     {selectedUnis.map(u => {
@@ -845,16 +845,16 @@ function CompareContent() {
                       return (
                         <td key={u.id} className={`p-4 sm:p-5 border-r border-[#EAE6E2] align-middle ${isBest ? 'bg-[#16a34a]/5' : ''}`}>
                           <div className="flex items-center justify-between gap-1">
-                            <span className="text-[14px] font-black text-[#111111]">
+                            <span className="text-[18px] font-black text-[#111111]">
                               {formatCurrency(u.tuition)}
                             </span>
                             {isBest && (
-                              <span className="text-[9.5px] font-black uppercase tracking-wide bg-[#16a34a] text-white px-2 py-0.5 rounded-full">
+                              <span className="text-[11px] font-black uppercase tracking-wide bg-[#16a34a] text-white px-2.5 py-1 rounded-full">
                                 Lowest Tuition
                               </span>
                             )}
                           </div>
-                          <div className="text-[10.5px] text-[#777777]">Annual base rate</div>
+                          <div className="text-[12.5px] text-[#666666]">Annual base rate</div>
                         </td>
                       );
                     })}
@@ -862,37 +862,37 @@ function CompareContent() {
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Room & Board / Living
                     </td>
                     {selectedUnis.map(u => (
                       <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-middle">
-                        <span className="text-[13.5px] font-bold text-[#222222]">
+                        <span className="text-[18px] font-black text-[#111111]">
                           {formatCurrency(u.livingCosts)}
                         </span>
-                        <div className="text-[10.5px] text-[#777777]">Housing & food allowance</div>
+                        <div className="text-[12.5px] text-[#666666]">Housing & food allowance</div>
                       </td>
                     ))}
                     {selectedUnis.length < 4 && <td className="bg-[#FAF8F6] border-r border-[#EAE6E2]" />}
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Total Published COA
                     </td>
                     {selectedUnis.map(u => (
                       <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-middle">
-                        <div className="text-[15px] font-black text-[#111111]">
+                        <div className="text-[18px] font-black text-[#111111]">
                           {formatCurrency(u.tuition + u.livingCosts)}
                         </div>
-                        <div className="text-[10.5px] text-[#777777]">Tuition + Room & Board</div>
+                        <div className="text-[12.5px] text-[#666666]">Tuition + Room & Board</div>
                       </td>
                     ))}
                     {selectedUnis.length < 4 && <td className="bg-[#FAF8F6] border-r border-[#EAE6E2]" />}
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Average Need-Based Grant
                     </td>
                     {selectedUnis.map(u => {
@@ -900,16 +900,16 @@ function CompareContent() {
                       return (
                         <td key={u.id} className={`p-4 sm:p-5 border-r border-[#EAE6E2] align-middle ${isBest ? 'bg-[#16a34a]/5' : ''}`}>
                           <div className="flex items-center justify-between gap-1">
-                            <span className="text-[14px] font-extrabold text-[#16a34a]">
+                            <span className="text-[18px] font-black text-[#16a34a]">
                               {formatCurrency(u.avgNeedBasedGrant)}
                             </span>
                             {isBest && (
-                              <span className="text-[9.5px] font-black uppercase tracking-wide bg-[#16a34a] text-white px-2 py-0.5 rounded-full">
+                              <span className="text-[11px] font-black uppercase tracking-wide bg-[#16a34a] text-white px-2.5 py-1 rounded-full">
                                 Highest Grant
                               </span>
                             )}
                           </div>
-                          <div className="text-[10.5px] text-[#777777]">Institutional aid average</div>
+                          <div className="text-[12.5px] text-[#666666]">Institutional aid average</div>
                         </td>
                       );
                     })}
@@ -917,16 +917,16 @@ function CompareContent() {
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Est. Net Price After Aid
                     </td>
                     {selectedUnis.map(u => {
                       const net = Math.max(0, (u.tuition + u.livingCosts) - u.avgNeedBasedGrant);
                       return (
                         <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-middle bg-[#690B1B]/5">
-                          <div className="text-[16px] font-black text-[#690B1B]">
+                          <div className="text-[20px] font-black text-[#690B1B]">
                             {formatCurrency(net)}
-                            <span className="text-[11px] font-medium text-[#777777]">/yr</span>
+                            <span className="text-[13px] font-medium text-[#777777]">/yr</span>
                           </div>
                           <div className="text-[10.5px] text-[#555555] font-medium">
                             Estimated out-of-pocket
@@ -947,7 +947,7 @@ function CompareContent() {
                   {renderSectionHeader('🎓 Key Scholarships (Authentic)', 'Verified Institutional & Merit Scholarship Programs')}
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Institutional & State Awards
                     </td>
                     {selectedUnis.map(u => {
@@ -961,16 +961,16 @@ function CompareContent() {
                                   key={sIdx}
                                   className="p-3 rounded-[12px] bg-[#FAF8F6] border border-[#EAE6E2] space-y-1.5 shadow-2xs"
                                 >
-                                  <div className="font-bold text-[#111111] leading-snug">
+                                  <div className="font-bold text-[14.5px] text-[#111111] leading-snug">
                                     {s.title}
                                   </div>
                                   <div>
-                                    <span className="inline-block text-[#16a34a] font-extrabold text-[10.5px] bg-[#16a34a]/10 px-2 py-0.5 rounded-full border border-[#16a34a]/20 max-w-full break-words leading-tight">
+                                    <span className="inline-block text-[#16a34a] font-black text-[13px] bg-[#16a34a]/10 px-2.5 py-1 rounded-full border border-[#16a34a]/20 max-w-full break-words leading-tight">
                                       {s.amount}
                                     </span>
                                   </div>
                                   {s.description && (
-                                    <p className="text-[10.5px] text-[#666666] leading-relaxed">
+                                    <p className="text-[12.5px] text-[#555555] leading-relaxed">
                                       {s.description}
                                     </p>
                                   )}
@@ -978,7 +978,7 @@ function CompareContent() {
                               ))}
                             </div>
                           ) : (
-                            <span className="text-[12px] text-[#888888] italic">
+                            <span className="text-[13.5px] text-[#777777] italic">
                               Institutional & federal Pell grants apply
                             </span>
                           )}
@@ -998,7 +998,7 @@ function CompareContent() {
                   {renderSectionHeader('📊 Admissions Selectivity', 'Acceptance Rates, Test Score Percentiles & High School GPA')}
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Acceptance Rate
                     </td>
                     {selectedUnis.map(u => {
@@ -1017,10 +1017,10 @@ function CompareContent() {
                       return (
                         <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-middle">
                           <div className="flex items-center justify-between gap-1 mb-1">
-                            <span className="text-[15px] font-black text-[#111111]">
+                            <span className="text-[18px] font-black text-[#111111]">
                               {formatPercentage(rate)}
                             </span>
-                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${rateBadgeColor}`}>
+                            <span className={`text-[12px] font-extrabold px-2.5 py-1 rounded-full border ${rateBadgeColor}`}>
                               {label}
                             </span>
                           </div>
@@ -1037,31 +1037,31 @@ function CompareContent() {
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Average High School GPA
                     </td>
                     {selectedUnis.map(u => (
                       <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-middle">
-                        <span className="text-[14px] font-extrabold text-[#111111]">
+                        <span className="text-[18px] font-black text-[#111111]">
                           {u.avgGPA > 0 ? `${u.avgGPA} / 4.0` : '3.25 / 4.0'}
                         </span>
-                        <div className="text-[10.5px] text-[#777777]">Unweighted median GPA</div>
+                        <div className="text-[12.5px] text-[#666666]">Unweighted median GPA</div>
                       </td>
                     ))}
                     {selectedUnis.length < 4 && <td className="bg-[#FAF8F6] border-r border-[#EAE6E2]" />}
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       SAT Score Range
                     </td>
                     {selectedUnis.map(u => {
                       return (
                         <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-middle">
-                          <span className="text-[14px] font-extrabold text-[#111111]">
+                          <span className="text-[17px] font-black text-[#111111]">
                             {formatSATRange(u.satScore)}
                           </span>
-                          <div className="text-[10.5px] text-[#777777]">25th – 75th percentile composite</div>
+                          <div className="text-[12.5px] text-[#666666]">25th – 75th percentile composite</div>
                         </td>
                       );
                     })}
@@ -1078,15 +1078,15 @@ function CompareContent() {
                   {renderSectionHeader('🗣️ English Proficiency & Tests', 'Cut-offs for TOEFL iBT, IELTS, Duolingo & Waiver Policies')}
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       TOEFL / IELTS Standards
                     </td>
                     {selectedUnis.map(u => (
                       <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-top">
-                        <div className="text-[12px] font-bold text-[#111111] leading-snug">
+                        <div className="text-[14.5px] font-bold text-[#111111] leading-snug">
                           {u.toeflScore || '79 iBT (or English Proficiency Waiver available)'}
                         </div>
-                        <div className="text-[10.5px] text-[#777777] mt-1">
+                        <div className="text-[12.5px] text-[#666666] mt-1">
                           IELTS 6.5 / Duolingo 110+ equivalent
                         </div>
                       </td>
@@ -1104,11 +1104,11 @@ function CompareContent() {
                   {renderSectionHeader('📋 Application Checklists & Essays', 'Portals, Required Transcripts, Recommendations & Writing Prompts')}
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Application Checklist
                     </td>
                     {selectedUnis.map(u => (
-                      <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-top text-[11.5px] text-[#444444] leading-relaxed">
+                      <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-top text-[13.5px] text-[#333333] leading-relaxed">
                         {u.admissionRequirements || 'Common App or Institutional Application; Official Transcripts; Counselor/Teacher Recommendations; Test-Optional SAT/ACT.'}
                       </td>
                     ))}
@@ -1116,16 +1116,16 @@ function CompareContent() {
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Writing & Essays
                     </td>
                     {selectedUnis.map(u => (
-                      <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-top text-[11.5px] text-[#444444] leading-relaxed space-y-1.5">
-                        <div className="font-bold text-[#111111]">
+                      <td key={u.id} className="p-4 sm:p-5 border-r border-[#EAE6E2] align-top text-[13.5px] text-[#333333] leading-relaxed space-y-1.5">
+                        <div className="font-bold text-[14px] text-[#111111]">
                           {u.writingReqs || 'Common App Personal Essay (650 words max)'}
                         </div>
                         {u.essayPrompts && (
-                          <div className="text-[10.5px] text-[#666666] line-clamp-3">
+                          <div className="text-[12.5px] text-[#555555] line-clamp-3">
                             {u.essayPrompts}
                           </div>
                         )}
@@ -1144,7 +1144,7 @@ function CompareContent() {
                   {renderSectionHeader('📚 Popular Academic Majors', 'Top Degree Offerings & Search Match Highlighting')}
 
                   <tr>
-                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
+                    <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] bg-[#FAF8F6] sticky left-0 z-10 border-r border-[#EAE6E2] align-top shadow-[4px_0_10px_rgba(0,0,0,0.03)]">
                       Major Programs
                       <div className="mt-2">
                         <input
@@ -1152,7 +1152,7 @@ function CompareContent() {
                           placeholder="Search a major..."
                           value={majorFilter}
                           onChange={e => setMajorFilter(e.target.value)}
-                          className="w-full px-2 py-1 text-[11px] rounded-[8px] border border-[#D9D2CB] bg-white focus:outline-none focus:border-[#690B1B]"
+                          className="w-full px-2.5 py-1.5 text-[12.5px] rounded-[8px] border border-[#D9D2CB] bg-white focus:outline-none focus:border-[#690B1B]"
                         />
                       </div>
                     </td>
@@ -1167,7 +1167,7 @@ function CompareContent() {
                               return (
                                 <span
                                   key={mIdx}
-                                  className={`text-[10.5px] px-2 py-0.5 rounded-full font-medium transition-all ${
+                                  className={`text-[12px] px-2.5 py-1 rounded-full font-semibold transition-all ${
                                     matches
                                       ? 'bg-[#C9A55D] text-black font-extrabold shadow-2xs scale-105'
                                       : 'bg-[#F0EBE6] text-[#444444]'
@@ -1190,7 +1190,7 @@ function CompareContent() {
                   SECTION 8: 🚀 EXPLORE & ACTIONS
                   ───────────────────────────────────────────── */}
               <tr className="bg-[#FAF8F6]">
-                <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-bold text-[#555555] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)] bg-[#FAF8F6]">
+                <td className="p-4 sm:p-5 w-[240px] min-w-[240px] max-w-[240px] font-extrabold text-[15px] text-[#1a1a1a] sticky left-0 z-10 border-r border-[#EAE6E2] shadow-[4px_0_10px_rgba(0,0,0,0.03)] bg-[#FAF8F6]">
                   Actions
                 </td>
                 {selectedUnis.map(u => (
@@ -1198,7 +1198,7 @@ function CompareContent() {
                     <div className="space-y-2">
                       <Link
                         href={`/dashboard/calculator`}
-                        className="w-full py-2 px-3 rounded-[10px] bg-[#690B1B] hover:bg-[#530816] text-white text-[11.5px] font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs"
+                        className="w-full py-2 px-3 rounded-[10px] bg-[#690B1B] hover:bg-[#530816] text-white text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs"
                       >
                         <Calculator size={13} />
                         <span>Simulate Net Price</span>
@@ -1207,7 +1207,7 @@ function CompareContent() {
                         href={u.website?.startsWith('http') ? u.website : `https://${u.website}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full py-2 px-3 rounded-[10px] bg-white border border-[#E0DBD5] hover:border-[#690B1B]/30 hover:text-[#690B1B] text-[#444444] text-[11.5px] font-bold transition-all flex items-center justify-center gap-1.5"
+                        className="w-full py-2 px-3 rounded-[10px] bg-white border border-[#E0DBD5] hover:border-[#690B1B]/30 hover:text-[#690B1B] text-[#444444] text-[13px] font-bold transition-all flex items-center justify-center gap-1.5"
                       >
                         <span>Official Website</span>
                         <ExternalLink size={12} />
@@ -1230,8 +1230,8 @@ function CompareContent() {
         {selectedUnis.length > 2 && (
           <div className="bg-[#FAF8F6] p-3 rounded-[18px] border border-[#E7E2DE] space-y-2.5">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[12px] font-bold text-[#111111]">Mobile View:</span>
-              <div className="flex items-center bg-white border border-[#E7E2DE] rounded-full p-0.5 text-[11px] font-bold">
+              <span className="text-[13.5px] font-bold text-[#111111]">Mobile View:</span>
+              <div className="flex items-center bg-white border border-[#E7E2DE] rounded-full p-0.5 text-[12.5px] font-bold">
                 <button
                   type="button"
                   onClick={() => setMobileCompareMode('h2h')}
@@ -1260,14 +1260,14 @@ function CompareContent() {
             {mobileCompareMode === 'h2h' && (
               <div className="grid grid-cols-2 gap-2 text-[11.5px] pt-1 border-t border-[#EAE6E2]">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#777777] mb-0.5">College A:</label>
+                  <label className="block text-[12px] font-bold text-[#777777] mb-0.5">College A:</label>
                   <select
                     value={mobileH2HIndices[0]}
                     onChange={(e) => {
                       const newIdx = Number(e.target.value);
                       setMobileH2HIndices([newIdx, newIdx === mobileH2HIndices[1] ? (newIdx + 1) % selectedUnis.length : mobileH2HIndices[1]]);
                     }}
-                    className="w-full bg-white border border-[#E7E2DE] rounded-[10px] px-2 py-1.5 font-bold text-[#111111] text-[11px] truncate"
+                    className="w-full bg-white border border-[#E7E2DE] rounded-[10px] px-2.5 py-2 font-bold text-[#111111] text-[13px] truncate"
                   >
                     {selectedUnis.map((uni, idx) => (
                       <option key={uni.id} value={idx}>
@@ -1277,14 +1277,14 @@ function CompareContent() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#777777] mb-0.5">College B:</label>
+                  <label className="block text-[12px] font-bold text-[#777777] mb-0.5">College B:</label>
                   <select
                     value={mobileH2HIndices[1]}
                     onChange={(e) => {
                       const newIdx = Number(e.target.value);
                       setMobileH2HIndices([newIdx === mobileH2HIndices[0] ? (newIdx + 1) % selectedUnis.length : mobileH2HIndices[0], newIdx]);
                     }}
-                    className="w-full bg-white border border-[#E7E2DE] rounded-[10px] px-2 py-1.5 font-bold text-[#111111] text-[11px] truncate"
+                    className="w-full bg-white border border-[#E7E2DE] rounded-[10px] px-2.5 py-2 font-bold text-[#111111] text-[13px] truncate"
                   >
                     {selectedUnis.map((uni, idx) => (
                       <option key={uni.id} value={idx}>
@@ -1321,20 +1321,20 @@ function CompareContent() {
 
               <div className="grid grid-cols-2 gap-2 text-[12px]">
                 <div className="p-3 rounded-[14px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                  <div className="text-[#888888] text-[10px] font-bold uppercase">Sticker Tuition</div>
-                  <div className="text-[16px] font-black text-[#690B1B] mt-0.5">{formatCurrency(selectedUnis[0].tuition)}/yr</div>
+                  <div className="text-[#777777] text-[11.5px] font-bold uppercase">Sticker Tuition</div>
+                  <div className="text-[18px] font-black text-[#690B1B] mt-0.5">{formatCurrency(selectedUnis[0].tuition)}/yr</div>
                 </div>
                 <div className="p-3 rounded-[14px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                  <div className="text-[#888888] text-[10px] font-bold uppercase">Housing & Living</div>
-                  <div className="text-[16px] font-black text-[#111111] mt-0.5">{formatCurrency(selectedUnis[0].livingCosts)}/yr</div>
+                  <div className="text-[#777777] text-[11.5px] font-bold uppercase">Housing & Living</div>
+                  <div className="text-[18px] font-black text-[#111111] mt-0.5">{formatCurrency(selectedUnis[0].livingCosts)}/yr</div>
                 </div>
                 <div className="p-3 rounded-[14px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                  <div className="text-[#888888] text-[10px] font-bold uppercase">Acceptance Rate</div>
-                  <div className="text-[16px] font-black text-[#111111] mt-0.5">{selectedUnis[0].acceptanceRate}%</div>
+                  <div className="text-[#777777] text-[11.5px] font-bold uppercase">Acceptance Rate</div>
+                  <div className="text-[18px] font-black text-[#111111] mt-0.5">{selectedUnis[0].acceptanceRate}%</div>
                 </div>
                 <div className="p-3 rounded-[14px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                  <div className="text-[#888888] text-[10px] font-bold uppercase">Avg Need Aid</div>
-                  <div className="text-[16px] font-black text-green-700 mt-0.5">{formatCurrency(selectedUnis[0].avgNeedBasedGrant)}/yr</div>
+                  <div className="text-[#777777] text-[11.5px] font-bold uppercase">Avg Need Aid</div>
+                  <div className="text-[18px] font-black text-green-700 mt-0.5">{formatCurrency(selectedUnis[0].avgNeedBasedGrant)}/yr</div>
                 </div>
               </div>
 
@@ -1370,8 +1370,8 @@ function CompareContent() {
               <div className="w-9 h-9 rounded-full bg-[#FAF8F6] border border-[#E7E2DE] flex items-center justify-center text-[#690B1B]">
                 <Plus size={18} />
               </div>
-              <span className="text-[13px] font-black">Add Second College to Compare (1/4)</span>
-              <span className="text-[11px] text-[#999999]">See head-to-head metrics side-by-side with zero horizontal scroll</span>
+              <span className="text-[15px] font-black">Add Second College to Compare (1/4)</span>
+              <span className="text-[12.5px] text-[#777777]">See head-to-head metrics side-by-side with zero horizontal scroll</span>
             </button>
           </div>
         )}
@@ -1397,7 +1397,7 @@ function CompareContent() {
                           setModalSlotIndex(mobileH2HIndices[0]);
                           setSearchModalOpen(true);
                         }}
-                        className="text-[10px] font-bold text-[#690B1B] hover:underline"
+                        className="text-[12px] font-bold text-[#690B1B] hover:underline"
                         title="Swap"
                       >
                         <ArrowLeftRight size={11} />
@@ -1411,10 +1411,10 @@ function CompareContent() {
                       </button>
                     </div>
                   </div>
-                  <h4 className="text-[13px] font-black text-[#111111] leading-tight line-clamp-2 min-h-[34px]">
+                  <h4 className="text-[15.5px] font-black text-[#111111] leading-tight line-clamp-2 min-h-[38px]">
                     {uA.name}
                   </h4>
-                  <div className="text-[10.5px] font-bold text-[#690B1B]">
+                  <div className="text-[12.5px] font-extrabold text-[#690B1B]">
                     Rank: #{uA.qsRanking}
                   </div>
                 </div>
@@ -1430,7 +1430,7 @@ function CompareContent() {
                           setModalSlotIndex(mobileH2HIndices[1]);
                           setSearchModalOpen(true);
                         }}
-                        className="text-[10px] font-bold text-[#690B1B] hover:underline"
+                        className="text-[12px] font-bold text-[#690B1B] hover:underline"
                         title="Swap"
                       >
                         <ArrowLeftRight size={11} />
@@ -1444,10 +1444,10 @@ function CompareContent() {
                       </button>
                     </div>
                   </div>
-                  <h4 className="text-[13px] font-black text-[#111111] leading-tight line-clamp-2 min-h-[34px]">
+                  <h4 className="text-[15.5px] font-black text-[#111111] leading-tight line-clamp-2 min-h-[38px]">
                     {uB.name}
                   </h4>
-                  <div className="text-[10.5px] font-bold text-[#690B1B]">
+                  <div className="text-[12.5px] font-extrabold text-[#690B1B]">
                     Rank: #{uB.qsRanking}
                   </div>
                 </div>
@@ -1456,7 +1456,7 @@ function CompareContent() {
               {/* SECTION: COSTS & FINANCIAL AID */}
               {(activeCategory === 'all' || activeCategory === 'financials') && (
                 <div className="space-y-2">
-                  <div className="px-2.5 py-1 rounded-[8px] bg-[#690B1B]/5 text-[#690B1B] text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-1.5">
+                  <div className="px-2.5 py-1 rounded-[8px] bg-[#690B1B]/5 text-[#690B1B] text-[13px] font-extrabold uppercase tracking-wider flex items-center gap-1.5">
                     <DollarSign size={12} />
                     <span>Costs & Financial Aid</span>
                   </div>
@@ -1464,23 +1464,23 @@ function CompareContent() {
                   <div className="space-y-1.5 text-[12px]">
                     {/* Published Tuition */}
                     <div className="bg-[#FAF8F6] p-2.5 rounded-[12px]">
-                      <div className="text-[10.5px] font-bold text-[#888888] mb-1">Published Tuition & Fees</div>
+                      <div className="text-[12.5px] font-bold text-[#666666] mb-1">Published Tuition & Fees</div>
                       <div className="grid grid-cols-2 gap-2">
                         <div className={`font-black ${highlightBest && lowerTuition === 'A' ? 'text-green-700 font-extrabold' : 'text-[#111111]'}`}>
                           {formatCurrency(uA.tuition)}/yr
-                          {highlightBest && lowerTuition === 'A' && <span className="block text-[9px] text-green-700 font-bold">✓ Lower Tuition</span>}
+                          {highlightBest && lowerTuition === 'A' && <span className="block text-[11px] text-green-700 font-bold">✓ Lower Tuition</span>}
                         </div>
                         <div className={`border-l border-[#EAE6E2] pl-2 font-black ${highlightBest && lowerTuition === 'B' ? 'text-green-700 font-extrabold' : 'text-[#111111]'}`}>
                           {formatCurrency(uB.tuition)}/yr
-                          {highlightBest && lowerTuition === 'B' && <span className="block text-[9px] text-green-700 font-bold">✓ Lower Tuition</span>}
+                          {highlightBest && lowerTuition === 'B' && <span className="block text-[11px] text-green-700 font-bold">✓ Lower Tuition</span>}
                         </div>
                       </div>
                     </div>
 
                     {/* Housing & Food */}
                     <div className="bg-[#FAF8F6] p-2 rounded-[12px]">
-                      <div className="text-[10.5px] font-bold text-[#888888] mb-0.5">Housing & Living Costs</div>
-                      <div className="grid grid-cols-2 gap-2 font-bold text-[#111111]">
+                      <div className="text-[12.5px] font-bold text-[#666666] mb-0.5">Housing & Living Costs</div>
+                      <div className="grid grid-cols-2 gap-2 font-black text-[15px] text-[#111111]">
                         <div>{formatCurrency(uA.livingCosts)}/yr</div>
                         <div className="border-l border-[#EAE6E2] pl-2">{formatCurrency(uB.livingCosts)}/yr</div>
                       </div>
@@ -1488,8 +1488,8 @@ function CompareContent() {
 
                     {/* Total COA */}
                     <div className="bg-[#FAF8F6] p-2 rounded-[12px]">
-                      <div className="text-[10.5px] font-bold text-[#888888] mb-0.5">Total Estimated COA</div>
-                      <div className="grid grid-cols-2 gap-2 font-bold text-[#111111]">
+                      <div className="text-[12.5px] font-bold text-[#666666] mb-0.5">Total Estimated COA</div>
+                      <div className="grid grid-cols-2 gap-2 font-black text-[15px] text-[#111111]">
                         <div>{formatCurrency(uA.tuition + uA.livingCosts)}/yr</div>
                         <div className="border-l border-[#EAE6E2] pl-2">{formatCurrency(uB.tuition + uB.livingCosts)}/yr</div>
                       </div>
@@ -1497,8 +1497,8 @@ function CompareContent() {
 
                     {/* Avg Need Aid */}
                     <div className="bg-[#FAF8F6] p-2 rounded-[12px]">
-                      <div className="text-[10.5px] font-bold text-[#888888] mb-0.5">Avg Need-Based Aid</div>
-                      <div className="grid grid-cols-2 gap-2 font-bold text-green-700">
+                      <div className="text-[12.5px] font-bold text-[#666666] mb-0.5">Avg Need-Based Aid</div>
+                      <div className="grid grid-cols-2 gap-2 font-black text-[15px] text-green-700">
                         <div>{formatCurrency(uA.avgNeedBasedGrant)}/yr</div>
                         <div className="border-l border-[#EAE6E2] pl-2">{formatCurrency(uB.avgNeedBasedGrant)}/yr</div>
                       </div>
@@ -1510,7 +1510,7 @@ function CompareContent() {
               {/* SECTION: SCHOLARSHIPS */}
               {(activeCategory === 'all' || activeCategory === 'scholarships') && (
                 <div className="space-y-2 pt-2 border-t border-[#F0EBE6]">
-                  <div className="px-2.5 py-1 rounded-[8px] bg-green-50 text-green-800 text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-1.5">
+                  <div className="px-2.5 py-1 rounded-[8px] bg-green-50 text-green-800 text-[13px] font-extrabold uppercase tracking-wider flex items-center gap-1.5">
                     <Award size={12} />
                     <span>Key Scholarships</span>
                   </div>
@@ -1520,7 +1520,7 @@ function CompareContent() {
                       {(uA.scholarships || []).slice(0, 2).map((sch, i) => (
                         <div key={i} className="p-2 rounded-[10px] bg-[#FAF8F6] border border-[#EAE6E2]">
                           <div className="font-bold text-[#111111] leading-tight line-clamp-1">{sch.title}</div>
-                          <div className="text-[10px] font-black text-[#16a34a]">{sch.amount}</div>
+                          <div className="text-[12px] font-black text-[#16a34a]">{sch.amount}</div>
                         </div>
                       ))}
                       {(!uA.scholarships || uA.scholarships.length === 0) && (
@@ -1532,7 +1532,7 @@ function CompareContent() {
                       {(uB.scholarships || []).slice(0, 2).map((sch, i) => (
                         <div key={i} className="p-2 rounded-[10px] bg-[#FAF8F6] border border-[#EAE6E2]">
                           <div className="font-bold text-[#111111] leading-tight line-clamp-1">{sch.title}</div>
-                          <div className="text-[10px] font-black text-[#16a34a]">{sch.amount}</div>
+                          <div className="text-[12px] font-black text-[#16a34a]">{sch.amount}</div>
                         </div>
                       ))}
                       {(!uB.scholarships || uB.scholarships.length === 0) && (
@@ -1546,31 +1546,31 @@ function CompareContent() {
               {/* SECTION: ADMISSIONS & SELECTIVITY */}
               {(activeCategory === 'all' || activeCategory === 'admissions') && (
                 <div className="space-y-2 pt-2 border-t border-[#F0EBE6]">
-                  <div className="px-2.5 py-1 rounded-[8px] bg-[#FAF8F6] text-[#666666] text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-1.5">
+                  <div className="px-2.5 py-1 rounded-[8px] bg-[#FAF8F6] text-[#666666] text-[13px] font-extrabold uppercase tracking-wider flex items-center gap-1.5">
                     <GraduationCap size={12} />
                     <span>Admissions Profile</span>
                   </div>
 
                   <div className="space-y-1.5 text-[12px]">
                     <div className="bg-[#FAF8F6] p-2 rounded-[12px]">
-                      <div className="text-[10.5px] font-bold text-[#888888] mb-0.5">Acceptance Rate</div>
-                      <div className="grid grid-cols-2 gap-2 font-bold text-[#111111]">
+                      <div className="text-[12.5px] font-bold text-[#666666] mb-0.5">Acceptance Rate</div>
+                      <div className="grid grid-cols-2 gap-2 font-black text-[15px] text-[#111111]">
                         <div>{formatPercentage(uA.acceptanceRate)}</div>
                         <div className="border-l border-[#EAE6E2] pl-2">{formatPercentage(uB.acceptanceRate)}</div>
                       </div>
                     </div>
 
                     <div className="bg-[#FAF8F6] p-2 rounded-[12px]">
-                      <div className="text-[10.5px] font-bold text-[#888888] mb-0.5">Average GPA</div>
-                      <div className="grid grid-cols-2 gap-2 font-bold text-[#111111]">
+                      <div className="text-[12.5px] font-bold text-[#666666] mb-0.5">Average GPA</div>
+                      <div className="grid grid-cols-2 gap-2 font-black text-[15px] text-[#111111]">
                         <div>{uA.avgGPA ? `${uA.avgGPA.toFixed(2)} / 4.0` : '3.25+'}</div>
                         <div className="border-l border-[#EAE6E2] pl-2">{uB.avgGPA ? `${uB.avgGPA.toFixed(2)} / 4.0` : '3.25+'}</div>
                       </div>
                     </div>
 
                     <div className="bg-[#FAF8F6] p-2 rounded-[12px]">
-                      <div className="text-[10.5px] font-bold text-[#888888] mb-0.5">SAT Score Range</div>
-                      <div className="grid grid-cols-2 gap-2 font-bold text-[#111111] text-[11px]">
+                      <div className="text-[12.5px] font-bold text-[#666666] mb-0.5">SAT Score Range</div>
+                      <div className="grid grid-cols-2 gap-2 font-black text-[15px] text-[#111111] text-[11px]">
                         <div>{formatSATRange(uA.satScore)}</div>
                         <div className="border-l border-[#EAE6E2] pl-2">{formatSATRange(uB.satScore)}</div>
                       </div>
@@ -1582,23 +1582,23 @@ function CompareContent() {
               {/* SECTION: ENGLISH & REQUIREMENTS */}
               {(activeCategory === 'all' || activeCategory === 'testing' || activeCategory === 'requirements') && (
                 <div className="space-y-2 pt-2 border-t border-[#F0EBE6]">
-                  <div className="px-2.5 py-1 rounded-[8px] bg-[#FAF8F6] text-[#666666] text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-1.5">
+                  <div className="px-2.5 py-1 rounded-[8px] bg-[#FAF8F6] text-[#666666] text-[13px] font-extrabold uppercase tracking-wider flex items-center gap-1.5">
                     <Building2 size={12} />
                     <span>English & Requirements</span>
                   </div>
 
                   <div className="space-y-1.5 text-[12px]">
                     <div className="bg-[#FAF8F6] p-2 rounded-[12px]">
-                      <div className="text-[10.5px] font-bold text-[#888888] mb-0.5">English Proficiency</div>
-                      <div className="grid grid-cols-2 gap-2 font-bold text-[#111111] text-[10.5px]">
+                      <div className="text-[12.5px] font-bold text-[#666666] mb-0.5">English Proficiency</div>
+                      <div className="grid grid-cols-2 gap-2 font-black text-[15px] text-[#111111] text-[10.5px]">
                         <div>{uA.toeflScore || 'TOEFL 79 / IELTS 6.5'}</div>
                         <div className="border-l border-[#EAE6E2] pl-2">{uB.toeflScore || 'TOEFL 79 / IELTS 6.5'}</div>
                       </div>
                     </div>
 
                     <div className="bg-[#FAF8F6] p-2 rounded-[12px]">
-                      <div className="text-[10.5px] font-bold text-[#888888] mb-0.5">Admission Reqs</div>
-                      <div className="grid grid-cols-2 gap-2 font-bold text-[#111111] text-[10.5px]">
+                      <div className="text-[12.5px] font-bold text-[#666666] mb-0.5">Admission Reqs</div>
+                      <div className="grid grid-cols-2 gap-2 font-black text-[15px] text-[#111111] text-[10.5px]">
                         <div className="line-clamp-2">{uA.admissionRequirements || 'Common App or Portal'}</div>
                         <div className="border-l border-[#EAE6E2] pl-2 line-clamp-2">{uB.admissionRequirements || 'Common App or Portal'}</div>
                       </div>
@@ -1611,14 +1611,14 @@ function CompareContent() {
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#F0EBE6]">
                 <Link
                   href="/dashboard/calculator"
-                  className="py-2 px-2 rounded-[12px] bg-[#690B1B] text-white text-[11px] font-bold hover:bg-[#530816] transition-colors flex items-center justify-center gap-1 shadow-2xs"
+                  className="py-2 px-2 rounded-[12px] bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#530816] transition-colors flex items-center justify-center gap-1 shadow-2xs"
                 >
                   <Calculator size={11} />
                   <span>Net Price</span>
                 </Link>
                 <Link
                   href="/dashboard/calculator"
-                  className="py-2 px-2 rounded-[12px] bg-[#690B1B] text-white text-[11px] font-bold hover:bg-[#530816] transition-colors flex items-center justify-center gap-1 shadow-2xs"
+                  className="py-2 px-2 rounded-[12px] bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#530816] transition-colors flex items-center justify-center gap-1 shadow-2xs"
                 >
                   <Calculator size={11} />
                   <span>Net Price</span>
@@ -1638,7 +1638,7 @@ function CompareContent() {
                     <div className="text-[10.5px] font-extrabold uppercase text-[#C9A55D]">
                       #{idx + 1} • {uni.state} • Rank #{uni.qsRanking}
                     </div>
-                    <h4 className="text-[15px] font-black text-[#111111] leading-snug">
+                    <h4 className="text-[17px] font-black text-[#111111] leading-snug">
                       {uni.name}
                     </h4>
                   </div>
@@ -1652,27 +1652,27 @@ function CompareContent() {
 
                 <div className="grid grid-cols-2 gap-2 text-[12px]">
                   <div className="p-2.5 rounded-[12px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                    <div className="text-[#888888] text-[10px] font-bold uppercase">Sticker Tuition</div>
-                    <div className="text-[15px] font-black text-[#690B1B] mt-0.5">{formatCurrency(uni.tuition)}/yr</div>
+                    <div className="text-[#777777] text-[11.5px] font-bold uppercase">Sticker Tuition</div>
+                    <div className="text-[17px] font-black text-[#690B1B] mt-0.5">{formatCurrency(uni.tuition)}/yr</div>
                   </div>
                   <div className="p-2.5 rounded-[12px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                    <div className="text-[#888888] text-[10px] font-bold uppercase">Acceptance</div>
-                    <div className="text-[15px] font-black text-[#111111] mt-0.5">{formatPercentage(uni.acceptanceRate)}</div>
+                    <div className="text-[#777777] text-[11.5px] font-bold uppercase">Acceptance</div>
+                    <div className="text-[17px] font-black text-[#111111] mt-0.5">{formatPercentage(uni.acceptanceRate)}</div>
                   </div>
                   <div className="p-2.5 rounded-[12px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                    <div className="text-[#888888] text-[10px] font-bold uppercase">Avg Need Aid</div>
-                    <div className="text-[14px] font-black text-green-700 mt-0.5">{formatCurrency(uni.avgNeedBasedGrant)}/yr</div>
+                    <div className="text-[#777777] text-[11.5px] font-bold uppercase">Avg Need Aid</div>
+                    <div className="text-[16px] font-black text-green-700 mt-0.5">{formatCurrency(uni.avgNeedBasedGrant)}/yr</div>
                   </div>
                   <div className="p-2.5 rounded-[12px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                    <div className="text-[#888888] text-[10px] font-bold uppercase">SAT Range</div>
-                    <div className="text-[12px] font-bold text-[#111111] mt-0.5">{formatSATRange(uni.satScore)}</div>
+                    <div className="text-[#777777] text-[11.5px] font-bold uppercase">SAT Range</div>
+                    <div className="text-[14px] font-bold text-[#111111] mt-0.5">{formatSATRange(uni.satScore)}</div>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-[#F0EBE6] flex gap-2">
                   <Link
                     href="/dashboard/calculator"
-                    className="flex-1 py-2 rounded-[10px] bg-[#690B1B] text-white text-[11.5px] font-bold hover:bg-[#530816] transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+                    className="flex-1 py-2 rounded-[10px] bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#530816] transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
                   >
                     <Calculator size={13} />
                     <span>Net Price Calc</span>
@@ -1780,7 +1780,7 @@ function CompareContent() {
                         <div className="text-[14px] font-bold text-[#111111] truncate">
                           {uni.name}
                         </div>
-                        <div className="text-[11.5px] text-[#666666] flex items-center gap-2 mt-0.5">
+                        <div className="text-[13px] text-[#666666] flex items-center gap-2 mt-0.5">
                           <span>📍 {uni.state}</span>
                           <span className="text-[#C9A55D]">•</span>
                           <span>Tuition: <strong className="text-[#111111]">{formatCurrency(uni.tuition)}</strong></span>
@@ -1790,13 +1790,13 @@ function CompareContent() {
                       </div>
 
                       {isSelected ? (
-                        <span className="px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#EAE6E2] text-[#888888] shrink-0">
+                        <span className="px-3 py-1.5 rounded-full text-[12.5px] font-bold bg-[#EAE6E2] text-[#888888] shrink-0">
                           Added
                         </span>
                       ) : (
                         <button
                           onClick={() => handleAddUniversity(uni.id)}
-                          className="px-3.5 py-1.5 rounded-full text-[11.5px] font-bold bg-[#690B1B] hover:bg-[#530816] text-white transition-all shrink-0 cursor-pointer shadow-2xs"
+                          className="px-3.5 py-1.5 rounded-full text-[13px] font-bold bg-[#690B1B] hover:bg-[#530816] text-white transition-all shrink-0 cursor-pointer shadow-2xs"
                         >
                           Select
                         </button>

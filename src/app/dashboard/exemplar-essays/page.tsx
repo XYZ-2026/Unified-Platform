@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import {
   FileText,
   Search,
@@ -351,7 +350,7 @@ export default function ExemplarEssaysPage() {
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <button
                   onClick={() => setActiveModalEssay(null)}
-                  className="flex-1 sm:flex-initial h-[38px] sm:h-[42px] px-4 rounded-full border border-[#E7E2DE] bg-white text-[#555] hover:bg-[#F9F7F5] font-bold text-[12.5px] sm:text-[13px] transition-all cursor-pointer flex items-center justify-center active:scale-95 whitespace-nowrap"
+                  className="w-full sm:w-auto h-[38px] sm:h-[40px] px-6 rounded-full border border-[#E7E2DE] bg-white text-[#444] hover:text-[#111] hover:bg-[#F9F7F5] font-bold text-[12.5px] sm:text-[13px] transition-all cursor-pointer flex items-center justify-center active:scale-95 whitespace-nowrap shadow-2xs"
                 >
                   Close
                 </button>

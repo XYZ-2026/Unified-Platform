@@ -41,15 +41,7 @@ import { University, formatCurrency, formatPercentage, getStickerPrice } from '@
 import { calculateNetPrice, CalculationResult, getMeritLevelLabel, getMeritLevelDescription } from '@/lib/npc/calculator';
 import { analyzeScholarships, ScholarshipAnalysis } from '@/lib/npc/scholarship-matcher';
 
-/* ─── Currency Exchange Rates (Base USD) ─── */
-const CURRENCIES: Record<string, { symbol: string; label: string; rate: number }> = {
-  USD: { symbol: '$', label: 'USD ($)', rate: 1 },
-  INR: { symbol: '₹', label: 'INR (₹)', rate: 86.5 },
-  EUR: { symbol: '€', label: 'EUR (€)', rate: 0.92 },
-  GBP: { symbol: '£', label: 'GBP (£)', rate: 0.78 },
-  CAD: { symbol: 'C$', label: 'CAD (C$)', rate: 1.38 },
-  AUD: { symbol: 'A$', label: 'AUD (A$)', rate: 1.54 },
-};
+
 
 /* ─── Income Bracket Definitions ─── */
 const INCOME_BRACKETS = [
@@ -112,7 +104,8 @@ function NetPriceCalculatorContent() {
 
   /* ─── UI & View States ─── */
   const [activeTab, setActiveTab] = useState<'catalog' | 'compare'>('catalog');
-  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
+  const totalUniCount = universities.length > 0 ? universities.length : 2328;
+  const totalUniCountStr = totalUniCount.toLocaleString();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [tuitionFilter, setTuitionFilter] = useState<number | null>(null);
   const [meritFilter, setMeritFilter] = useState<'all' | 'high' | 'moderate'>('all');
@@ -190,14 +183,10 @@ function NetPriceCalculatorContent() {
     }
   }, []);
 
-  /* ─── Format Money with Selected Currency ─── */
+  /* ─── Format Money (USD only) ─── */
   const formatMoney = useCallback(
-    (amountInUSD: number) => {
-      const curr = CURRENCIES[selectedCurrency] || CURRENCIES.USD;
-      const converted = Math.round(amountInUSD * curr.rate);
-      return `${curr.symbol}${converted.toLocaleString()}`;
-    },
-    [selectedCurrency]
+    (amountInUSD: number) => `$${Math.round(amountInUSD).toLocaleString()}`,
+    []
   );
 
   /* ─── Save University to College List ─── */
@@ -533,7 +522,7 @@ function NetPriceCalculatorContent() {
                     {selectedUniDetail ? selectedUniDetail.name : 'US Universities Net Price Calculator'}
                   </h1>
                   <span className="px-2.5 py-0.5 rounded-full bg-[#F7F0F1] text-[#690B1B] text-[10.5px] font-extrabold uppercase tracking-wider border border-[#690B1B]/20">
-                    {selectedUniDetail ? `${selectedUniDetail.state}, USA` : '2,328 Institutions'}
+                    {selectedUniDetail ? `${selectedUniDetail.state}, USA` : `${totalUniCountStr} Institutions`}
                   </span>
                 </div>
                 <p className="text-[12.5px] sm:text-[13.5px] text-[#666666] mt-0.5">
@@ -578,22 +567,7 @@ function NetPriceCalculatorContent() {
               </button>
             </div>
 
-            {/* CURRENCY SELECTOR */}
-            <div className="flex items-center bg-white border border-[#E7E2DE] rounded-full p-1 shadow-2xs">
-              {Object.keys(CURRENCIES).map((code) => (
-                <button
-                  key={code}
-                  onClick={() => setSelectedCurrency(code)}
-                  className={`px-2.5 py-1 text-[11px] font-bold rounded-full transition-all cursor-pointer ${
-                    selectedCurrency === code
-                      ? 'bg-[#690B1B] text-white shadow-xs'
-                      : 'text-[#666666] hover:text-[#111111]'
-                  }`}
-                >
-                  {code}
-                </button>
-              ))}
-            </div>
+
           </div>
         </div>
 
@@ -609,7 +583,7 @@ function NetPriceCalculatorContent() {
           </div>
           <div className="flex items-center gap-2 text-[11.5px] text-[#777777]">
             <Sparkles size={14} className="text-[#C9A55D]" />
-            <span>Updated live across all 2,328 universities</span>
+            <span>Updated live across all {totalUniCountStr} universities</span>
           </div>
         </div>
       </div>
@@ -916,7 +890,7 @@ function NetPriceCalculatorContent() {
                     Your Student &amp; Financial Profile
                   </h2>
                   <p className="text-[11.5px] text-[#777777]">
-                    Adjust your values below to recalibrate all 2,328 universities instantly
+                    Adjust your values below to recalibrate all {totalUniCountStr} universities instantly
                   </p>
                 </div>
               </div>
@@ -1269,7 +1243,7 @@ function NetPriceCalculatorContent() {
 
                   <div className="flex items-center gap-3">
                     <span className="text-[#666666] font-semibold">
-                      Showing <strong className="text-[#111111]">{filteredUniversities.length}</strong> of 2,328 schools
+                      Showing <strong className="text-[#111111]">{filteredUniversities.length}</strong> of {totalUniCountStr} schools
                     </span>
                     {hasActiveFilters && (
                       <button
@@ -1289,7 +1263,7 @@ function NetPriceCalculatorContent() {
                 <div className="py-20 text-center bg-white rounded-[22px] border border-[#E7E2DE] shadow-xs">
                   <div className="w-9 h-9 border-3 border-[#690B1B] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                   <div className="text-[14px] font-bold text-[#111111]">Loading US Universities Database...</div>
-                  <div className="text-[12px] text-[#888888] mt-1">Analyzing 2,328 institutions and aid policies</div>
+                  <div className="text-[12px] text-[#888888] mt-1">Analyzing {totalUniCountStr} institutions and aid policies</div>
                 </div>
               )}
 

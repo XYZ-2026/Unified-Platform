@@ -90,17 +90,7 @@ export default function ExtracurricularsPage() {
   const { user, userData } = useAuth();
   const [rightTab, setRightTab] = useState<'analyse' | 'chat' | 'examples'>('analyse');
   
-  const [activities, setActivities] = useState<ExtracurricularActivity[]>([
-    {
-      id: 'act-1',
-      title: 'Founder & Lead Developer',
-      organization: 'TechForGood Student Non-Profit',
-      category: 'Computer Science / STEM',
-      hoursPerWeek: '8 hrs/wk',
-      duration: '40 wks/yr',
-      description: 'Built an open-source web platform helping local food banks manage volunteer scheduling. Scaled to 3,000+ monthly active users.'
-    }
-  ]);
+  const [activities, setActivities] = useState<ExtracurricularActivity[]>([]);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -122,6 +112,11 @@ export default function ExtracurricularsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Helper to remove any previous hardcoded mock activity
+  const filterMockActivities = (list: any[]): ExtracurricularActivity[] => {
+    return list.filter((item) => !(item.id === 'act-1' && item.title === 'Founder & Lead Developer'));
+  };
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -147,8 +142,9 @@ export default function ExtracurricularsPage() {
           list = null;
         }
       }
-      if (Array.isArray(list) && list.length > 0) {
-        setActivities(list);
+      if (Array.isArray(list)) {
+        const cleaned = filterMockActivities(list);
+        setActivities(cleaned);
       }
     }
 
@@ -161,7 +157,8 @@ export default function ExtracurricularsPage() {
           } catch (e) {}
         }
         if (Array.isArray(list)) {
-          setActivities(list);
+          const cleaned = filterMockActivities(list);
+          setActivities(cleaned);
         }
       }
     });
@@ -190,9 +187,10 @@ export default function ExtracurricularsPage() {
               list = null;
             }
           }
-          if (Array.isArray(list) && list.length > 0) {
-            setActivities(list);
-            setCachedUserDetails(userKey, { extracurriculars: list });
+          if (Array.isArray(list)) {
+            const cleaned = filterMockActivities(list);
+            setActivities(cleaned);
+            setCachedUserDetails(userKey, { extracurriculars: cleaned });
           }
         }
       } catch (err) {
@@ -405,18 +403,19 @@ export default function ExtracurricularsPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => syncToWixCms(activities)}
               disabled={savingCms}
-              className="px-4 py-2.5 rounded-full border border-[#E7E2DE] text-[#555] text-[13px] font-bold hover:bg-[#F7F5F3] transition-all flex items-center gap-2 cursor-pointer"
+              className="h-[42px] px-5 rounded-full border border-[#E7E2DE] bg-white text-[#444] hover:text-[#111] hover:border-[#690B1B]/40 hover:bg-[#FDFCFB] text-[13px] font-bold transition-all inline-flex items-center justify-center gap-2 cursor-pointer shadow-2xs whitespace-nowrap active:scale-[0.98] disabled:opacity-50"
+              title="Save extracurriculars"
             >
-              <Save size={15} />
-              <span>{savingCms ? 'Saving...' : 'Save & Sync'}</span>
+              <Save size={15} className="text-[#690B1B]" />
+              <span>{savingCms ? 'Saving...' : 'Save'}</span>
             </button>
             <button
               onClick={handleOpenAddModal}
-              className="px-5 py-2.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all flex items-center gap-2 shadow-xs cursor-pointer"
+              className="h-[42px] px-5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[13px] font-bold transition-all inline-flex items-center justify-center gap-2 shadow-xs cursor-pointer whitespace-nowrap active:scale-[0.98]"
             >
               <Plus size={16} />
               <span>Add Activity</span>
@@ -694,7 +693,7 @@ export default function ExtracurricularsPage() {
                   className="px-5 py-2.5 rounded-full bg-[#690B1B] text-white text-[13px] font-bold hover:bg-[#7A1022] transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5 shadow-xs"
                 >
                   <Save size={15} />
-                  <span>{editingId ? 'Update Activity' : 'Save Activity & Sync'}</span>
+                  <span>{editingId ? 'Update Activity' : 'Save Activity'}</span>
                 </button>
               </div>
             </div>
