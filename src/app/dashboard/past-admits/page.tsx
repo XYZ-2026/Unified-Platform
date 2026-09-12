@@ -347,35 +347,35 @@ export default function PastAdmitsPage() {
 
         {/* PAGINATION */}
         {totalPages > 1 && !loading && (
-          <div className="flex items-center justify-center gap-2 pt-4">
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-4 w-full">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className={`px-4 py-2 rounded-full text-[12.5px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-3.5 sm:px-4 py-2 rounded-full text-[12px] sm:text-[12.5px] font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap ${
                 currentPage === 1
                   ? 'bg-[#F7F5F3] text-[#CCC] cursor-not-allowed'
                   : 'bg-white border border-[#E7E2DE] text-[#555] hover:bg-[#F7F0F1]'
               }`}
             >
-              <ChevronLeft size={14} />
-              <span>Previous</span>
+              <ChevronLeft size={14} className="shrink-0" />
+              <span className="whitespace-nowrap">Previous</span>
             </button>
 
-            <span className="px-3 text-[12.5px] text-[#777] font-medium">
+            <span className="px-2 sm:px-3 text-[12px] sm:text-[12.5px] text-[#777] font-medium shrink-0 whitespace-nowrap">
               Page {currentPage} of {totalPages}
             </span>
 
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className={`px-4 py-2 rounded-full text-[12.5px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-3.5 sm:px-4 py-2 rounded-full text-[12px] sm:text-[12.5px] font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap ${
                 currentPage === totalPages
                   ? 'bg-[#F7F5F3] text-[#CCC] cursor-not-allowed'
                   : 'bg-white border border-[#E7E2DE] text-[#555] hover:bg-[#F7F0F1]'
               }`}
             >
-              <span>Next</span>
-              <ChevronRight size={14} />
+              <span className="whitespace-nowrap">Next</span>
+              <ChevronRight size={14} className="shrink-0" />
             </button>
           </div>
         )}

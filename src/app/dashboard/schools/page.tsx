@@ -385,21 +385,21 @@ export default function UniversityFinderPage() {
 
       {/* PAGINATION */}
       {totalPages > 1 && !loading && (
-        <div className="flex items-center justify-center gap-2 pt-4">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pt-4 px-1 w-full">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-[12px] text-[12px] sm:text-[13px] font-bold transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer shrink-0 whitespace-nowrap ${
               currentPage === 1
                 ? 'bg-[#F7F5F3] text-[#CCC] cursor-not-allowed'
                 : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
             }`}
           >
-            <ChevronLeft size={14} />
-            <span>Previous</span>
+            <ChevronLeft size={14} className="shrink-0" />
+            <span className="whitespace-nowrap">Previous</span>
           </button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-wrap justify-center">
             {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => {
               let pageNum: number;
               if (totalPages <= 7) {
@@ -416,7 +416,7 @@ export default function UniversityFinderPage() {
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`w-10 h-10 rounded-[10px] text-[13px] font-bold transition-all cursor-pointer ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-[8px] sm:rounded-[10px] text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer shrink-0 ${
                     currentPage === pageNum
                       ? 'bg-[#690B1B] text-white shadow-xs'
                       : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
@@ -431,14 +431,14 @@ export default function UniversityFinderPage() {
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-[12px] text-[12px] sm:text-[13px] font-bold transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer shrink-0 whitespace-nowrap ${
               currentPage === totalPages
                 ? 'bg-[#F7F5F3] text-[#CCC] cursor-not-allowed'
                 : 'bg-[#F7F5F3] text-[#555] hover:bg-[#E7E2DE]'
             }`}
           >
-            <span>Next</span>
-            <ChevronRight size={14} />
+            <span className="whitespace-nowrap">Next</span>
+            <ChevronRight size={14} className="shrink-0" />
           </button>
         </div>
       )}

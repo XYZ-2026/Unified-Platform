@@ -1,9 +1,188 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
+/* ─────── Light Mode Variables ─────── */
 :root {
   --background: #F6F4F2;
   --foreground: #111111;
+
+  /* Dashboard surface colours */
+  --surface: #FFFFFF;
+  --surface-subtle: #F7F5F3;
+  --border: #E7E2DE;
+  --border-subtle: #F0EBE6;
+  --muted: #777777;
+  --accent: #690B1B;
+  --accent-gold: #C9A55D;
 }
+
+/* ─────── Dark Mode Variables (deep navy — eye-friendly) ─────── */
+.dark {
+  --background: #0F1117;
+  --foreground: #E8E6E3;
+
+  --surface: #1A1D27;
+  --surface-subtle: #141720;
+  --border: #2A2D3A;
+  --border-subtle: #222535;
+  --muted: #8A8FA8;
+  --accent: #C1465A;
+  --accent-gold: #D4A84B;
+}
+
+/* ─────── Dark mode body/background ─────── */
+.dark body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* ─────── Dashboard layout dark mode ─────── */
+/* Sidebar */
+.dark aside {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+/* Dashboard header */
+.dark header {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+/* All white cards in dashboard */
+.dark .bg-white {
+  background-color: var(--surface) !important;
+}
+
+/* All light-bg sections in dashboard */
+.dark .bg-\[\#F6F4F2\],
+.dark .bg-\[\#F7F5F3\],
+.dark .bg-\[\#F9F7F5\],
+.dark .bg-\[\#FDFCFB\] {
+  background-color: var(--surface-subtle) !important;
+}
+
+/* Borders */
+.dark .border-\[\#E7E2DE\],
+.dark .border-\[\#F0EBE6\],
+.dark .border-\[\#E7E1DD\],
+.dark .border-\[\#EBEBEB\],
+.dark .border-\[\#DDD7D3\] {
+  border-color: var(--border) !important;
+}
+
+/* Primary text */
+.dark .text-\[\#111\],
+.dark .text-\[\#111111\],
+.dark .text-\[\#0D0D0D\],
+.dark .text-\[\#090909\] {
+  color: #E8E6E3 !important;
+}
+
+/* Secondary / muted text */
+.dark .text-\[\#444\],
+.dark .text-\[\#444444\],
+.dark .text-\[\#555\],
+.dark .text-\[\#555555\],
+.dark .text-\[\#666\],
+.dark .text-\[\#666666\],
+.dark .text-\[\#777\],
+.dark .text-\[\#777777\],
+.dark .text-\[\#888\],
+.dark .text-\[\#888888\],
+.dark .text-\[\#9A9A9A\],
+.dark .text-\[\#999999\],
+.dark .text-\[\#A3A3A3\],
+.dark .text-\[\#727272\] {
+  color: var(--muted) !important;
+}
+
+/* Nav hover states in dark sidebar */
+.dark .hover\:bg-\[\#F9F7F5\]:hover,
+.dark .hover\:bg-\[\#F7F0F1\]:hover {
+  background-color: #252836 !important;
+}
+
+/* Active nav item */
+.dark .bg-\[\#F7F0F1\] {
+  background-color: rgba(193, 70, 90, 0.15) !important;
+}
+
+/* Active nav text keep burgundy-ish in dark mode but lighter */
+.dark .text-\[\#690B1B\] {
+  color: #E8748A !important;
+}
+.dark .hover\:text-\[\#690B1B\]:hover {
+  color: #E8748A !important;
+}
+.dark .border-\[\#690B1B\] {
+  border-color: #C1465A !important;
+}
+
+/* Input fields */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #1E2130 !important;
+  border-color: var(--border) !important;
+  color: #E8E6E3 !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #5A5F78 !important;
+}
+
+/* Mobile bottom nav */
+.dark nav.fixed {
+  background: rgba(26, 29, 39, 0.97) !important;
+  border-color: var(--border) !important;
+}
+
+/* Upgrade pro button — keep gradient, just slightly richer */
+.dark .bg-gradient-to-r {
+  opacity: 0.95;
+}
+
+/* Settings page cards danger zone */
+.dark .border-red-200 {
+  border-color: #4A1520 !important;
+}
+.dark .bg-red-50 {
+  background-color: #2A1118 !important;
+}
+
+/* Essay viewer dark */
+.dark .essay-viewer-content {
+  color: #C8C5C0;
+}
+.dark .essay-viewer-content h1,
+.dark .essay-viewer-content h2,
+.dark .essay-viewer-content strong {
+  color: #E8E6E3;
+}
+.dark .essay-viewer-content h3,
+.dark .essay-viewer-content h4 {
+  color: #CCC9C4;
+}
+.dark .essay-viewer-content code {
+  background: #1E2130;
+  color: #E8748A;
+}
+.dark .essay-viewer-content blockquote {
+  background: #1E2130;
+  color: #A8A5A0;
+}
+.dark .essay-viewer-content hr {
+  background: var(--border);
+}
+
+/* Subtle gold tint stays readable */
+.dark .text-\[\#C9A55D\],
+.dark .text-\[\#C4A15F\],
+.dark .text-\[\#C8A15D\] {
+  color: var(--accent-gold) !important;
+}
+
 
 /* ─────── Global Reset & Mobile Base ─────── */
 *,
@@ -21,6 +200,20 @@ html {
 body {
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Responsive Overflow & Word Break Utilities */
+.responsive-text {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  h1, h2, h3, h4, h5, h6, p {
+    overflow-wrap: break-word;
+  }
 }
 
 img, video, svg {
