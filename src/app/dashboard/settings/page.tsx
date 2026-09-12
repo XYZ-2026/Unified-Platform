@@ -9,7 +9,6 @@ import {
   User,
   Mail,
   ShieldAlert,
-  Moon,
   CheckCircle2,
   LogOut,
   Zap,
@@ -24,7 +23,6 @@ export default function SettingsPage() {
   const [displayName, setDisplayName] = useState('');
   const [transactionalEmails, setTransactionalEmails] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const userKey = user?.uid || user?.email || userData?.email || 'default';
@@ -175,29 +173,6 @@ export default function SettingsPage() {
                   <span
                     className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
                       marketingEmails ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* TOGGLE 3: DARK MODE */}
-              <div className="flex items-start sm:items-center justify-between gap-4 border-t border-[#F0EBE6] pt-4">
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-[15px] font-bold text-[#111]">Dark Mode</h4>
-                  <p className="text-[13px] text-[#777] leading-relaxed">Switch between light and dark appearance themes.</p>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={darkMode}
-                  onClick={() => setDarkMode(!darkMode)}
-                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-                    darkMode ? 'bg-[#690B1B]' : 'bg-[#E5E0DC]'
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                      darkMode ? 'translate-x-5' : 'translate-x-0'
                     }`}
                   />
                 </button>

@@ -88,7 +88,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const resourceItems = [
     { id: 'admits', label: 'Admitted Profiles', icon: BookOpen, href: '/dashboard/past-admits' },
-    { id: 'exemplars', label: 'SOP Examples', icon: Award, href: '/dashboard/exemplar-essays' },
+    { id: 'exemplars', label: 'Admitted Essays', icon: Award, href: '/dashboard/exemplar-essays' },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/dashboard/settings' },
   ];
 

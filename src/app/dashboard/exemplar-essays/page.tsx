@@ -1,17 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import {
   FileText,
   Search,
   Sparkles,
-  ArrowRight,
   Eye,
   X,
   Copy,
   Check,
-  ExternalLink,
   Clock,
   CheckCircle2,
   RefreshCw,
@@ -308,15 +305,6 @@ export default function ExemplarEssaysPage() {
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
-                <Link
-                  href={`/dashboard/essays/studio?topic=${encodeURIComponent(activeModalEssay.title)}&format=ieee&essayId=${encodeURIComponent(activeModalEssay.id)}`}
-                  className="hidden md:flex h-[36px] px-4 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[12px] font-bold transition-all items-center justify-center gap-1.5 shadow-xs cursor-pointer whitespace-nowrap active:scale-95"
-                >
-                  <Sparkles size={13} className="text-[#C9A55D]" />
-                  <span>Open in AI Studio</span>
-                  <ExternalLink size={12} />
-                </Link>
-
                 <button
                   onClick={() => setActiveModalEssay(null)}
                   className="w-8 h-8 rounded-full text-[#777] hover:bg-[#F7F0F1] hover:text-[#111] transition-colors cursor-pointer flex items-center justify-center shrink-0"
@@ -362,18 +350,10 @@ export default function ExemplarEssaysPage() {
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <button
                   onClick={() => setActiveModalEssay(null)}
-                  className="flex-1 sm:flex-initial h-[38px] sm:h-[42px] px-4 rounded-full border border-[#E7E2DE] bg-white text-[#555] hover:bg-[#F9F7F5] font-bold text-[12.5px] sm:text-[13px] transition-all cursor-pointer flex items-center justify-center active:scale-95 whitespace-nowrap"
+                  className="w-full sm:w-auto h-[38px] sm:h-[40px] px-6 rounded-full border border-[#E7E2DE] bg-white text-[#444] hover:text-[#111] hover:bg-[#F9F7F5] font-bold text-[12.5px] sm:text-[13px] transition-all cursor-pointer flex items-center justify-center active:scale-95 whitespace-nowrap shadow-2xs"
                 >
                   Close
                 </button>
-                <Link
-                  href={`/dashboard/essays/studio?topic=${encodeURIComponent(activeModalEssay.title)}&format=ieee&essayId=${encodeURIComponent(activeModalEssay.id)}`}
-                  className="flex-1 sm:flex-initial h-[38px] sm:h-[42px] px-4 sm:px-5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white font-bold text-[12.5px] sm:text-[13px] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95 whitespace-nowrap"
-                >
-                  <Sparkles size={14} className="text-[#C9A55D] shrink-0" />
-                  <span>Open in AI Studio</span>
-                  <ArrowRight size={13} className="shrink-0" />
-                </Link>
               </div>
             </div>
           </div>
