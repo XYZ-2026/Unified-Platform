@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Globe,
   X,
+  TrendingUp,
 } from 'lucide-react';
 import { searchUniversities, UniversitySearchRecord, SearchResult } from '@/lib/search/universitySearchEngine';
 

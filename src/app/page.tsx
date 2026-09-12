@@ -87,7 +87,7 @@ export default function Home() {
                 { label: "AI Chance-Me", targetId: "chance-me", href: "#chance-me", dashboardHref: "/dashboard/chance-me" },
                 { label: "SOP Builder", targetId: "features", href: "#features", dashboardHref: "/dashboard/essays" },
                 { label: "Scholarships", targetId: "scholarships", href: "https://scholarship.abroadsimplified.com", isExternal: true },
-                { label: "Visa Help", targetId: "features", href: "#features", dashboardHref: "/dashboard/visa" },
+                { label: "Visa Help", targetId: "visa", href: "/country-guide", isDirectLink: true },
               ].map((item) => (
                 item.isExternal ? (
                   <a
@@ -99,6 +99,14 @@ export default function Home() {
                   >
                     {item.label}
                   </a>
+                ) : item.isDirectLink ? (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="px-5 h-[42px] rounded-full flex items-center justify-center text-[15px] font-medium text-[#5F5F5F] hover:bg-[#690B1B] hover:text-white transition-all duration-300 cursor-pointer"
+                  >
+                    {item.label}
+                  </Link>
                 ) : (
                   <a
                     key={item.label}
@@ -232,9 +240,9 @@ export default function Home() {
                 },
                 {
                   label: "Visa Help",
-                  targetId: "features",
-                  href: "#features",
-                  dashboardHref: "/dashboard/visa",
+                  targetId: "visa",
+                  href: "/country-guide",
+                  isDirectLink: true,
                   icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -256,6 +264,18 @@ export default function Home() {
                     </div>
                     <span>{item.label}</span>
                   </a>
+                ) : item.isDirectLink ? (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3.5 py-2.5 px-3 rounded-[14px] text-[15px] font-semibold text-[#111111] hover:bg-[#F7F0F1] hover:text-[#690B1B] transition-all group"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-[#F7F0F1] border border-[#E8C4CC] text-[#690B1B] flex items-center justify-center shrink-0 group-hover:bg-[#690B1B] group-hover:text-white transition-colors">
+                      {item.icon}
+                    </div>
+                    <span>{item.label}</span>
+                  </Link>
                 ) : (
                   <a
                     key={item.label}
@@ -538,7 +558,7 @@ export default function Home() {
             ].map((item) => (
               <Link
                 key={item.code}
-                href={`/country/${item.slug}`}
+                href={`/country-guide/${item.slug}`}
                 className="group bg-white border border-[#E7E2DE] rounded-[16px] p-5 sm:p-6 hover:border-[#690B1B] hover:-translate-y-1 transition-all shadow-2xs hover:shadow-md flex flex-col cursor-pointer"
               >
                 <div className="flex justify-between items-center mb-3.5">
@@ -586,7 +606,7 @@ export default function Home() {
             { num: "03", title: "AI SOP Feedback", desc: "Ethical, real-time essay analysis grounded in thousands of successful SOPs.", link: "/dashboard/essays", linkText: "SOP Analyzer →" },
             { num: "04", id: "scholarships", title: "Scholarship Finder", desc: "Discover merit and need-based grants matched to your student profile.", link: "https://scholarship.abroadsimplified.com", linkText: "Browse Scholarships ↗", isExternal: true },
             { num: "05", title: "Application Tracker", desc: "Never miss deadlines, document requirements, or portal submissions.", link: "/dashboard/tracker", linkText: "Open Tracker →" },
-            { num: "06", title: "Visa & Document Guide", desc: "Tailored checklists, financial proof guides, and mock visa interview tools.", link: "/dashboard/visa", linkText: "Visa Guide →" },
+            { num: "06", title: "Visa & Document Guide", desc: "Country-wise visa steps, mandatory document checklists, blocked accounts, and post-study work rights.", link: "/country-guide", linkText: "Visa & Document Guide →", isDirectLink: true },
           ].map((feature) => (
             <div
               key={feature.num}
@@ -615,6 +635,13 @@ export default function Home() {
                     >
                       {feature.linkText}
                     </a>
+                  ) : feature.isDirectLink ? (
+                    <Link
+                      href={feature.link}
+                      className="text-[13px] font-bold text-[#690B1B] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      {feature.linkText}
+                    </Link>
                   ) : (
                     <button
                       onClick={() => handleProtectedLink(feature.link)}
@@ -842,19 +869,19 @@ export default function Home() {
               </div>
               <div className="space-y-4">
                 {[
+                  { label: "University Finder", href: "/dashboard/schools" },
                   { label: "Net Price Calculator", href: "/dashboard/calculator" },
                   { label: "AI Chance-Me Predictor", href: "#chance-me" },
                   { label: "SOP Builder", href: "#features" },
-                  { label: "Scholarship Matcher", href: "#features" },
-                  { label: "Visa Guidance", href: "#features" },
+                  { label: "Visa & Document Guide", href: "/country-guide" },
                 ].map((item) => (
-                  <a
+                  <Link
                     key={item.label}
                     href={item.href}
                     className="block text-[#6B6F78] text-[15px] hover:text-white transition cursor-pointer"
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -862,15 +889,15 @@ export default function Home() {
             {/* DESTINATIONS */}
             <div>
               <div className="text-[#C8A15D] text-[11px] tracking-[0.24em] uppercase font-bold mb-6">
-                Destinations
+                Country Guides
               </div>
               <div className="space-y-4">
                 {[
-                  { label: "Study in USA", href: "/country/usa" },
-                  { label: "Study in UK", href: "/country/uk" },
-                  { label: "Study in Germany", href: "/country/germany" },
-                  { label: "Study in Canada", href: "/country/canada" },
-                  { label: "Study in Australia", href: "/country/australia" },
+                  { label: "Study in USA 🇺🇸", href: "/country-guide/usa" },
+                  { label: "Study in UK 🇬🇧", href: "/country-guide/uk" },
+                  { label: "Study in Germany 🇩🇪", href: "/country-guide/germany" },
+                  { label: "Study in Canada 🇨🇦", href: "/country-guide/canada" },
+                  { label: "Study in Australia 🇦🇺", href: "/country-guide/australia" },
                 ].map((item) => (
                   <Link
                     key={item.label}
