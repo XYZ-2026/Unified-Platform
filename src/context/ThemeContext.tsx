@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 
 interface ThemeContextType {
   darkMode: boolean;
@@ -15,40 +15,22 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [darkMode, setDarkModeState] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  // On mount: read saved preference from localStorage
+  // Always enforce clean light mode irrespective of OS / system theme
   useEffect(() => {
-    const saved = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = saved ? saved === 'dark' : prefersDark;
-    setDarkModeState(isDark);
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    setMounted(true);
+    try {
+      localStorage.setItem('theme', 'light');
+    } catch (e) {}
+    document.documentElement.classList.remove('dark');
   }, []);
 
-  const setDarkMode = (value: boolean) => {
-    setDarkModeState(value);
-    localStorage.setItem('theme', value ? 'dark' : 'light');
-    if (value) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
-
-  const toggleDarkMode = () => setDarkMode(!darkMode);
-
-  // Prevent flash of wrong theme
-  if (!mounted) return null;
-
   return (
-    <ThemeContext.Provider value={{ darkMode, toggleDarkMode, setDarkMode }}>
+    <ThemeContext.Provider
+      value={{
+        darkMode: false,
+        toggleDarkMode: () => {},
+        setDarkMode: () => {},
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );

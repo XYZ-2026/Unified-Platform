@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getCachedUserDetails, subscribeToUserDetails } from '@/lib/userDetailsCache';
 import {
@@ -28,13 +28,22 @@ import {
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, userData } = useAuth();
+  const router = useRouter();
+  const { user, userData, loading } = useAuth();
   const [initial, setInitial] = useState('S');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const pathname = usePathname();
 
   const isStudio = pathname === '/dashboard/essays/studio';
+
+  // ── STRICT AUTH GUARD ──
+  // If authentication check completes and no user is signed in, redirect to /login immediately
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [loading, user, router]);
 
   useEffect(() => {
     const userKey = user?.uid || user?.email || userData?.email || 'default';
@@ -65,6 +74,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       document.body.style.overflow = '';
     };
   }, [mobileSidebarOpen]);
+
+  // If loading or unauthenticated, DO NOT render ANY element of the dashboard
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-[#F6F4F2] flex flex-col items-center justify-center p-6 font-[Poppins]">
+        <div className="flex flex-col items-center gap-4 text-center max-w-sm">
+          <div className="w-10 h-10 rounded-full border-3 border-[#690B1B]/20 border-t-[#690B1B] animate-spin" />
+          <div className="space-y-1">
+            <h3 className="text-[15px] font-bold text-[#111111]">
+              {loading ? 'Checking authentication...' : 'Redirecting to sign up...'}
+            </h3>
+            <p className="text-[12.5px] text-[#777777]">
+              Please sign up or log in to access the dashboard.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isStudio) {
     return <>{children}</>;
@@ -102,17 +130,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ];
 
   return (
-    <div className="bg-[#F6F4F2] dark:bg-[#0F1117] text-[#111111] dark:text-[#E8E6E3] font-[Poppins] min-h-screen flex flex-col md:flex-row antialiased selection:bg-[#690B1B] selection:text-white transition-colors duration-300">
+    <div className="bg-[#F6F4F2] text-[#111111] font-[Poppins] min-h-screen flex flex-col md:flex-row antialiased selection:bg-[#690B1B] selection:text-white">
       {/* ═══════════════════════════════════════════════════════════════
          LEFT SIDEBAR — Unified Dashboard Navigation (LOCKED & STATIONARY)
          ═══════════════════════════════════════════════════════════════ */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 h-screen max-h-screen z-40 bg-white dark:bg-[#1A1D27] border-r border-[#E7E2DE] dark:border-[#2A2D3A] transition-all duration-300 ease-in-out flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.06)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.3)] overflow-hidden select-none ${
+        className={`fixed top-0 left-0 bottom-0 h-screen max-h-screen z-40 bg-white border-r border-[#E7E2DE] transition-all duration-300 ease-in-out flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.06)] overflow-hidden select-none ${
           sidebarCollapsed ? 'w-[80px]' : 'w-[280px] max-w-[85vw] md:max-w-none'
         } ${mobileSidebarOpen ? 'translate-x-0 !z-50' : '-translate-x-full md:translate-x-0'}`}
       >
         {/* SIDEBAR HEADER - PINNED AT TOP */}
-        <div className={`h-[64px] sm:h-[68px] flex items-center border-b border-[#F0EBE6] dark:border-[#2A2D3A] shrink-0 bg-white dark:bg-[#1A1D27] z-10 ${
+        <div className={`h-[64px] sm:h-[68px] flex items-center border-b border-[#F0EBE6] shrink-0 bg-white z-10 ${
           sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-4'
         }`}>
           {sidebarCollapsed ? (
@@ -288,7 +316,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* SIDEBAR FOOTER — PINNED AT BOTTOM */}
-        <div className={`border-t border-[#F0EBE6] dark:border-[#2A2D3A] bg-white dark:bg-[#1A1D27] shrink-0 z-10 ${
+        <div className={`border-t border-[#F0EBE6] bg-white shrink-0 z-10 ${
           sidebarCollapsed ? 'p-2 pb-3 flex justify-center' : 'p-3 sm:p-3.5 pb-4 sm:pb-5'
         }`}>
           <Link
@@ -333,7 +361,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         sidebarCollapsed ? 'md:pl-[80px]' : 'md:pl-[280px]'
       }`}>
         {/* TOP HEADER BAR */}
-        <header className="h-[60px] sm:h-[76px] px-3 sm:px-5 md:px-8 bg-white dark:bg-[#1A1D27] border-b border-[#E7E2DE] dark:border-[#2A2D3A] flex items-center justify-between sticky top-0 z-30 transition-colors duration-300">
+        <header className="h-[60px] sm:h-[76px] px-3 sm:px-5 md:px-8 bg-white border-b border-[#E7E2DE] flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Mobile: Hamburger button */}
             <button
@@ -406,7 +434,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* ═══════════════════════════════════════════════════════════════
            MOBILE BOTTOM NAVIGATION BAR
            ═══════════════════════════════════════════════════════════════ */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#1A1D27]/97 backdrop-blur-xl border-t border-[#E7E2DE] dark:border-[#2A2D3A] shadow-[0_-4px_24px_rgba(0,0,0,0.08)] flex items-stretch">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#E7E2DE] shadow-[0_-4px_24px_rgba(0,0,0,0.08)] flex items-stretch">
           {mobileNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
