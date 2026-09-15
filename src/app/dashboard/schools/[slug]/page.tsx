@@ -384,9 +384,8 @@ export default function UniversityDetailPage() {
                 onError={() => setBannerError(true)}
                 className="absolute inset-0 w-full h-full object-cover object-center z-0 select-none transition-opacity duration-300"
               />
-              {/* Refined gradient overlays to ensure badge/button readability and sleek visual depth */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/35 z-[1] pointer-events-none" />
-              <div className="absolute inset-0 bg-[#690B1B]/15 mix-blend-multiply z-[1] pointer-events-none" />
+              {/* Light bottom gradient only — keeps image crisp, darkens just the bottom edge for the overlay card */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/15 z-[1] pointer-events-none" />
             </>
           ) : (
             /* Fallback maroon ambient lights when no image is present in CMS */
