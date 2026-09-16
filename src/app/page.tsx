@@ -30,11 +30,15 @@ export default function Home() {
     setModalLoading(true);
     setModalError('');
     try {
-      await googleSignIn();
+      const { isNewUser } = await googleSignIn();
       setShowAuthModal(false);
-      if (pendingRedirectRef.current) {
+      if (isNewUser) {
+        router.push('/onboarding');
+      } else if (pendingRedirectRef.current) {
         router.push(pendingRedirectRef.current);
         pendingRedirectRef.current = null;
+      } else {
+        router.push('/dashboard');
       }
     } catch (err: any) {
       setModalError(err?.message || 'Sign in failed. Please try again.');

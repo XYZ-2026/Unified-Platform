@@ -9,7 +9,8 @@ import {
   signOut,
   sendPasswordResetEmail,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithCredential
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -30,7 +31,8 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
   signup: (name: string, email: string, pass: string, agreedToTerms?: boolean) => Promise<void>;
-  googleSignIn: (agreedToTerms?: boolean) => Promise<void>;
+  googleSignIn: (agreedToTerms?: boolean) => Promise<{ isNewUser: boolean }>;
+  signInWithGoogleIdToken: (idToken: string) => Promise<{ isNewUser: boolean }>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -41,7 +43,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   login: async () => {},
   signup: async () => {},
-  googleSignIn: async () => {},
+  googleSignIn: async () => ({ isNewUser: false }),
+  signInWithGoogleIdToken: async () => ({ isNewUser: false }),
   logout: async () => {},
   resetPassword: async () => {},
 });
@@ -125,13 +128,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const googleSignIn = async (agreedToTerms = false) => {
+  const googleSignIn = async (agreedToTerms = false): Promise<{ isNewUser: boolean }> => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     const res = await signInWithPopup(auth, provider);
     
     const displayName = res.user.displayName || res.user.email?.split('@')[0] || 'Student';
     const email = res.user.email || '';
+    let isNewUser = false;
 
     setUserData({
       uid: res.user.uid,
@@ -169,8 +173,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           photoURL: res.user.photoURL || undefined,
           ...existingData
         } as UserData);
+        isNewUser = false;
       } else {
         // New user via Google: save profile + terms agreement
+        isNewUser = true;
         const writePromise = setDoc(userRef, {
           name: displayName,
           fullName: displayName,
@@ -187,6 +193,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (firestoreErr) {
       console.warn('Firestore Google sign-in profile notice:', firestoreErr);
     }
+
+    return { isNewUser };
+  };
+
+  // Google One Tap: sign in using a Google ID token from the GSI callback
+  const signInWithGoogleIdToken = async (idToken: string): Promise<{ isNewUser: boolean }> => {
+    const credential = GoogleAuthProvider.credential(idToken);
+    const res = await signInWithCredential(auth, credential);
+
+    const displayName = res.user.displayName || res.user.email?.split('@')[0] || 'Student';
+    const email = res.user.email || '';
+    let isNewUser = false;
+
+    setUserData({
+      uid: res.user.uid,
+      name: displayName,
+      fullName: displayName,
+      email: email,
+      role: 'student',
+      photoURL: res.user.photoURL || undefined
+    });
+
+    // Safe background Firestore sync (same logic as googleSignIn)
+    try {
+      const userRef = doc(db, 'users', res.user.uid);
+      const fetchPromise = getDoc(userRef);
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+      const userSnap = await Promise.race([fetchPromise, timeoutPromise]);
+
+      if (userSnap && 'exists' in userSnap && userSnap.exists()) {
+        const existingData = userSnap.data();
+        setUserData({
+          uid: res.user.uid,
+          name: displayName,
+          fullName: displayName,
+          email: email,
+          role: 'student',
+          photoURL: res.user.photoURL || undefined,
+          ...existingData
+        } as UserData);
+        isNewUser = false;
+      } else {
+        // New user via One Tap: save profile
+        isNewUser = true;
+        const writePromise = setDoc(userRef, {
+          name: displayName,
+          fullName: displayName,
+          email: email,
+          role: 'student',
+          photoURL: res.user.photoURL || '',
+          createdAt: serverTimestamp(),
+          termsAgreed: true,
+          termsAgreedAt: serverTimestamp(),
+          termsVersion: '2026-09-04'
+        }, { merge: true });
+        await Promise.race([writePromise, timeoutPromise]);
+      }
+    } catch (firestoreErr) {
+      console.warn('Firestore One Tap sign-in profile notice:', firestoreErr);
+    }
+
+    return { isNewUser };
   };
 
   const logout = async () => {
@@ -198,7 +266,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, userData, loading, login, signup, googleSignIn, logout, resetPassword }}>
+    <AuthContext.Provider value={{ user, userData, loading, login, signup, googleSignIn, signInWithGoogleIdToken, logout, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );

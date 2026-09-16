@@ -131,10 +131,11 @@ export default function LoginPage() {
       return;
     }
     setLoading(true);
-    targetRedirectRef.current = '/onboarding';
     try {
-      await googleSignIn();
-      router.push('/onboarding');
+      const { isNewUser } = await googleSignIn();
+      const destination = isNewUser ? '/onboarding' : '/dashboard';
+      targetRedirectRef.current = destination;
+      router.push(destination);
     } catch (err: any) {
       targetRedirectRef.current = null;
       console.error(err);

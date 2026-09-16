@@ -3,6 +3,7 @@ import { Poppins } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import GoogleOneTap from '@/components/GoogleOneTap';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -37,6 +38,7 @@ export default function RootLayout({
       <body className="bg-[#F6F4F2] text-[#111111] min-h-screen flex flex-col antialiased font-[Poppins]">
         <AuthProvider>
           <ThemeProvider>
+            <GoogleOneTap />
             {children}
           </ThemeProvider>
         </AuthProvider>

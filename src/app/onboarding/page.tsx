@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { setCachedUserDetails } from '@/lib/userDetailsCache';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import {
   ChevronLeft,
@@ -276,7 +276,35 @@ export default function OnboardingPage() {
   const { user, userData } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const totalSteps = 6;
+
+  // Guard: redirect existing users (who already completed onboarding) to dashboard
+  useEffect(() => {
+    if (!user) {
+      setCheckingOnboarding(false);
+      return;
+    }
+    const checkOnboardingStatus = async () => {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const fetchPromise = getDoc(userRef);
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+        const userSnap = await Promise.race([fetchPromise, timeoutPromise]);
+        if (userSnap && 'exists' in userSnap && userSnap.exists()) {
+          const data = userSnap.data();
+          if (data?.onboardingCompleted) {
+            router.replace('/dashboard');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Onboarding check notice:', err);
+      }
+      setCheckingOnboarding(false);
+    };
+    checkOnboardingStatus();
+  }, [user, router]);
 
   // Onboarding Form State
   const [userRole, setUserRole] = useState<'applicant' | 'admit'>('applicant');
@@ -387,6 +415,11 @@ export default function OnboardingPage() {
       setCurrentStep((prev) => prev - 1);
     }
   };
+
+  // Show nothing while checking if user already completed onboarding
+  if (checkingOnboarding) {
+    return <div className="min-h-screen bg-[#F6F4F2]" />;
+  }
 
   return (
     <div className="min-h-screen bg-[#F6F4F2] flex flex-col justify-between items-center p-5 selection:bg-[#690B1B] selection:text-white font-[Poppins]">
