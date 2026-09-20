@@ -1,6 +1,15 @@
-'use client';
-
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy | Abroad Simplified',
+  description:
+    'Learn how Abroad Simplified protects your personal data, essay drafts, and profile information. Read our complete privacy and data protection policy.',
+  alternates: {
+    canonical: 'https://abroadsimplified.com/privacy',
+  },
+};
 
 export default function PrivacyPolicyPage() {
   return (
@@ -10,7 +19,7 @@ export default function PrivacyPolicyPage() {
         <div className="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
             <div className="w-[40px] h-[40px] rounded-[12px] shadow-[0_4px_16px_rgba(105,11,27,0.2)] overflow-hidden shrink-0">
-              <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
+              <Image src="/logo.png" alt="Abroad Simplified Logo" width={40} height={40} priority className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="text-[18px] font-bold text-[#111111] tracking-[-0.04em] leading-none">
@@ -33,6 +42,8 @@ export default function PrivacyPolicyPage() {
         </div>
       </header>
 
+      {/* MAIN CONTENT */}
+      <main>
       {/* HERO */}
       <div className="bg-gradient-to-br from-[#690B1B] via-[#7A1022] to-[#530816] text-white py-16 px-5">
         <div className="max-w-5xl mx-auto">
@@ -311,6 +322,7 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
       </div>
+      </main>
 
       {/* SIMPLE FOOTER */}
       <footer className="text-center py-8 text-[12px] text-[#AAA]">

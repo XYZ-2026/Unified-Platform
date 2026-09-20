@@ -13,9 +13,30 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'Abroad Simplified — Study Abroad & University Finder',
+  metadataBase: new URL('https://abroadsimplified.com'),
+  title: {
+    default: 'Abroad Simplified — Study Abroad & University Finder',
+    template: '%s | Abroad Simplified',
+  },
   description:
     'Discover top global universities, match scholarships, receive AI SOP & visa assistance, and take career psychometric assessments.',
+  openGraph: {
+    siteName: 'Abroad Simplified',
+    type: 'website',
+    locale: 'en_US',
+    images: [
+      {
+        url: '/logo.png',
+        width: 512,
+        height: 512,
+        alt: 'Abroad Simplified Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    images: ['/logo.png'],
+  },
   icons: {
     icon: [
       { url: '/favicon.ico' },

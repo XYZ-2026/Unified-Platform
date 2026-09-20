@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Sparkles, ArrowRight, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -166,7 +167,7 @@ export default function LoginPage() {
       {/* BRAND LOGO & NAME HEADER */}
       <Link href="/" className="flex items-center gap-3.5 mb-8 hover:opacity-90 transition-opacity">
         <div className="w-[52px] h-[52px] rounded-[16px] shadow-[0_8px_24px_rgba(105,11,27,0.22)] overflow-hidden shrink-0">
-          <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
+          <Image src="/logo.png" alt="Abroad Simplified Logo" width={52} height={52} priority className="w-full h-full object-cover" />
         </div>
         <div>
           <div className="text-[22px] font-bold text-[#111111] tracking-[-0.04em] leading-none">

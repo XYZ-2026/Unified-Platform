@@ -1,9 +1,10 @@
-'use client';
-
-import { use, useState } from 'react';
+import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import AuthCTALink from '@/components/landing/AuthCTALink';
+import UniversityFilterSection from '@/components/country/UniversityFilterSection';
+import StudyCostsSection from '@/components/country/StudyCostsSection';
 
 /* ══════════════════════════════════════════════════════════════
    TYPES
@@ -584,30 +585,123 @@ const SECTIONS = [
 const DEGREE_TABS = ["Bachelor's", "Master's", 'MBA', 'PhD'];
 
 /* ══════════════════════════════════════════════════════════════
-   PAGE COMPONENT
+   STATIC PARAMS & METADATA (SSR)
 ══════════════════════════════════════════════════════════════ */
-export default function CountryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+export function generateStaticParams() {
+  return [
+    { slug: 'usa' },
+    { slug: 'uk' },
+    { slug: 'canada' },
+    { slug: 'australia' },
+    { slug: 'germany' },
+  ];
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
   const country = COUNTRY_DATA[slug];
-  const { user } = useAuth();
-  const [uniFilter, setUniFilter] = useState<'All' | 'Public' | 'Private'>('All');
-  const [costsTab, setCostsTab] = useState(0);
+  if (!country) return { title: 'Country Guide Not Found' };
+
+  const title = `Study in ${country.name} — Universities, Scholarships & Visa Guide`;
+  const description = `Complete 2026 guide to study in ${country.name}. Explore ${country.universities.length}+ top universities, tuition fees, scholarships, post-study work visa rules, and living costs.`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      `study in ${country.name}`,
+      `${country.name} universities`,
+      `${country.name} student visa`,
+      `${country.name} scholarships`,
+      `tuition fees in ${country.name}`,
+      `cost of living in ${country.name}`,
+      'study abroad',
+      'university admission',
+    ],
+    alternates: {
+      canonical: `https://abroadsimplified.com/country/${slug}`,
+    },
+    openGraph: {
+      title: `${title} | Abroad Simplified`,
+      description,
+      url: `https://abroadsimplified.com/country/${slug}`,
+      siteName: 'Abroad Simplified',
+      type: 'article',
+      locale: 'en_US',
+      images: [
+        {
+          url: '/logo.png',
+          width: 512,
+          height: 512,
+          alt: `Study in ${country.name} Guide — Abroad Simplified`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | Abroad Simplified`,
+      description,
+      images: ['/logo.png'],
+    },
+  };
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE COMPONENT (SSR)
+══════════════════════════════════════════════════════════════ */
+export default async function CountryPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const country = COUNTRY_DATA[slug];
 
   if (!country) notFound();
 
-  const authTarget = user ? '/dashboard' : '/login';
-  const filteredUnis = country.universities.filter(u => uniFilter === 'All' || u.type === uniFilter);
-  const degCosts = [country.studyCosts.bachelor, country.studyCosts.master, country.studyCosts.mba, country.studyCosts.phd];
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://abroadsimplified.com',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Destinations',
+        item: 'https://abroadsimplified.com/#universities',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `Study in ${country.name}`,
+        item: `https://abroadsimplified.com/country/${slug}`,
+      },
+    ],
+  };
 
   return (
-    <div className="bg-[#F6F4F2] text-[#111111] font-[Poppins] font-normal min-h-screen">
+    <div className="bg-[#F6F4F2] text-[#111111] font-[Poppins] font-normal min-h-screen flex flex-col">
+      {/* JSON-LD Breadcrumbs */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
 
       {/* ══ NAVBAR ══════════════════════════════════════════════════ */}
       <nav className="sticky top-0 z-50 w-full bg-[#F6F4F2]/95 backdrop-blur-xl border-b border-[#E7E2DE]">
         <div className="max-w-7xl mx-auto h-[64px] sm:h-[84px] px-4 sm:px-8 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 hover:opacity-90 transition-opacity shrink-0">
             <div className="w-[38px] h-[38px] sm:w-[46px] sm:h-[46px] rounded-[11px] sm:rounded-[14px] shadow-[0_4px_16px_rgba(105,11,27,0.2)] overflow-hidden shrink-0">
-              <img src="/logo.png" alt="Abroad Simplified Logo" className="w-full h-full object-cover" />
+              <Image src="/logo.png" alt="Abroad Simplified Logo" width={46} height={46} priority className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="text-[15px] sm:text-[19px] font-bold tracking-[-0.04em] text-[#111]">Abroad Simplified</div>
@@ -618,12 +712,14 @@ export default function CountryPage({ params }: { params: Promise<{ slug: string
             <Link href="/#universities" className="hidden md:flex text-[13px] sm:text-[14px] font-medium text-[#5B5B5B] hover:text-[#690B1B] transition-colors items-center gap-1.5">
               ← All Destinations
             </Link>
-            <Link href={authTarget} className="h-[38px] sm:h-[46px] px-4 sm:px-7 rounded-full bg-[#690B1B] text-white text-[12px] sm:text-[14px] font-bold hover:bg-[#7A1022] transition-all shadow-[0_6px_20px_rgba(105,11,27,0.22)] flex items-center gap-1.5 shrink-0">
+            <AuthCTALink className="h-[38px] sm:h-[46px] px-4 sm:px-7 rounded-full bg-[#690B1B] text-white text-[12px] sm:text-[14px] font-bold hover:bg-[#7A1022] transition-all shadow-[0_6px_20px_rgba(105,11,27,0.22)] flex items-center gap-1.5 shrink-0">
               Get Started →
-            </Link>
+            </AuthCTALink>
           </div>
         </div>
       </nav>
+
+      <main className="flex-1">
 
       {/* ══ HERO ════════════════════════════════════════════════════ */}
       <section className="relative bg-[#FAF8F5] pt-6 sm:pt-12 pb-10 sm:pb-16 overflow-hidden border-b border-[#EAE5DF]">
@@ -677,13 +773,12 @@ export default function CountryPage({ params }: { params: Promise<{ slug: string
 
               {/* CTAs & Quick Info */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <Link
-                  href={authTarget}
+                <AuthCTALink
                   className="h-[48px] sm:h-[52px] px-6 sm:px-8 rounded-[14px] bg-[#690B1B] text-white text-[14px] sm:text-[15px] font-bold hover:bg-[#7A1022] hover:shadow-[0_10px_25px_rgba(105,11,27,0.25)] transition-all duration-200 flex items-center justify-center gap-2 group w-full sm:w-auto"
                 >
                   Apply Now Free
                   <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </Link>
+                </AuthCTALink>
                 <a
                   href="#universities"
                   className="h-[48px] sm:h-[52px] px-6 sm:px-7 rounded-[14px] bg-white border border-[#E0DCD7] text-[#333333] text-[14px] sm:text-[15px] font-semibold hover:border-[#690B1B] hover:text-[#690B1B] shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-all duration-200 flex items-center justify-center gap-2 w-full sm:w-auto"
@@ -769,9 +864,9 @@ export default function CountryPage({ params }: { params: Promise<{ slug: string
                       <div className="text-[10px] sm:text-[11px] text-white/80 truncate">Check your admission odds</div>
                     </div>
                   </div>
-                  <Link href={authTarget} className="text-[11px] sm:text-[12px] font-bold bg-white text-[#690B1B] px-3 sm:px-3.5 py-1.5 rounded-lg hover:bg-[#FAF8F5] transition-colors shrink-0">
+                  <AuthCTALink className="text-[11px] sm:text-[12px] font-bold bg-white text-[#690B1B] px-3 sm:px-3.5 py-1.5 rounded-lg hover:bg-[#FAF8F5] transition-colors shrink-0">
                     Check
-                  </Link>
+                  </AuthCTALink>
                 </div>
               </div>
 
@@ -849,120 +944,10 @@ export default function CountryPage({ params }: { params: Promise<{ slug: string
       </section>
 
       {/* ══ TOP UNIVERSITIES ════════════════════════════════════════ */}
-      <section id="universities" className="px-4 sm:px-8 py-10 sm:py-20 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
-            <div>
-              <div className="text-[#C9A55D] text-[11px] tracking-[0.22em] font-bold uppercase mb-2 sm:mb-3">Top Institutions</div>
-              <h2 className="text-[24px] sm:text-[40px] font-bold tracking-[-0.04em] text-[#111]">
-                Top Universities in {country.name}
-              </h2>
-            </div>
-            {/* Filters */}
-            <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide shrink-0">
-              {(['All', 'Public', 'Private'] as const).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setUniFilter(f)}
-                  className={`h-[36px] px-4 sm:px-5 rounded-full text-[12px] sm:text-[13px] font-semibold transition-all border shrink-0 ${
-                    uniFilter === f
-                      ? 'bg-[#690B1B] text-white border-[#690B1B] shadow-sm'
-                      : 'bg-white text-[#555] border-[#E7E2DE] hover:border-[#690B1B]/40'
-                  }`}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {filteredUnis.length === 0 ? (
-            <div className="text-center py-12 text-[#999] text-[14px]">No {uniFilter.toLowerCase()} universities listed for {country.name}.</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-              {filteredUnis.map((uni) => (
-                <div
-                  key={uni.name}
-                  className="group bg-white rounded-[16px] border border-[#EAEAEA] border-t-[3px] border-t-[#690B1B] shadow-[0_1px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.10)] hover:-translate-y-0.5 transition-all duration-250 flex flex-col"
-                >
-                  <div className="px-5 pt-5 pb-5 flex flex-col flex-1">
-
-                    {/* Header: icon + ranking badge */}
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-[10px] bg-[#FDF0F2] border border-[#F0C9D0] flex items-center justify-center shrink-0">
-                        <CategoryIcon name="grad" className="w-5 h-5 text-[#690B1B]" />
-                      </div>
-                      <span className="text-[11px] font-black text-[#690B1B] bg-[#FDF0F2] border border-[#F0C9D0] px-3 py-1 rounded-md tracking-tight shrink-0 mt-0.5">
-                        {uni.ranking}
-                      </span>
-                    </div>
-
-                    {/* University name */}
-                    <h3 className="text-[15px] sm:text-[16px] font-bold text-[#111827] leading-snug mb-1">{uni.name}</h3>
-
-                    {/* Location */}
-                    <div className="flex items-center gap-1.5 text-[12px] text-[#9CA3AF] mb-4">
-                      <svg className="w-3 h-3 text-[#690B1B]/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <span>{uni.location}</span>
-                    </div>
-
-                    {/* Stats — 3 pills in a row */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <div className="flex items-center gap-1.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-full px-3 py-1.5">
-                        <span className="text-[10px] text-[#9CA3AF] font-semibold uppercase tracking-wider">Acceptance</span>
-                        <span className="text-[12px] font-black text-[#690B1B]">{uni.acceptance}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-full px-3 py-1.5">
-                        <span className="text-[10px] text-[#9CA3AF] font-semibold uppercase tracking-wider">Tuition</span>
-                        <span className="text-[12px] font-bold text-[#111827]">{uni.tuition}</span>
-                      </div>
-                      <div className={`flex items-center px-3 py-1.5 rounded-full text-[11px] font-bold border ${
-                        uni.type === 'Public'
-                          ? 'bg-[#EFF6FF] border-[#BFDBFE] text-[#1D4ED8]'
-                          : 'bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]'
-                      }`}>
-                        {uni.type}
-                      </div>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="h-px bg-[#F3F4F6] mb-4" />
-
-                    {/* Popular Programs */}
-                    <div className="mb-5">
-                      <p className="text-[10px] text-[#D1D5DB] uppercase tracking-[0.14em] font-bold mb-2">Popular Programs</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {uni.programs.slice(0, 3).map((p) => (
-                          <span key={p} className="text-[11px] bg-white border border-[#E5E7EB] text-[#374151] px-2.5 py-0.5 rounded-full font-medium hover:border-[#690B1B]/30 hover:text-[#690B1B] transition-colors cursor-default">{p}</span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* CTA — clean outlined */}
-                    <div className="mt-auto">
-                      <a
-                        href={uni.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full h-[42px] rounded-[10px] border border-[#690B1B] text-[#690B1B] text-[13px] font-bold hover:bg-[#690B1B] hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
-                      >
-                        View University
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-        </div>
-      </section>
+      <UniversityFilterSection
+        universities={country.universities}
+        countryName={country.name}
+      />
 
       {/* ══ POPULAR COURSES ═════════════════════════════════════════ */}
       <section id="courses" className="px-4 sm:px-8 py-10 sm:py-20 bg-[#F7F5F3]">
@@ -1010,65 +995,11 @@ export default function CountryPage({ params }: { params: Promise<{ slug: string
       </section>
 
       {/* ══ STUDY COSTS ═════════════════════════════════════════════ */}
-      <section id="costs" className="px-4 sm:px-8 py-10 sm:py-20 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-[#C9A55D] text-[11px] tracking-[0.22em] font-bold uppercase mb-2 sm:mb-3">Financial Planning</div>
-          <h2 className="text-[24px] sm:text-[40px] font-bold tracking-[-0.04em] text-[#111] mb-2">
-            Study Costs in {country.name}
-          </h2>
-          <p className="text-[#727272] text-[13px] sm:text-[14px] mb-6 sm:mb-8">Get the full financial picture before you apply. Select your degree level below.</p>
-
-          {/* Degree Tabs (scrollable on mobile) */}
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mb-6 sm:mb-8">
-            {DEGREE_TABS.map((tab, i) => (
-              <button
-                key={tab}
-                onClick={() => setCostsTab(i)}
-                className={`h-[38px] sm:h-[40px] px-5 sm:px-6 rounded-full text-[13px] sm:text-[14px] font-semibold transition-all border shrink-0 ${
-                  costsTab === i
-                    ? 'bg-[#690B1B] text-white border-[#690B1B] shadow-sm'
-                    : 'bg-white text-[#555] border-[#E7E2DE] hover:border-[#690B1B]/40'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-            {/* Tuition Card */}
-            <div className="bg-[#F7F5F3] border border-[#E7E2DE] rounded-[16px] p-5 sm:p-8">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-[#F7F0F1] text-[#690B1B] border border-[#E8C4CC] flex items-center justify-center shrink-0">
-                  <CategoryIcon name="grad" className="w-4 h-4" />
-                </div>
-                <div className="text-[11px] text-[#999] uppercase tracking-[0.1em] font-semibold">{DEGREE_TABS[costsTab]} — Tuition Range</div>
-              </div>
-              <div className="text-[20px] sm:text-[28px] font-bold text-[#690B1B] mb-3 sm:mb-4 leading-snug">{degCosts[costsTab].range}</div>
-              <p className="text-[13px] sm:text-[14px] text-[#666] leading-relaxed">{degCosts[costsTab].notes}</p>
-            </div>
-
-            {/* Living Cost Card with top 3 city breakdown */}
-            <div className="bg-[#F7F5F3] border border-[#E7E2DE] rounded-[16px] p-5 sm:p-8">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-[#F7F0F1] text-[#690B1B] border border-[#E8C4CC] flex items-center justify-center shrink-0">
-                  <CategoryIcon name="city" className="w-4 h-4" />
-                </div>
-                <div className="text-[11px] text-[#999] uppercase tracking-[0.1em] font-semibold">Monthly Living Cost</div>
-              </div>
-              <div className="text-[20px] sm:text-[28px] font-bold text-[#111] mb-4 sm:mb-5">{country.studyCosts.livingCost}</div>
-              <div className="space-y-2.5 sm:space-y-3">
-                {country.cities.slice(0, 3).map((c) => (
-                  <div key={c.city} className="flex justify-between items-center py-1.5 sm:py-2 border-b border-[#E7E2DE] last:border-b-0">
-                    <span className="text-[12px] sm:text-[13px] text-[#555] font-medium">{c.city}</span>
-                    <span className="text-[12px] sm:text-[13px] font-bold text-[#690B1B]">{c.total}/mo</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <StudyCostsSection
+        countryName={country.name}
+        studyCosts={country.studyCosts}
+        cities={country.cities}
+      />
 
       {/* ══ SCHOLARSHIPS ════════════════════════════════════════════ */}
       <section id="scholarships" className="px-4 sm:px-8 py-10 sm:py-20 bg-[#F7F5F3]">
@@ -1245,12 +1176,11 @@ export default function CountryPage({ params }: { params: Promise<{ slug: string
             Use our AI Chance-Me predictor, build your university shortlist, find scholarships, and get your SOP reviewed — all in one place.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <Link
-              href={authTarget}
+            <AuthCTALink
               className="h-[48px] sm:h-[58px] px-7 sm:px-10 rounded-[14px] bg-white text-[#5B0819] text-[14px] sm:text-[17px] font-bold hover:scale-[1.02] transition-all flex items-center justify-center shadow-lg w-full sm:w-auto"
             >
               Get Started Free →
-            </Link>
+            </AuthCTALink>
             <Link
               href="/#universities"
               className="h-[48px] sm:h-[58px] px-7 sm:px-10 rounded-[14px] border border-white/20 text-white text-[14px] sm:text-[17px] font-semibold hover:bg-white/10 transition-all flex items-center justify-center w-full sm:w-auto"
@@ -1260,6 +1190,7 @@ export default function CountryPage({ params }: { params: Promise<{ slug: string
           </div>
         </div>
       </section>
+      </main>
 
       {/* ══ FOOTER ══════════════════════════════════════════════════ */}
       <footer className="bg-[#030303] px-4 sm:px-8 py-10 text-center">

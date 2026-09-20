@@ -126,6 +126,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (firestoreErr) {
       console.warn('Firestore profile save notice (offline or rules not deployed):', firestoreErr);
     }
+
+    // Non-blocking welcome email dispatch for new signup
+    if (cleanEmail) {
+      fetch('/api/send-welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, name: cleanName }),
+      }).catch((err) => console.warn('Welcome email dispatch notice:', err));
+    }
   };
 
   const googleSignIn = async (agreedToTerms = false): Promise<{ isNewUser: boolean }> => {
@@ -194,6 +203,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn('Firestore Google sign-in profile notice:', firestoreErr);
     }
 
+    if (isNewUser && email) {
+      fetch('/api/send-welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name: displayName }),
+      }).catch((err) => console.warn('Welcome email dispatch notice:', err));
+    }
+
     return { isNewUser };
   };
 
@@ -252,6 +269,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (firestoreErr) {
       console.warn('Firestore One Tap sign-in profile notice:', firestoreErr);
+    }
+
+    if (isNewUser && email) {
+      fetch('/api/send-welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name: displayName }),
+      }).catch((err) => console.warn('Welcome email dispatch notice:', err));
     }
 
     return { isNewUser };
