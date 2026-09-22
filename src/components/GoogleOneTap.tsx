@@ -25,7 +25,9 @@ interface GoogleCredentialResponse {
   select_by: string;
 }
 
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  '829246439395-i37rvdbch9scch207hqhknb0k333fuft.apps.googleusercontent.com';
 
 // Pages where One Tap should NOT appear (user is already in auth flow)
 const SUPPRESSED_PATHS = ['/login', '/onboarding'];
@@ -58,7 +60,10 @@ export default function GoogleOneTap() {
     // - User is already signed in
     // - Auth state is still loading
     // - We're on a suppressed page (login, onboarding)
-    if (!GOOGLE_CLIENT_ID) return;
+    if (!GOOGLE_CLIENT_ID) {
+      console.warn('[Google One Tap] NEXT_PUBLIC_GOOGLE_CLIENT_ID is missing.');
+      return;
+    }
     if (loading) return;
     if (user) return;
     if (SUPPRESSED_PATHS.some((p) => pathname.startsWith(p))) {
@@ -69,12 +74,14 @@ export default function GoogleOneTap() {
     }
 
     const handleCredentialResponse = (response: GoogleCredentialResponse) => {
+      console.log('[Google One Tap] Credential received from Google, authenticating with Firebase...');
       signInRef.current(response.credential)
         .then(({ isNewUser }) => {
+          console.log('[Google One Tap] Sign-in successful. isNewUser:', isNewUser);
           routerRef.current.push(isNewUser ? '/onboarding' : '/dashboard');
         })
         .catch((err) => {
-          console.error('Google One Tap sign-in error:', err);
+          console.error('[Google One Tap] Firebase sign-in error:', err);
         });
     };
 
@@ -93,11 +100,17 @@ export default function GoogleOneTap() {
 
       promptActiveRef.current = true;
       window.google.accounts.id.prompt((notification: any) => {
-        if (
-          notification?.isNotDisplayed?.() ||
-          notification?.isSkippedMoment?.() ||
-          notification?.isDismissedMoment?.()
-        ) {
+        if (notification?.isNotDisplayed?.()) {
+          const reason = notification.getNotDisplayedReason?.();
+          console.warn('[Google One Tap] Prompt not displayed. Reason:', reason);
+          promptActiveRef.current = false;
+        } else if (notification?.isSkippedMoment?.()) {
+          const reason = notification.getSkippedReason?.();
+          console.warn('[Google One Tap] Prompt skipped. Reason:', reason);
+          promptActiveRef.current = false;
+        } else if (notification?.isDismissedMoment?.()) {
+          const reason = notification.getDismissedReason?.();
+          console.info('[Google One Tap] Prompt dismissed by user. Reason:', reason);
           promptActiveRef.current = false;
         }
       });
