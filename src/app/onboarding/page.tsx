@@ -21,8 +21,12 @@ import {
   UserCheck,
   Globe,
   Briefcase,
-  Check
+  Check,
+  School,
+  MapPin,
+  Percent
 } from 'lucide-react';
+import { convertPercentageToGpa, convertGpaToPercentage, cleanNumericValue } from '@/lib/academicUtils';
 
 const COUNTRIES = [
   { name: 'Afghanistan', flag: '🇦🇫' },
@@ -310,58 +314,153 @@ export default function OnboardingPage() {
   const [userRole, setUserRole] = useState<'applicant' | 'admit'>('applicant');
   const [applicationCycle, setApplicationCycle] = useState('Fall 2026');
   const [targetMajor, setTargetMajor] = useState('');
-  const [dreamSchool, setDreamSchool] = useState('');
+  const [school, setSchool] = useState('');
+  const [city, setCity] = useState('');
+  const [scoreScale, setScoreScale] = useState<'gpa' | 'percentage'>('gpa');
   const [gpa, setGpa] = useState('3.9');
+  const [percentage, setPercentage] = useState('93');
   const [country, setCountry] = useState(''); // Default unselected
   const [financialAid, setFinancialAid] = useState(true);
 
   // Search filter states
   const [majorSearch, setMajorSearch] = useState('');
-  const [schoolSearch, setSchoolSearch] = useState('');
 
   const majorsList = [
-    'Computer Science & AI',
-    'Business & Finance',
+    'Accounting & Auditing',
+    'Actuarial Science & Risk Management',
+    'Aerospace & Aeronautical Engineering',
+    'Animation & Visual Effects (VFX)',
+    'Applied Mathematics & Statistics',
+    'Architecture & Spatial Design',
+    'Artificial Intelligence & Machine Learning',
+    'Astrophysics & Astronomy',
+    'Automotive & Mobility Engineering',
+    'Biochemistry & Molecular Biology',
+    'Bioengineering & Biomaterials',
+    'Biology & Biological Sciences',
     'Biomedical Engineering',
-    'Data Science & Analytics',
-    'Economics & Policy',
+    'Biotechnology & Genetic Engineering',
+    'Business Administration & Management',
+    'Business Analytics & Operations Research',
+    'Chemical Engineering',
+    'Chemistry & Materials Science',
+    'Civil & Structural Engineering',
+    'Cloud Computing & Distributed Systems',
+    'Cognitive Science',
+    'Computer Engineering',
+    'Computer Science & AI',
+    'Creative Writing & Literature',
+    'Criminology & Criminal Justice',
+    'Cybersecurity & Information Assurance',
+    'Data Science & Big Data Analytics',
+    'Dentistry & Oral Health',
+    'Digital Marketing & Brand Strategy',
+    'Ecology & Conservation Biology',
+    'Economics & Econometrics',
+    'Electrical & Electronics Engineering',
+    'English & Comparative Literature',
+    'Entrepreneurship & Innovation',
+    'Environmental & Climate Science',
+    'Environmental Engineering',
+    'Epidemiology & Global Health',
+    'Fashion Design & Merchandising',
+    'Film, Cinema & Television Production',
+    'Finance & Financial Engineering',
+    'Fine Arts & Studio Painting',
+    'Game Design & Interactive Media',
+    'Genetics & Genomics',
+    'Geology & Earth Sciences',
+    'Graphic Design & Visual Communication',
+    'Health Informatics & Digital Health',
+    'Healthcare Administration & Management',
+    'History & Global Studies',
+    'Hospitality & Tourism Management',
+    'Human-Computer Interaction (HCI)',
+    'Industrial & Product Design',
+    'Industrial & Systems Engineering',
+    'Information Systems & Technology',
+    'International Business & Trade',
+    'International Relations & Diplomacy',
+    'Journalism & Mass Communication',
+    'Kinesiology & Exercise Science',
+    'Law & Legal Studies',
+    'Linguistics & Modern Languages',
+    'Marine Biology & Oceanography',
+    'Marketing & Consumer Psychology',
     'Mechanical Engineering',
-    'Pre-Medicine & Health',
-    'Law & International Relations',
-    'Psychology & Cognitive Science',
-    'Electrical Engineering & Robotics',
-    'Architecture & Urban Design',
-    'Environmental Science'
-  ];
-
-  const universitiesList = [
-    'University of Pennsylvania (UPenn)',
-    'Harvard University',
-    'Massachusetts Institute of Technology (MIT)',
-    'Stanford University',
-    'Imperial College London',
-    'Technical University of Munich (TUM)',
-    'University of Toronto',
-    'Oxford University',
-    'Cambridge University',
-    'Columbia University',
-    'Carnegie Mellon University (CMU)',
-    'Georgia Institute of Technology'
+    'Mechatronics & Automation',
+    'Media, Advertising & Public Relations',
+    'Music Production & Sound Design',
+    'Nanotechnology & Advanced Materials',
+    'Neuroscience & Neurobiology',
+    'Nuclear Engineering',
+    'Nursing & Clinical Practice',
+    'Nutrition, Dietetics & Food Science',
+    'Petroleum & Renewable Energy Engineering',
+    'Pharmacy & Pharmaceutical Sciences',
+    'Philosophy & Applied Ethics',
+    'Philosophy, Politics & Economics (PPE)',
+    'Physics & Theoretical Physics',
+    'Political Science & Government',
+    'Pre-Medicine & Health Sciences',
+    'Psychology & Behavioral Science',
+    'Public Health & Policy',
+    'Quantum Information Science & Computing',
+    'Real Estate & Urban Development',
+    'Robotics & Autonomous Systems',
+    'Software Engineering & Systems',
+    'Supply Chain & Global Logistics',
+    'Sustainable Energy & Green Technologies',
+    'Theatre, Drama & Performing Arts',
+    'UI/UX & Digital Product Design',
+    'Urban Planning & Smart Cities',
+    'Veterinary Medicine & Animal Sciences'
   ];
 
   const filteredMajors = majorsList.filter((m) =>
     m.toLowerCase().includes(majorSearch.toLowerCase())
   );
 
-  const filteredUniversities = universitiesList.filter((u) =>
-    u.toLowerCase().includes(schoolSearch.toLowerCase())
-  );
+  const handleGpaChange = (val: string) => {
+    setGpa(val);
+    const num = cleanNumericValue(val);
+    if (!isNaN(num) && num > 0) {
+      if (num > 4.0 && num <= 100) {
+        // Auto-detect percentage if user typed e.g. 88
+        setPercentage(Math.round(num).toString());
+        setGpa(convertPercentageToGpa(num));
+        setScoreScale('percentage');
+        return;
+      }
+      setPercentage(convertGpaToPercentage(num));
+    }
+  };
+
+  const handlePercentageChange = (val: string) => {
+    setPercentage(val);
+    const num = cleanNumericValue(val);
+    if (!isNaN(num) && num > 0) {
+      setGpa(convertPercentageToGpa(num));
+    }
+  };
+
+  const handleToggleScale = (scale: 'gpa' | 'percentage') => {
+    setScoreScale(scale);
+    if (scale === 'gpa' && !gpa && percentage) {
+      setGpa(convertPercentageToGpa(percentage));
+    } else if (scale === 'percentage' && !percentage && gpa) {
+      setPercentage(convertGpaToPercentage(gpa));
+    }
+  };
 
   const handleNext = async () => {
     if (currentStep < totalSteps) {
       setCurrentStep((prev) => prev + 1);
     } else {
       setIsSubmitting(true);
+      const finalGpa = gpa ? gpa.trim() : (percentage ? convertPercentageToGpa(percentage) : '3.9');
+      const finalPct = percentage ? percentage.trim() : (finalGpa ? convertGpaToPercentage(finalGpa) : '93');
+
       // Save onboarding answers to Wix CMS user-details collection and local cache
       const payload = {
         userId: user?.uid || 'guest-user',
@@ -370,8 +469,13 @@ export default function OnboardingPage() {
         applicationCycle,
         targetMajor,
         intendedMajor: targetMajor,
-        dreamSchool,
-        gpa,
+        dreamSchool: '',
+        school: school.trim(),
+        highSchool: school.trim(),
+        city: city.trim(),
+        gpa: finalGpa,
+        percentage: finalPct ? `${finalPct.replace('%', '')}%` : '',
+        gpaScale: scoreScale,
         country: country || 'Unspecified',
         financialAid,
         onboardingCompleted: true
@@ -604,54 +708,64 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP 4: DREAM SCHOOL */}
+          {/* STEP 4: SCHOOL & CITY */}
           {currentStep === 4 && (
             <div className="space-y-6 text-center">
               <div className="space-y-2">
                 <span className="text-[11px] font-bold uppercase tracking-widest text-[#690B1B] bg-[#F7F0F1] px-3 py-1 rounded-full">
-                  UNIVERSITY PREFERENCE
+                  ACADEMIC BACKGROUND
                 </span>
                 <h1 className="text-[28px] sm:text-[34px] font-bold text-[#111111] tracking-[-0.03em]">
-                  Do you already have a dream school?
+                  Where do you study?
                 </h1>
                 <p className="text-[14px] text-[#777777] max-w-[420px] mx-auto">
-                  Select your top choice university to add to your Dream tier list.
+                  Enter your school or institution and city to help us personalize your admissions profile.
                 </p>
               </div>
 
-              <div className="space-y-4 pt-2">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999]" size={18} />
+              <div className="space-y-4 pt-2 text-left">
+                <div>
+                  <label className="text-[12px] font-bold text-[#555] block mb-1.5 flex items-center gap-1.5">
+                    <School size={14} className="text-[#690B1B]" />
+                    <span>School / College / Institution</span>
+                  </label>
                   <input
                     type="text"
-                    value={schoolSearch}
-                    onChange={(e) => setSchoolSearch(e.target.value)}
-                    placeholder="Search universities (e.g. UPenn, Harvard, MIT)..."
-                    className="w-full h-[50px] pl-11 pr-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] text-[14px] text-[#111] outline-none focus:border-[#690B1B]"
+                    value={school}
+                    onChange={(e) => setSchool(e.target.value)}
+                    placeholder="e.g. Delhi Public School, Phillips Exeter, Lincoln High..."
+                    className="w-full h-[52px] px-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] text-[15px] font-semibold text-[#111] outline-none focus:border-[#690B1B] transition-all"
                   />
                 </div>
 
-                <div className="max-h-[260px] overflow-y-auto space-y-2 custom-scrollbar text-left pr-1">
-                  {filteredUniversities.map((u) => (
-                    <button
-                      key={u}
-                      type="button"
-                      onClick={() => setDreamSchool(u)}
-                      className={`w-full p-3.5 sm:p-4 rounded-[14px] border text-[14px] font-medium transition-all text-left flex items-center justify-between gap-3 cursor-pointer ${dreamSchool === u
-                        ? 'bg-[#F7F0F1] border-[#690B1B] text-[#690B1B] font-bold'
-                        : 'bg-[#FDFCFB] border-[#E7E2DE] text-[#444] hover:border-[#690B1B]/40'
-                        }`}
-                    >
-                      <span className="text-left leading-snug flex-1">{u}</span>
-                      {dreamSchool === u && <CheckCircle2 size={18} className="text-[#690B1B] shrink-0" />}
-                    </button>
-                  ))}
+                <div>
+                  <label className="text-[12px] font-bold text-[#555] block mb-1.5 flex items-center gap-1.5">
+                    <MapPin size={14} className="text-[#690B1B]" />
+                    <span>City / Town</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="e.g. Mumbai, New Delhi, San Francisco, London..."
+                    className="w-full h-[52px] px-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] text-[15px] font-semibold text-[#111] outline-none focus:border-[#690B1B] transition-all"
+                  />
+                </div>
+
+                <div className="p-4 rounded-[16px] bg-[#F7F5F3] border border-[#E7E2DE] text-left text-[13px] text-[#555] space-y-1">
+                  <div className="font-bold text-[#111] flex items-center gap-1.5">
+                    <Sparkles size={14} className="text-[#C9A55D]" />
+                    <span>Why this matters:</span>
+                  </div>
+                  <div>
+                    Admissions committees evaluate applicants in context of their high school curriculum, grading rigor, and geographical background.
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* STEP 5: ACADEMICS & GPA */}
+          {/* STEP 5: ACADEMICS & GPA / PERCENTAGE */}
           {currentStep === 5 && (
             <div className="space-y-6 text-center">
               <div className="space-y-2">
@@ -659,28 +773,85 @@ export default function OnboardingPage() {
                   ACADEMIC PROFILE
                 </span>
                 <h1 className="text-[28px] sm:text-[34px] font-bold text-[#111111] tracking-[-0.03em]">
-                  What is your high school GPA?
+                  What is your academic score?
                 </h1>
                 <p className="text-[14px] text-[#777777] max-w-[420px] mx-auto">
-                  Enter your unweighted GPA (out of 4.0 or percentage).
+                  Enter your score in 4.0 GPA or Percentage (%). We automatically convert and calibrate your profile.
                 </p>
               </div>
 
-              <div className="space-y-4 pt-2">
-                <div>
-                  <label className="text-[12px] font-bold text-[#555] block mb-1">Unweighted GPA</label>
-                  <input
-                    type="text"
-                    value={gpa}
-                    onChange={(e) => setGpa(e.target.value)}
-                    placeholder="e.g. 3.9"
-                    className="w-full h-[52px] px-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] text-[18px] font-bold text-[#111] text-center outline-none focus:border-[#690B1B]"
-                  />
-                </div>
+              {/* SCALE TOGGLE */}
+              <div className="inline-flex p-1 bg-[#ECE7E3] rounded-full gap-1 mx-auto">
+                <button
+                  type="button"
+                  onClick={() => handleToggleScale('gpa')}
+                  className={`px-4 sm:px-5 py-1.5 rounded-full text-[13px] font-bold transition-all cursor-pointer ${
+                    scoreScale === 'gpa'
+                      ? 'bg-white text-[#690B1B] shadow-xs'
+                      : 'text-[#666] hover:text-[#111]'
+                  }`}
+                >
+                  GPA (4.0 Scale)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleToggleScale('percentage')}
+                  className={`px-4 sm:px-5 py-1.5 rounded-full text-[13px] font-bold transition-all cursor-pointer ${
+                    scoreScale === 'percentage'
+                      ? 'bg-white text-[#690B1B] shadow-xs'
+                      : 'text-[#666] hover:text-[#111]'
+                  }`}
+                >
+                  Percentage (%)
+                </button>
+              </div>
+
+              <div className="space-y-4 pt-1">
+                {scoreScale === 'gpa' ? (
+                  <div>
+                    <label className="text-[12px] font-bold text-[#555] block mb-1.5">
+                      Unweighted GPA (out of 4.0)
+                    </label>
+                    <input
+                      type="text"
+                      value={gpa}
+                      onChange={(e) => handleGpaChange(e.target.value)}
+                      placeholder="e.g. 3.9"
+                      className="w-full h-[54px] px-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] text-[22px] font-bold text-[#111] text-center outline-none focus:border-[#690B1B] transition-all"
+                    />
+                    {percentage && (
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-[#690B1B] bg-[#F7F0F1] px-3.5 py-1 rounded-full border border-[#690B1B]/15">
+                        <Sparkles size={13} className="text-[#C9A55D]" />
+                        <span>Equivalent to ~{percentage.replace('%', '')}% Score (Auto-converted)</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <label className="text-[12px] font-bold text-[#555] block mb-1.5">
+                      High School Percentage (%)
+                    </label>
+                    <input
+                      type="text"
+                      value={percentage}
+                      onChange={(e) => handlePercentageChange(e.target.value)}
+                      placeholder="e.g. 92"
+                      className="w-full h-[54px] px-4 rounded-[14px] bg-[#FDFCFB] border border-[#E7E2DE] text-[22px] font-bold text-[#111] text-center outline-none focus:border-[#690B1B] transition-all"
+                    />
+                    {gpa && (
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-[#690B1B] bg-[#F7F0F1] px-3.5 py-1 rounded-full border border-[#690B1B]/15">
+                        <Sparkles size={13} className="text-[#C9A55D]" />
+                        <span>Converted to ~{gpa} / 4.0 GPA (Calibrated for admissions)</span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="p-4 rounded-[16px] bg-[#F7F5F3] border border-[#E7E2DE] text-left text-[13px] text-[#555] space-y-1">
-                  <div className="font-bold text-[#111]">💡 Test-Optional Note:</div>
-                  <div>Don&apos;t worry if you haven&apos;t taken the SAT/ACT yet — you can update test scores later inside your profile.</div>
+                  <div className="font-bold text-[#111]">💡 Standardized Conversion:</div>
+                  <div>
+                    Whether your school uses percentage, 10-point CGPA, or state board scores, we standardize your academic score to the US 4.0 GPA scale.
+                  </div>
                 </div>
               </div>
             </div>

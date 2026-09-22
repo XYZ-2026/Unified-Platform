@@ -349,7 +349,7 @@ function CompareContent() {
             Side-by-Side <span className="text-[#C9A55D]">University Comparison</span> Matrix
           </h1>
           <p className="text-[13.5px] sm:text-[15px] md:text-[15.5px] text-white/85 leading-relaxed font-normal">
-            Make confident, data-backed higher education decisions. Systematically analyze sticker costs vs. genuine out-of-pocket net prices, authentic institutional scholarships, selectivity percentiles, English cut-offs, and academic strengths across 2,328+ US institutions.
+            Make confident, data-backed higher education decisions. Systematically analyze published costs vs. genuine out-of-pocket net prices, authentic institutional scholarships, selectivity percentiles, English cut-offs, and academic strengths across 2,328+ US institutions.
           </p>
         </div>
 
@@ -378,7 +378,7 @@ function CompareContent() {
               <DollarSign size={16} />
               <span className="text-[13px] font-extrabold uppercase tracking-wider text-white/75">Financials</span>
             </div>
-            <div className="text-[18px] sm:text-[22px] font-black text-white">Net vs. Sticker</div>
+            <div className="text-[18px] sm:text-[22px] font-black text-white">Net vs. Published</div>
             <div className="text-[11px] text-white/70">Tuition, housing & direct grants</div>
           </div>
 
@@ -731,7 +731,7 @@ function CompareContent() {
                       {/* Quick Snapshot: Tuition & Net Price Badge */}
                       <div className="pt-2 border-t border-[#EAE6E2] flex items-center justify-between text-[13px]">
                         <div>
-                          <div className="text-[#777777] text-[11.5px] uppercase font-extrabold">Sticker Tuition</div>
+                          <div className="text-[#777777] text-[11.5px] uppercase font-extrabold">Published Tuition</div>
                           <div className="text-[18px] font-black text-[#111111]">
                             {formatCurrency(uni.tuition)}
                             <span className="text-[12px] font-medium text-[#777777]">/yr</span>
@@ -1327,7 +1327,7 @@ function CompareContent() {
 
               <div className="grid grid-cols-2 gap-2 text-[12px]">
                 <div className="p-3 rounded-[14px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                  <div className="text-[#777777] text-[11.5px] font-bold uppercase">Sticker Tuition</div>
+                  <div className="text-[#777777] text-[11.5px] font-bold uppercase">Published Tuition</div>
                   <div className="text-[18px] font-black text-[#690B1B] mt-0.5">{formatCurrency(selectedUnis[0].tuition)}/yr</div>
                 </div>
                 <div className="p-3 rounded-[14px] bg-[#FAF8F6] border border-[#F0EBE6]">
@@ -1658,7 +1658,7 @@ function CompareContent() {
 
                 <div className="grid grid-cols-2 gap-2 text-[12px]">
                   <div className="p-2.5 rounded-[12px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                    <div className="text-[#777777] text-[11.5px] font-bold uppercase">Sticker Tuition</div>
+                    <div className="text-[#777777] text-[11.5px] font-bold uppercase">Published Tuition</div>
                     <div className="text-[17px] font-black text-[#690B1B] mt-0.5">{formatCurrency(uni.tuition)}/yr</div>
                   </div>
                   <div className="p-2.5 rounded-[12px] bg-[#FAF8F6] border border-[#F0EBE6]">

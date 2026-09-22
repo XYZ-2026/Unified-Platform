@@ -21,8 +21,15 @@ import {
   School,
   Phone,
   Calendar,
-  ArrowRight
+  ArrowRight,
+  MapPin
 } from 'lucide-react';
+import {
+  convertPercentageToGpa,
+  convertGpaToPercentage,
+  cleanNumericValue,
+  formatAcademicScoreDisplay
+} from '@/lib/academicUtils';
 
 export default function StudentProfilePage() {
   const { user, userData } = useAuth();
@@ -34,10 +41,12 @@ export default function StudentProfilePage() {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [country, setCountry] = useState('');
+  const [city, setCity] = useState('');
   const [targetMajor, setTargetMajor] = useState('');
   const [dreamSchool, setDreamSchool] = useState('');
   const [applicationCycle, setApplicationCycle] = useState('Fall 2026');
   const [gpaUnweighted, setGpaUnweighted] = useState('');
+  const [percentage, setPercentage] = useState('');
   const [gpaWeighted, setGpaWeighted] = useState('');
   const [satScore, setSatScore] = useState('');
   const [actScore, setActScore] = useState('');
@@ -57,15 +66,17 @@ export default function StudentProfilePage() {
     if (d.fullName !== undefined || d.name !== undefined) setFullName(d.fullName || d.name || '');
     if (d.phone !== undefined) setPhone(d.phone || '');
     if (d.country !== undefined) setCountry(d.country || '');
+    if (d.city !== undefined) setCity(d.city || '');
     if (d.targetMajor !== undefined || d.intendedMajor !== undefined) setTargetMajor(d.targetMajor || d.intendedMajor || '');
     if (d.dreamSchool !== undefined) setDreamSchool(d.dreamSchool || '');
     if (d.applicationCycle !== undefined) setApplicationCycle(d.applicationCycle || 'Fall 2026');
     if (d.gpa !== undefined) setGpaUnweighted(d.gpa || '');
+    if (d.percentage !== undefined) setPercentage(d.percentage || '');
     if (d.gpaWeighted !== undefined) setGpaWeighted(d.gpaWeighted || '');
     if (d.satScore !== undefined) setSatScore(d.satScore || '');
     if (d.actScore !== undefined) setActScore(d.actScore || '');
     if (d.classRank !== undefined) setClassRank(d.classRank || '');
-    if (d.highSchool !== undefined) setHighSchool(d.highSchool || '');
+    if (d.highSchool !== undefined || d.school !== undefined) setHighSchool(d.highSchool || d.school || '');
   };
 
   // 1. INSTANT LOAD: Load cached data immediately on mount / key change
@@ -135,15 +146,18 @@ export default function StudentProfilePage() {
       name: fullName,
       phone,
       country,
+      city,
       targetMajor,
       intendedMajor: targetMajor,
       dreamSchool,
       applicationCycle,
       gpa: gpaUnweighted,
+      percentage: percentage ? `${percentage.toString().replace('%', '')}%` : '',
       gpaWeighted,
       satScore,
       actScore,
       classRank,
+      school: highSchool,
       highSchool
     };
 
@@ -180,12 +194,36 @@ export default function StudentProfilePage() {
     setter(val);
   };
 
+  const handleGpaChange = (val: string) => {
+    isDirtyRef.current = true;
+    setGpaUnweighted(val);
+    const num = cleanNumericValue(val);
+    if (!isNaN(num) && num > 0) {
+      if (num > 4.0 && num <= 100) {
+        setPercentage(Math.round(num).toString());
+        setGpaUnweighted(convertPercentageToGpa(num));
+        return;
+      }
+      setPercentage(convertGpaToPercentage(num));
+    }
+  };
+
+  const handlePercentageChange = (val: string) => {
+    isDirtyRef.current = true;
+    setPercentage(val);
+    const num = cleanNumericValue(val);
+    if (!isNaN(num) && num > 0) {
+      setGpaUnweighted(convertPercentageToGpa(num));
+    }
+  };
+
   const profileTags = [
-    country || 'Country Unspecified',
+    city && country ? `${city}, ${country}` : (country || city || 'Country Unspecified'),
     targetMajor || 'Major Unspecified',
     applicationCycle || 'Fall 2026',
     dreamSchool ? `Dream: ${dreamSchool}` : 'Dream School Unspecified',
-    gpaUnweighted ? `GPA: ${gpaUnweighted}` : (gpaWeighted ? `GPA: ${gpaWeighted}` : 'GPA Unspecified'),
+    formatAcademicScoreDisplay(gpaUnweighted, percentage),
+    gpaWeighted ? `Weighted: ${gpaWeighted}` : null,
     satScore ? `SAT: ${satScore}` : (actScore ? `ACT: ${actScore}` : null)
   ].filter(Boolean);
 
@@ -278,6 +316,20 @@ export default function StudentProfilePage() {
               </div>
 
               <div>
+                <label className="text-[12px] font-bold text-[#777] block mb-1 flex items-center gap-1">
+                  <MapPin size={12} />
+                  <span>City / Town</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Mumbai, New Delhi, Austin, London..."
+                  value={city}
+                  onChange={(e) => handleInputChange(setCity, e.target.value)}
+                  className="w-full h-[46px] px-3.5 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[14px] font-bold text-[#111] outline-none focus:border-[#690B1B] transition-all"
+                />
+              </div>
+
+              <div>
                 <label className="text-[12px] font-bold text-[#777] block mb-1">Intended Major</label>
                 <input
                   type="text"
@@ -336,16 +388,41 @@ export default function StudentProfilePage() {
               <span>Academics &amp; Test Scores</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="text-[12px] font-bold text-[#777] block mb-1">Unweighted GPA</label>
+                <label className="text-[12px] font-bold text-[#777] block mb-1">
+                  Unweighted GPA (4.0 Scale)
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. 3.9"
                   value={gpaUnweighted}
-                  onChange={(e) => handleInputChange(setGpaUnweighted, e.target.value)}
+                  onChange={(e) => handleGpaChange(e.target.value)}
                   className="w-full h-[46px] px-3.5 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[15px] font-bold text-[#111] outline-none focus:border-[#690B1B] transition-all"
                 />
+                {percentage && (
+                  <span className="text-[11px] font-bold text-[#690B1B] block mt-1">
+                    ≈ {percentage.includes('%') ? percentage : `${percentage}%`} Score
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label className="text-[12px] font-bold text-[#777] block mb-1">
+                  Percentage Score (%)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 92%"
+                  value={percentage}
+                  onChange={(e) => handlePercentageChange(e.target.value)}
+                  className="w-full h-[46px] px-3.5 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[15px] font-bold text-[#111] outline-none focus:border-[#690B1B] transition-all"
+                />
+                {gpaUnweighted && (
+                  <span className="text-[11px] font-bold text-[#690B1B] block mt-1">
+                    ≈ {gpaUnweighted} / 4.0 GPA
+                  </span>
+                )}
               </div>
 
               <div>
@@ -380,6 +457,7 @@ export default function StudentProfilePage() {
                   className="w-full h-[46px] px-3.5 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[15px] font-bold text-[#111] outline-none focus:border-[#690B1B] transition-all"
                 />
               </div>
+
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#F0EBE6]">

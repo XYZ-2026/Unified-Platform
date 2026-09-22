@@ -19,6 +19,8 @@ export default function LandingNavbar() {
       const yOffset = -90;
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
+    } else {
+      router.push(`/#${targetId}`);
     }
   };
 

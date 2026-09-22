@@ -11,7 +11,7 @@ declare global {
       accounts: {
         id: {
           initialize: (config: Record<string, unknown>) => void;
-          prompt: () => void;
+          prompt: (momentListener?: (notification: any) => void) => void;
           cancel: () => void;
           disableAutoSelect: () => void;
         };
@@ -92,7 +92,15 @@ export default function GoogleOneTap() {
       });
 
       promptActiveRef.current = true;
-      window.google.accounts.id.prompt();
+      window.google.accounts.id.prompt((notification: any) => {
+        if (
+          notification?.isNotDisplayed?.() ||
+          notification?.isSkippedMoment?.() ||
+          notification?.isDismissedMoment?.()
+        ) {
+          promptActiveRef.current = false;
+        }
+      });
     };
 
     // Load GSI script if not already loaded

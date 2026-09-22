@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import LandingNavbar from '@/components/landing/LandingNavbar';
+import LandingFooter from '@/components/landing/LandingFooter';
 import AuthCTALink from '@/components/landing/AuthCTALink';
 import FeatureSection from '@/components/landing/FeatureSection';
 
@@ -368,22 +369,35 @@ export default function Home() {
                 { code: "CA", flag: "🇨🇦", name: "Canada", count: "85+ Universities", desc: "Post-study work permits & PR pathways", slug: "canada" },
                 { code: "AU", flag: "🇦🇺", name: "Australia", count: "60+ Universities", desc: "Group of Eight & high quality of life", slug: "australia" },
                 { code: "DE", flag: "🇩🇪", name: "Germany", count: "55+ Universities", desc: "Tuition-free public universities & tech hubs", slug: "germany" },
+                { code: "FR", flag: "🇫🇷", name: "France", count: "45+ Universities", desc: "Grandes Écoles & subsidized European tuition", slug: "france" },
+                { code: "RU", flag: "🇷🇺", name: "Russia", count: "40+ Universities", desc: "Top STEM, physics & affordable medical degrees", slug: "russia" },
+                { code: "SG", flag: "🇸🇬", name: "Singapore", count: "25+ Universities", desc: "Asia's premier global hub with NUS & NTU", slug: "singapore" },
+                { code: "JP", flag: "🇯🇵", name: "Japan", count: "35+ Universities", desc: "Robotics mastery, tech & MEXT scholarships", slug: "japan" },
+                { code: "UAE", flag: "🇦🇪", name: "United Arab Emirates", count: "30+ Universities", desc: "Branch campuses, 0% tax & Golden Visa", slug: "uae" },
               ].map((item) => (
                 <Link
                   key={item.code}
                   href={`/country/${item.slug}`}
-                  className="group bg-white border border-[#E7E2DE] rounded-[16px] p-5 sm:p-6 hover:border-[#690B1B] hover:-translate-y-1 transition-all shadow-2xs hover:shadow-md flex flex-col cursor-pointer"
+                  className="group bg-white border border-[#E7E2DE] rounded-[16px] p-5 sm:p-6 hover:border-[#690B1B] hover:-translate-y-1 transition-all shadow-2xs hover:shadow-md flex flex-col justify-between h-full min-h-[250px] sm:min-h-[265px] cursor-pointer"
                 >
-                  <div className="flex justify-between items-center mb-3.5">
-                    <span className="text-[28px] sm:text-[32px]">{item.flag}</span>
-                    <span className="text-[11px] font-bold text-[#690B1B] bg-[#F7F0F1] px-2.5 py-1 rounded-full uppercase border border-[#E8C4CC]/50">
-                      {item.code}
-                    </span>
+                  <div className="flex flex-col flex-1">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-[28px] sm:text-[32px] leading-none">{item.flag}</span>
+                      <span className="text-[11px] font-bold text-[#690B1B] bg-[#F7F0F1] px-2.5 py-1 rounded-full uppercase border border-[#E8C4CC]/50">
+                        {item.code}
+                      </span>
+                    </div>
+                    <h3 className="text-[17px] sm:text-[18px] font-bold text-[#111] mb-1 min-h-[44px] sm:min-h-[48px] flex items-center leading-snug">
+                      {item.name}
+                    </h3>
+                    <div className="text-[12px] sm:text-[13px] font-bold text-[#690B1B] mb-2">
+                      {item.count}
+                    </div>
+                    <p className="text-[12px] sm:text-[13px] text-[#777777] leading-relaxed min-h-[38px] sm:min-h-[42px] line-clamp-2">
+                      {item.desc}
+                    </p>
                   </div>
-                  <h3 className="text-[17px] sm:text-[18px] font-bold text-[#111] mb-1">{item.name}</h3>
-                  <div className="text-[12px] sm:text-[13px] font-bold text-[#690B1B] mb-2">{item.count}</div>
-                  <p className="text-[12px] sm:text-[13px] text-[#777777] leading-relaxed flex-1">{item.desc}</p>
-                  <div className="mt-4 flex items-center gap-1 text-[12px] font-semibold text-[#690B1B] group-hover:translate-x-0.5 transition-transform">
+                  <div className="mt-4 pt-3 border-t border-[#F5F2EF] flex items-center gap-1 text-[12px] font-semibold text-[#690B1B] group-hover:translate-x-0.5 transition-transform">
                     Explore <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
                   </div>
                 </Link>
@@ -607,113 +621,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════
          FOOTER — Fully static, SSR (no interactivity)
          ═══════════════════════════════════════════════════════════════ */}
-      <footer className="bg-[#030303] px-4 sm:px-6 md:px-10 lg:px-16 pt-12 sm:pt-16 md:pt-20 pb-8 text-left">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-14">
-            {/* BRAND */}
-            <div className="col-span-2 sm:col-span-2 lg:col-span-1 max-w-[300px]">
-              <Link href="/" className="flex items-center gap-3 text-white hover:opacity-90 transition-opacity">
-                <div className="w-[46px] h-[46px] rounded-[14px] overflow-hidden shadow-[0_6px_20px_rgba(105,11,27,0.3)] shrink-0">
-                  <Image src="/logo.png" alt="Abroad Simplified Logo" width={46} height={46} className="w-full h-full object-cover" />
-                </div>
-                <span className="text-[22px] font-bold tracking-[-0.03em]">Abroad Simplified</span>
-              </Link>
-              <p className="mt-6 text-[#5E6168] text-[15px] leading-[2]">
-                Think Beyond Your Boundaries. Your ultimate AI-powered study abroad platform.
-              </p>
-            </div>
-
-            {/* TOOLS */}
-            <div>
-              <div className="text-[#C8A15D] text-[11px] tracking-[0.24em] uppercase font-bold mb-6">
-                Platform Tools
-              </div>
-              <div className="space-y-4">
-                {[
-                  { label: "Net Price Calculator", href: "/dashboard/calculator" },
-                  { label: "AI Chance-Me Predictor", href: "#chance-me" },
-                  { label: "SOP Builder", href: "#features" },
-                  { label: "Scholarship Matcher", href: "#features" },
-                  { label: "Visa Guidance", href: "#features" },
-                ].map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    className="block text-[#6B6F78] text-[15px] hover:text-white transition cursor-pointer"
-                  >
-                    {item.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* DESTINATIONS */}
-            <div>
-              <div className="text-[#C8A15D] text-[11px] tracking-[0.24em] uppercase font-bold mb-6">
-                Destinations
-              </div>
-              <div className="space-y-4">
-                {[
-                  { label: "Study in USA", href: "/country/usa" },
-                  { label: "Study in UK", href: "/country/uk" },
-                  { label: "Study in Germany", href: "/country/germany" },
-                  { label: "Study in Canada", href: "/country/canada" },
-                  { label: "Study in Australia", href: "/country/australia" },
-                ].map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="block text-[#6B6F78] text-[15px] hover:text-white transition cursor-pointer"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* COMPANY */}
-            <div>
-              <div className="text-[#C8A15D] text-[11px] tracking-[0.24em] uppercase font-bold mb-6">
-                Company
-              </div>
-              <div className="space-y-4">
-                {[
-                  { label: "Admissions Journey", href: "#journey" },
-                  { label: "Platform Features", href: "#features" },
-                  { label: "Admissions FAQ", href: "#faq" },
-                  { label: "Contact & Support", href: "mailto:support@abroadsimplified.com" },
-                ].map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    className="block text-[#6B6F78] text-[15px] hover:text-white transition cursor-pointer"
-                  >
-                    {item.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* DIVIDER */}
-          <div className="w-full h-px bg-white/5 mt-16 md:mt-20 mb-6" />
-
-          {/* BOTTOM */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-[#5E6168] text-[14px] text-center md:text-left">
-              © 2026 Abroad Simplified. All rights reserved.
-            </div>
-            <div className="flex items-center gap-6 text-[#5E6168] text-[14px]">
-              <Link href="/privacy" className="hover:text-white transition cursor-pointer">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="hover:text-white transition cursor-pointer">
-                Terms of Service
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }

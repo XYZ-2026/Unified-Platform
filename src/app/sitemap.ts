@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next';
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://abroadsimplified.com';
 
-  const countries = ['usa', 'uk', 'canada', 'australia', 'germany'];
+  const countries = ['usa', 'uk', 'canada', 'australia', 'germany', 'france', 'russia', 'singapore', 'japan', 'uae'];
 
   return [
     {

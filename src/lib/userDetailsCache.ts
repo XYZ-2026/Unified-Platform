@@ -12,11 +12,15 @@ export interface CachedUserDetails {
   dreamSchool?: string;
   applicationCycle?: string;
   gpa?: string;
+  percentage?: string;
+  gpaScale?: 'gpa' | 'percentage' | string;
   gpaWeighted?: string;
   satScore?: string;
   actScore?: string;
   classRank?: string;
   highSchool?: string;
+  school?: string;
+  city?: string;
   extracurriculars?: any;
   userRole?: string;
   financialAid?: boolean;

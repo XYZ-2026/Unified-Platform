@@ -24,10 +24,45 @@ interface ExemplarEssay {
   content: string;
   author?: string;
   year?: string;
+  program?: string;
+  categoryLevel?: string;
 }
 
 // In-memory module cache for instant load
 let cachedClientEssays: ExemplarEssay[] | null = null;
+
+// Determine degree level for filtering (UG, PG, PhD)
+export function detectEssayLevel(essay: ExemplarEssay): 'UG' | 'PG' | 'PHD' {
+  const combined = [
+    essay.categoryLevel || '',
+    essay.program || '',
+    essay.tag || '',
+    essay.title || '',
+    essay.year || '',
+    essay.previewText || '',
+  ].join(' ').toLowerCase();
+
+  // 1. PhD / Doctoral
+  if (/\b(ph\.?d|doctoral|doctorate|dphil|postdoc|dissertation)\b/i.test(combined)) {
+    return 'PHD';
+  }
+
+  // 2. Undergraduate / Bachelor's
+  if (/\b(undergraduate|undergrad|bachelor|bachelors|b\.?a\.?|b\.?s\.?|b\.?sc|b\.?tech|b\.?eng|common\s*app|high\s*school|freshman|ug)\b/i.test(combined)) {
+    return 'UG';
+  }
+
+  // 3. Postgraduate / Master's / Graduate
+  if (/\b(master|masters|graduate|grad|postgraduate|postgrad|ms|m\.?s\.?|ma|m\.?a\.?|msc|m\.?sc|meng|m\.?eng|mba|m\.?b\.?a|llm|mfa|mphil|pg)\b/i.test(combined)) {
+    return 'PG';
+  }
+
+  if (/\b(commonapp|common\s*app|college\s*essay)\b/i.test(combined)) {
+    return 'UG';
+  }
+
+  return 'PG';
+}
 
 export default function ExemplarEssaysPage() {
   const [essays, setEssays] = useState<ExemplarEssay[]>(() => cachedClientEssays || []);
@@ -35,6 +70,7 @@ export default function ExemplarEssaysPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSchool, setSelectedSchool] = useState('ALL');
+  const [selectedLevel, setSelectedLevel] = useState<'ALL' | 'UG' | 'PG' | 'PHD'>('ALL');
 
   // Modal State for viewing full essay in Rich Text Editor
   const [activeModalEssay, setActiveModalEssay] = useState<ExemplarEssay | null>(null);
@@ -100,7 +136,8 @@ export default function ExemplarEssaysPage() {
       (e.previewText && e.previewText.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (e.content && e.content.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesSchool = selectedSchool === 'ALL' || (e.school && e.school.toLowerCase().includes(selectedSchool.toLowerCase()));
-    return matchesSearch && matchesSchool;
+    const matchesLevel = selectedLevel === 'ALL' || detectEssayLevel(e) === selectedLevel;
+    return matchesSearch && matchesSchool && matchesLevel;
   });
 
   return (
@@ -128,31 +165,42 @@ export default function ExemplarEssaysPage() {
           Statement of Purpose (SOP) &amp; Essay Bank
         </h2>
         <p className="text-[14px] text-white/80 max-w-[700px] relative z-10 leading-relaxed">
-          Comprehensive database of admitted SOPs and personal statements. Click <strong>View Essay</strong> on any card to read and review the full text.
+          Comprehensive database of admitted SOPs and personal statements. Filter by <strong>Undergraduate (UG)</strong>, <strong>Postgraduate (PG)</strong>, or <strong>PhD / Doctorate</strong>. Click <strong>View Essay</strong> to review the full text.
         </p>
       </div>
 
       {/* SEARCH AND FILTERS BAR */}
       <div className="bg-white border border-[#E7E2DE] rounded-[20px] p-5 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
+        {/* LINE 1: Search Input & University Filter */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 sm:gap-4">
+          <div className="relative w-full md:w-[340px] lg:w-[380px] shrink-0">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999]" size={18} />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search essays by prompt, university, topic, or keyword..."
-              className="w-full h-[48px] pl-11 pr-4 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[14px] text-[#111] outline-none focus:border-[#690B1B] transition-all"
+              placeholder="Search essays by university, topic, or keyword..."
+              className="w-full h-[46px] sm:h-[48px] pl-11 pr-4 rounded-[12px] bg-[#FDFCFB] border border-[#E7E2DE] text-[13.5px] sm:text-[14px] text-[#111] outline-none focus:border-[#690B1B] transition-all shadow-2xs"
             />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#111] p-1 cursor-pointer"
+                title="Clear search"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
 
           {schoolOptions.length > 1 && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full flex-1 min-w-0 scrollbar-hide">
               {schoolOptions.map((s) => (
                 <button
                   key={s}
                   onClick={() => setSelectedSchool(s)}
-                  className={`px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  className={`h-[42px] px-4 rounded-[12px] text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 flex items-center justify-center ${
                     selectedSchool === s ? 'bg-[#690B1B] text-white shadow-xs' : 'bg-[#F7F5F3] text-[#555] hover:bg-[#EFEBE7]'
                   }`}
                 >
@@ -163,11 +211,47 @@ export default function ExemplarEssaysPage() {
           )}
         </div>
 
+        {/* LINE 2: Degree Level Filter (UG, PG, PhD) with clean top padding */}
+        <div className="flex items-center gap-2.5 overflow-x-auto pt-3.5 sm:pt-4 border-t border-[#F0EBE6] scrollbar-hide">
+          <span className="text-[11px] font-bold text-[#888] uppercase tracking-wider shrink-0 mr-1">Degree:</span>
+          {[
+            { id: 'ALL', label: 'All Degrees' },
+            { id: 'UG', label: 'UG (Undergrad)' },
+            { id: 'PG', label: 'PG (Master’s)' },
+            { id: 'PHD', label: 'PhD' },
+          ].map((lvl) => (
+            <button
+              key={lvl.id}
+              type="button"
+              onClick={() => setSelectedLevel(lvl.id as 'ALL' | 'UG' | 'PG' | 'PHD')}
+              className={`h-[34px] px-4 rounded-full text-[12.5px] font-bold transition-all whitespace-nowrap cursor-pointer border shrink-0 flex items-center justify-center ${
+                selectedLevel === lvl.id
+                  ? 'bg-[#690B1B] text-white border-[#690B1B] shadow-xs'
+                  : 'bg-[#FDFCFB] text-[#555] border-[#E7E2DE] hover:border-[#690B1B]/40 hover:bg-[#F9F7F5]'
+              }`}
+            >
+              {lvl.label}
+            </button>
+          ))}
+        </div>
+
         <div className="flex items-center justify-between border-t border-[#F0EBE6] pt-3 text-[13px]">
           <span className="text-[12px] text-[#888] font-medium flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[#16a34a]" />
             <span>{filteredEssays.length} exemplar essays available</span>
           </span>
+          {(searchTerm || selectedSchool !== 'ALL' || selectedLevel !== 'ALL') && (
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedSchool('ALL');
+                setSelectedLevel('ALL');
+              }}
+              className="text-[12px] font-bold text-[#690B1B] hover:underline cursor-pointer"
+            >
+              Reset Filters
+            </button>
+          )}
         </div>
       </div>
 
@@ -227,9 +311,20 @@ export default function ExemplarEssaysPage() {
             >
               <div className="space-y-2.5 sm:space-y-3">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10.5px] sm:text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-wider truncate">
-                    {ex.school}
-                  </span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-[10.5px] sm:text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-wider truncate">
+                      {ex.school}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border shrink-0 ${
+                      detectEssayLevel(ex) === 'UG'
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : detectEssayLevel(ex) === 'PHD'
+                        ? 'bg-purple-50 text-purple-700 border-purple-200'
+                        : 'bg-amber-50 text-amber-800 border-amber-200'
+                    }`}>
+                      {detectEssayLevel(ex) === 'UG' ? 'UG' : detectEssayLevel(ex) === 'PHD' ? 'PhD' : 'PG'}
+                    </span>
+                  </div>
                   <span className="text-[10.5px] sm:text-[11px] font-medium text-[#888] flex items-center gap-1 shrink-0">
                     <Clock size={12} />
                     <span>{ex.words}</span>
@@ -261,14 +356,13 @@ export default function ExemplarEssaysPage() {
                 </span>
                 
                 <button
-                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleOpenEssay(ex);
                   }}
-                  className="h-[32px] sm:h-[34px] px-3.5 sm:px-4 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[11.5px] sm:text-[12px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 shrink-0 whitespace-nowrap"
+                  className="px-3 py-1.5 rounded-full bg-[#690B1B] hover:bg-[#7A1022] text-white text-[11.5px] sm:text-[12px] font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs group-hover:scale-[1.02]"
                 >
-                  <Eye size={13} />
+                  <Eye size={12} />
                   <span>View Essay</span>
                 </button>
               </div>
@@ -281,9 +375,12 @@ export default function ExemplarEssaysPage() {
          FULL ESSAY RICH TEXT VIEWER MODAL
          ═══════════════════════════════════════════════════════════════ */}
       {activeModalEssay && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 md:p-6 animate-fadeIn"
+          onClick={() => setActiveModalEssay(null)}
+        >
           <div
-            className="bg-white border border-[#E7E2DE] rounded-[20px] sm:rounded-[24px] w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
+            className="bg-white rounded-[20px] sm:rounded-[24px] max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-[#E7E2DE] overflow-hidden animate-scaleUp"
             onClick={(e) => e.stopPropagation()}
           >
             {/* MODAL HEADER */}
@@ -292,6 +389,15 @@ export default function ExemplarEssaysPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10.5px] sm:text-[11px] font-bold bg-[#F7F0F1] text-[#690B1B] px-2.5 sm:px-3 py-0.5 rounded-full uppercase shrink-0">
                     {activeModalEssay.school}
+                  </span>
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${
+                    detectEssayLevel(activeModalEssay) === 'UG'
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : detectEssayLevel(activeModalEssay) === 'PHD'
+                      ? 'bg-purple-50 text-purple-700 border-purple-200'
+                      : 'bg-amber-50 text-amber-800 border-amber-200'
+                  }`}>
+                    {detectEssayLevel(activeModalEssay) === 'UG' ? 'Undergraduate (UG)' : detectEssayLevel(activeModalEssay) === 'PHD' ? 'PhD / Doctorate' : 'Postgraduate (PG)'}
                   </span>
                   <span className="text-[11px] sm:text-[12px] text-[#777] font-medium shrink-0">• {activeModalEssay.words}</span>
                   <span className="text-[10.5px] sm:text-[11px] font-bold bg-[#16a34a]/10 text-[#16a34a] px-2 sm:px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0">

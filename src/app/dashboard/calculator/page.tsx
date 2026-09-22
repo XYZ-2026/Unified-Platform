@@ -779,7 +779,7 @@ function NetPriceCalculatorContent() {
                     <strong className="text-[#111]">{formatMoney(selectedUniDetail.livingCosts)}</strong>
                   </div>
                   <div className="flex justify-between py-1.5 border-b border-[#EAE6E2] font-semibold">
-                    <span className="text-[#333]">Total Sticker Price (COA):</span>
+                    <span className="text-[#333]">Total Cost of Attendance (COA):</span>
                     <strong className="text-[#111]">{formatMoney(uniDetailCalc.sticker)}</strong>
                   </div>
                   <div className="flex justify-between py-1.5 border-b border-[#EAE6E2] text-[#16a34a]">
@@ -1342,7 +1342,7 @@ function NetPriceCalculatorContent() {
                           {/* SPOTLIGHT COST BOX */}
                           <div className="bg-[#FAF8F6] border border-[#F0EBE6] rounded-[16px] p-3.5 my-3 space-y-1.5">
                             <div className="flex items-center justify-between text-[11.5px] text-[#777777]">
-                              <span>Published COA (Sticker):</span>
+                              <span>Published Cost of Attendance (COA):</span>
                               <span className="line-through font-medium">{formatMoney(sticker)}</span>
                             </div>
 
@@ -1444,7 +1444,7 @@ function NetPriceCalculatorContent() {
                     <span>University Comparison Matrix</span>
                   </h3>
                   <p className="text-[12px] text-[#666666]">
-                    Comparing side-by-side estimated net tuition, sticker prices, and scholarships
+                    Comparing side-by-side estimated net tuition, published costs, and scholarships
                   </p>
                 </div>
 
@@ -1601,7 +1601,7 @@ function NetPriceCalculatorContent() {
                           colSpan={compareUniversities.length + 1}
                           className="px-4 sm:px-5 py-2.5 text-[11px] font-extrabold text-[#690B1B] uppercase tracking-wider"
                         >
-                          💵 Published Cost of Attendance (Sticker Price)
+                          💵 Published Cost of Attendance (COA)
                         </td>
                       </tr>
                       <tr>
@@ -1636,7 +1636,7 @@ function NetPriceCalculatorContent() {
                       </tr>
                       <tr>
                         <td className="p-4 sm:p-5 font-bold text-[#333333] bg-[#FAF8F6]/40">
-                          Total Sticker Price (COA)
+                          Total Cost of Attendance (COA)
                         </td>
                         {compareUniversities.map(({ university, calc }) => (
                           <td key={university.id} className="p-4 sm:p-5 border-l border-[#F0EBE6] font-bold text-[#111111]">
@@ -1908,13 +1908,13 @@ function NetPriceCalculatorContent() {
                           <span className="text-[12px] font-bold text-[#666666]">/yr</span>
                         </div>
                         <div className="text-[11px] text-green-700 font-bold">
-                          🎉 Save {formatMoney(compareUniversities[0].savings)} ({compareUniversities[0].savingsPercent.toFixed(0)}% Off Sticker)
+                          🎉 Save {formatMoney(compareUniversities[0].savings)} ({compareUniversities[0].savingsPercent.toFixed(0)}% Off Published Cost)
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 text-[12px]">
                         <div className="p-2.5 rounded-[12px] bg-[#FAF8F6] border border-[#F0EBE6]">
-                          <div className="text-[#888888] text-[10.5px] font-bold">Sticker COA</div>
+                          <div className="text-[#888888] text-[10.5px] font-bold">Published COA</div>
                           <div className="font-bold text-[#111111]">{formatMoney(compareUniversities[0].sticker)}</div>
                         </div>
                         <div className="p-2.5 rounded-[12px] bg-[#FAF8F6] border border-[#F0EBE6]">
@@ -1967,7 +1967,7 @@ function NetPriceCalculatorContent() {
                               {uA.university.name}
                             </h4>
                             <div className="text-[10px] font-semibold text-[#888888]">
-                              Sticker: {formatMoney(uA.sticker)}
+                              Published COA: {formatMoney(uA.sticker)}
                             </div>
                           </div>
 
@@ -1988,7 +1988,7 @@ function NetPriceCalculatorContent() {
                               {uB.university.name}
                             </h4>
                             <div className="text-[10px] font-semibold text-[#888888]">
-                              Sticker: {formatMoney(uB.sticker)}
+                              Published COA: {formatMoney(uB.sticker)}
                             </div>
                           </div>
                         </div>
@@ -2036,7 +2036,7 @@ function NetPriceCalculatorContent() {
                         <div className="space-y-2 pt-2 border-t border-[#F0EBE6]">
                           <div className="px-2.5 py-1 rounded-[8px] bg-[#FAF8F6] text-[#666666] text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-1.5">
                             <Building2 size={12} />
-                            <span>Sticker Breakdown</span>
+                            <span>Published Cost Breakdown</span>
                           </div>
 
                           <div className="space-y-1.5 text-[12px]">
@@ -2183,7 +2183,7 @@ function NetPriceCalculatorContent() {
                                 Save {formatMoney(item.savings)}
                               </span>
                               <div className="text-[10px] text-[#777777] mt-0.5">
-                                Sticker: {formatMoney(item.sticker)}
+                                Published COA: {formatMoney(item.sticker)}
                               </div>
                             </div>
                           </div>
