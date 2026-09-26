@@ -32,6 +32,7 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
   const [initial, setInitial] = useState('S');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [isAdmitUser, setIsAdmitUser] = useState(false);
   const pathname = usePathname();
 
   const isStudio = pathname === '/dashboard/essays/studio';
@@ -50,11 +51,17 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
     if (name) {
       setInitial(name.charAt(0).toUpperCase());
     }
+    if (cached?.userRole === 'admit') {
+      setIsAdmitUser(true);
+    }
 
     const unsub = subscribeToUserDetails((data) => {
       const updatedName = data.fullName || data.name;
       if (updatedName) {
         setInitial(updatedName.charAt(0).toUpperCase());
+      }
+      if (data.userRole === 'admit') {
+        setIsAdmitUser(true);
       }
     });
 
@@ -114,6 +121,7 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
   const resourceItems = [
     { id: 'admits', label: 'Admitted Profiles', icon: BookOpen, href: '/dashboard/past-admits' },
     { id: 'exemplars', label: 'Admitted Essays', icon: Award, href: '/dashboard/exemplar-essays' },
+    ...(isAdmitUser ? [{ id: 'college-admit', label: 'Submit Admit Profile', icon: Award, href: '/dashboard/college-admit' }] : []),
     { id: 'settings', label: 'Settings', icon: Settings, href: '/dashboard/settings' },
   ];
 

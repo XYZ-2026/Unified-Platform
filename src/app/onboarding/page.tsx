@@ -454,6 +454,51 @@ export default function OnboardingPage() {
   };
 
   const handleNext = async () => {
+    // ── ADMIT FAST-TRACK: skip applicant-specific steps 2–6 ──
+    if (currentStep === 1 && userRole === 'admit') {
+      setIsSubmitting(true);
+
+      const payload = {
+        userId: user?.uid || 'guest-user',
+        userEmail: user?.email || '',
+        userRole: 'admit',
+        onboardingCompleted: true
+      };
+
+      const userKey = user?.uid || user?.email || 'default';
+      setCachedUserDetails(userKey, payload);
+
+      // 1. Post to Wix CMS
+      try {
+        await fetch('/api/wix/user-details', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.error('Error submitting data to Wix CMS:', err);
+      }
+
+      // 2. Sync to Firebase Firestore safely
+      try {
+        if (user?.uid) {
+          const userRef = doc(db, 'users', user.uid);
+          const writePromise = setDoc(userRef, {
+            ...payload,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+          const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+          await Promise.race([writePromise, timeoutPromise]);
+        }
+      } catch (firestoreErr) {
+        console.warn('Firestore onboarding save notice:', firestoreErr);
+      }
+
+      router.push('/dashboard/college-admit');
+      return;
+    }
+
+    // ── NORMAL APPLICANT FLOW ──
     if (currentStep < totalSteps) {
       setCurrentStep((prev) => prev + 1);
     } else {
