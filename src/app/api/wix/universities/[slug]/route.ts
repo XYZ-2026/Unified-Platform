@@ -178,6 +178,40 @@ const FALLBACK_UNIVERSITIES: Record<string, any> = {
     expectedSalary: '£42,000–£68,000/yr (median ~£52,000)',
     roi: '510% (Very Good)',
   },
+  'acadia-university': {
+    id: 'acadia-ca',
+    universityId: 'CA-INST-001',
+    name: 'Acadia University',
+    country: 'Canada',
+    countryCode: 'CA',
+    state: 'Nova Scotia',
+    qsRanking: '#42 Canada (uniRank; not QS)',
+    tuition: 'International: CA$28,000–38,000/yr; Domestic: CA$5,500–9,000/yr',
+    livingCosts: 'CA$11,000–15,000/yr (housing ~CA$7,500; meals & transit ~CA$4,500)',
+    acceptanceRate: 'Approximately 70% (unverified)',
+    website: 'https://www.acadiau.ca',
+    domain: 'acadiau.ca',
+    bannerImage: 'https://www.unirank.org/i/screenshots/acadia-university-ca-website-screenshot.jpg',
+    bannerAlt: "Acadia University's website homepage screenshot",
+    popularMajors: ['Computer Science', 'Software Engineering', 'Business Administration', 'Commerce', 'Nursing', 'Mechanical Engineering', 'Data Science', 'Psychology', 'Biomedical Sciences', 'Economics', 'Digital Media'],
+    slug: 'acadia-university',
+    avgGpa: 3.2,
+    satScore: 'Generally optional; 1280–1480 estimated for US applicants (verify)',
+    avgNeedBasedGrant: 'CA$5,000–12,000/yr (unverified estimate)',
+    dliNumber: 'O19209939222',
+    internationalEligible: 'Yes; study permit and PGWP subject to current eligibility requirements',
+    offersUndergraduate: 'Yes',
+    offersPostgraduate: 'Yes',
+    offersDoctoral: 'No (verify)',
+    languageOfInstruction: 'English',
+    requiredEssayPromptsDetails: 'Acadia University Essay Prompts:\n1. 1–2 essays of 250–500 words on leadership, extracurricular involvement, and academic goals.\n2. Interviews may apply to some programs.\nVerify current requirements at acadiau.ca.',
+    writingRequirements: 'IELTS Academic 6.5 (min. 6.0 per band) or TOEFL iBT 88–100; additional statement may be required for certain programs.',
+    careerOutcomes: '92%–96% employment within six months (original estimate); sectors: technology, banking, healthcare, and engineering. Verify official statistics.',
+    expectedSalary: 'CA$62,000–88,000/yr starting salary; CA$95,000+ for CS and engineering graduates (unverified estimates)',
+    roi: 'High ROI; estimated 3–4 year break-even period. Actual ROI depends on costs, financial aid, employment, salary, and immigration eligibility.',
+    scholarships: 'Entrance merit scholarships: CA$2,000–10,000/yr; International President\'s Excellence Award: CA$15,000–40,000; need-based bursaries and work-study options subject to eligibility.',
+    totalCost: 'CA$42,000/yr; CA$168,000 over four years (estimates; reconcile with tuition and living costs)',
+  },
   'university-of-toronto': {
     id: 'toronto-ca',
     universityId: 'utoronto',
@@ -252,90 +286,226 @@ const FALLBACK_UNIVERSITIES: Record<string, any> = {
   },
 };
 
+import {
+  fetchCanadianUniversitiesFromWix,
+  fetchGermanyUniversitiesFromWix,
+  toCleanSlug,
+} from '@/lib/wixCountryUniversities';
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug } = await params;
-
-    const wixApiKey = process.env.WIX_API_KEY;
-    const wixSiteId = process.env.WIX_SITE_ID;
+    const cleanSlug = toCleanSlug(slug);
 
     let found: any = null;
 
-    if (wixApiKey && wixSiteId) {
-      try {
-        const headers = {
-          'Authorization': wixApiKey,
-          'wix-site-id': wixSiteId,
-          'Content-Type': 'application/json',
+    // 1. Check connected Canadian Universities from Wix Studio CMS
+    try {
+      const canadaUnis = await fetchCanadianUniversitiesFromWix();
+      const matchedCa = canadaUnis.find((u) => {
+        const uSlug = toCleanSlug(u.institutionName);
+        const idSlug = toCleanSlug(u.institutionId);
+        return uSlug === cleanSlug || idSlug === cleanSlug || cleanSlug.includes(idSlug) || uSlug.includes(cleanSlug);
+      });
+
+      if (matchedCa) {
+        const majorsArray = (matchedCa.popularMajors || '')
+          .split(',')
+          .map((m: string) => m.trim())
+          .filter(Boolean);
+
+        found = {
+          id: `ca-${matchedCa.institutionId.toLowerCase()}`,
+          universityId: matchedCa.institutionId,
+          name: matchedCa.institutionName,
+          country: 'Canada',
+          countryCode: 'CA',
+          state: matchedCa.province,
+          province: matchedCa.province,
+          city: matchedCa.city,
+          qsRanking: matchedCa.qsRanking || '#Top Canadian University',
+          tuition: matchedCa.tuition,
+          livingCosts: matchedCa.livingCosts,
+          acceptanceRate: matchedCa.acceptanceRate,
+          website: matchedCa.officialWebsite,
+          bannerImage: matchedCa.bannerImage,
+          bannerAlt: matchedCa.bannerImageAlt,
+          popularMajors: majorsArray,
+          slug: cleanSlug,
+          avgGpa: matchedCa.avgGpa || '3.2 / 4.0',
+          satScore: matchedCa.satScore || 'Optional / Not Required for Canadian Applicants',
+          avgNeedBasedGrant: matchedCa.avgNeedBasedGrant,
+          requiredEssayPromptsDetails: matchedCa.requiredEssayPrompts,
+          writingRequirements: matchedCa.writingRequirements,
+          careerOutcomes: matchedCa.careerOutcomes,
+          expectedSalary: matchedCa.expectedSalary,
+          roi: matchedCa.roi,
+          scholarships: matchedCa.scholarships,
+          type: matchedCa.publicPrivate || matchedCa.institutionType || 'Public',
+          dliNumber: matchedCa.dliNumber,
+          internationalEligible: matchedCa.internationalStudentEligible,
         };
+      }
+    } catch (err) {
+      console.warn('Wix Canada slug lookup notice:', err);
+    }
 
-        let cursor: string | null = null;
-        let hasMore = true;
+    // 2. Check connected Germany Universities from Wix Studio CMS
+    if (!found) {
+      try {
+        const germanyUnis = await fetchGermanyUniversitiesFromWix();
+        const matchedDe = germanyUnis.find((u) => {
+          const uSlug = toCleanSlug(u.universityName);
+          const uCity = toCleanSlug(u.city);
+          return uSlug === cleanSlug || uSlug.includes(cleanSlug) || cleanSlug.includes(uCity) || cleanSlug.includes(uSlug);
+        });
 
-        while (hasMore && !found) {
-          const queryPayload: any = {
-            dataCollectionId: 'Import2',
-            query: {
-              paging: { limit: 1000 },
-            },
+        if (matchedDe) {
+          found = {
+            id: `de-${cleanSlug}`,
+            universityId: `DE-${cleanSlug}`,
+            name: matchedDe.universityName,
+            country: 'Germany',
+            countryCode: 'DE',
+            state: matchedDe.federalState,
+            province: matchedDe.federalState,
+            city: matchedDe.city,
+            qsRanking: matchedDe.ranking || '#Top German University',
+            tuition: matchedDe.bwTuitionFee?.toLowerCase().startsWith('yes') ? '€1,500/semester (Non-EU BW)' : '€0 (Tuition Free Public University)',
+            livingCosts: matchedDe.blockedAccountProofOfFunds ? `${matchedDe.blockedAccountProofOfFunds} (Blocked Account)` : '€992/month',
+            acceptanceRate: (matchedDe.ncNumerusClausus?.toLowerCase().startsWith('yes') || matchedDe.ncGradeCutoff) ? 'NC Restricted' : 'Open Admission',
+            website: matchedDe.website,
+            bannerImage: '',
+            bannerAlt: `${matchedDe.universityName} Campus`,
+            popularMajors: ['Informatics & Computer Science', 'Mechanical Engineering', 'Natural Sciences', 'Medicine & Life Sciences'],
+            slug: cleanSlug,
+            avgGpa: 'Class 12 > 70% + Studienkolleg (FSP)',
+            satScore: 'Not Required / APS Certificate Mandatory',
+            avgNeedBasedGrant: 'DAAD Scholarships (€934/month)',
+            requiredEssayPromptsDetails: `Admissions Protocol for ${matchedDe.universityName}:\n1. APS Certificate: ${matchedDe.apsCertificateRequired || 'Mandatory for Indian Applicants'}\n2. HZB Requirement: ${matchedDe.hzb}\n3. Studienkolleg: ${matchedDe.studienkollegRequired}\n4. Application Channel: ${matchedDe.uniAssistApplication}`,
+            writingRequirements: matchedDe.germanLanguageRequirement,
+            careerOutcomes: '18-Month Post-Study Job Seeker Visa with EU Blue Card accelerated pathway',
+            expectedSalary: '€55,000–€82,000/yr starting salary (€90,000+ for STEM & Tech)',
+            roi: 'Exceptional ROI (€0 tuition, low cost of living, world-renowned German engineering hub)',
+            scholarships: 'DAAD Scholarships, Deutschlandstipendium (€300/mo), Erasmus+ grants',
+            type: matchedDe.universityType || 'Public',
+            ncNumerusClausus: matchedDe.ncNumerusClausus,
+            ncGradeCutoff: matchedDe.ncGradeCutoff,
+            hzb: matchedDe.hzb,
+            studienkollegRequired: matchedDe.studienkollegRequired,
+            apsCertificateRequired: matchedDe.apsCertificateRequired,
+            uniAssistApplication: matchedDe.uniAssistApplication,
+            hochschulstartApplication: matchedDe.hochschulstartApplication,
+            semesterContribution: matchedDe.semesterContribution,
+            semesterTicket: matchedDe.semesterTicket,
+            bwTuitionFee: matchedDe.bwTuitionFee,
+            ectsRequirements: matchedDe.ectsRequirements,
+            germanLanguageRequirement: matchedDe.germanLanguageRequirement,
+            testDaF: matchedDe.testDaF,
+            dsh: matchedDe.dsh,
+            blockedAccountProofOfFunds: matchedDe.blockedAccountProofOfFunds,
+            winterSemester: matchedDe.winterSemester,
+            summerSemester: matchedDe.summerSemester,
+            indianQualificationEquivalency: matchedDe.indianQualificationEquivalency,
+            anabinRecognition: matchedDe.anabinRecognition,
+            countrySpecificRequirements: matchedDe.countrySpecificRequirements,
           };
-
-          if (cursor) {
-            queryPayload.query.cursorPaging = { cursor, limit: 1000 };
-            delete queryPayload.query.paging;
-          }
-
-          const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(queryPayload),
-          });
-
-          if (!res.ok) break;
-
-          const data = await res.json();
-          const items = data.dataItems || [];
-
-          for (const item of items) {
-            const d = item.data || item;
-            const generatedSlug = (d.university_name || 'university')
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/^-|-$/g, '');
-
-            if (
-              generatedSlug === slug ||
-              d.university_id === slug ||
-              d._id === slug ||
-              item.id === slug ||
-              (d.slug && d.slug === slug)
-            ) {
-              found = d;
-              found.id = d._id || item.id;
-              break;
-            }
-          }
-
-          if (found) break;
-
-          if (data.pagingMetadata?.hasNext && data.pagingMetadata?.cursors?.next) {
-            cursor = data.pagingMetadata.cursors.next;
-          } else {
-            hasMore = false;
-          }
         }
-      } catch (wixErr) {
-        console.warn('Wix API single fetch notice:', wixErr);
+      } catch (err) {
+        console.warn('Wix Germany slug lookup notice:', err);
       }
     }
 
-    // Check fallback database if not found via Wix
-    if (!found && FALLBACK_UNIVERSITIES[slug]) {
-      found = FALLBACK_UNIVERSITIES[slug];
+
+    // 3. Check Wix US Universities (Import2)
+    if (!found) {
+      try {
+        const wixApiKey = process.env.WIX_API_KEY;
+        const wixSiteId = process.env.WIX_SITE_ID;
+        if (wixApiKey && wixSiteId) {
+          const words = cleanSlug.split('-').filter((w) => w.length > 2);
+          const searchTerm = words.slice(0, 2).join(' ');
+
+          const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+            method: 'POST',
+            headers: {
+              'Authorization': wixApiKey,
+              'wix-site-id': wixSiteId,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              dataCollectionId: 'Import2',
+              query: {
+                filter: {
+                  university_name: { '$contains': searchTerm },
+                },
+                paging: { limit: 10 },
+              },
+            }),
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const items = data.dataItems || [];
+            const matched = items.find((item: any) => {
+              const d = item.data || item;
+              const s = toCleanSlug(d.university_name || '');
+              return s === cleanSlug || s.includes(cleanSlug) || cleanSlug.includes(s);
+            });
+
+            if (matched) {
+              const d = matched.data || matched;
+              const majorsRaw = d.popularMajors || '';
+              const majorsArray = majorsRaw
+                .split(',')
+                .map((m: string) => m.trim())
+                .filter(Boolean);
+              const { bannerImage, bannerAlt } = extractBannerAndAlt(d);
+
+              found = {
+                id: d._id || matched.id,
+                universityId: d.university_id || cleanSlug,
+                name: d.university_name,
+                country: d.country || 'United States',
+                countryCode: d.country_code || 'US',
+                state: d.state_province || '',
+                province: d.state_province || '',
+                city: d.city || '',
+                qsRanking: d.qsRanking || 'Top 100',
+                tuition: d.tution || '$35,000/yr',
+                livingCosts: d.livingCosts || '$1,800/mo',
+                acceptanceRate: d.acceptanceRate || 'N/A',
+                website: d.official_website || '',
+                bannerImage,
+                bannerAlt,
+                popularMajors: majorsArray.length > 0 ? majorsArray.slice(0, 8) : ['Computer Science', 'Business', 'Engineering'],
+                allMajors: majorsArray,
+                slug: cleanSlug,
+                type: 'Public',
+                careerOutcomes: d.careerOutcomes || d.career_outcomes || '92% employment within 6 months',
+                expectedSalary: d.expectedSalary || d.expected_salary || '$75,000–$110,000/yr',
+                roi: d.roi || 'High ROI',
+                scholarships: d.scholarships || 'Merit and Need-Based Scholarships Available',
+                avgNeedBasedGrant: d.avgNeedBasedGrant || '$24,500/yr Avg',
+                avgGpa: d.avgGpa || '3.6+',
+                satScore: d.satScore || 'Optional / 1350+',
+              };
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Wix US slug lookup notice:', err);
+      }
     }
+
+    // 4. Fallback database
+    if (!found && FALLBACK_UNIVERSITIES[cleanSlug]) {
+      found = FALLBACK_UNIVERSITIES[cleanSlug];
+    }
+
 
     // If still not found, return generic matching template instead of error
     if (!found) {
@@ -380,12 +550,14 @@ export async function GET(
     const { bannerImage, bannerAlt } = extractBannerAndAlt(found);
 
     const university = {
+      ...found,
       id: found.id || found._id || slug,
       universityId: found.university_id || found.universityId || slug,
       name: found.university_name || found.name || 'University',
       country: found.country || 'Global Partner',
       countryCode: found.country_code || found.countryCode || 'US',
-      state: found.state_province || found.state || '',
+      state: found.state_province || found.state || found.province || '',
+      city: found.city || '',
       qsRanking: found.qsRanking || 'Top 100',
       tuition: found.tution || found.tuition || '$35,000/yr',
       livingCosts: found.livingCosts || '$1,800/mo',

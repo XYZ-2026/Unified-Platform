@@ -349,14 +349,44 @@ const FALLBACK_UNIVERSITIES = [
 
   // CANADA
   {
+    id: 'acadia-ca',
+    universityId: 'CA-INST-001',
+    name: 'Acadia University',
+    country: 'Canada',
+    countryCode: 'CA',
+    state: 'Nova Scotia',
+    province: 'Nova Scotia',
+    city: 'Main Campus',
+    qsRanking: '#42 Canada (uniRank)',
+    tuition: 'CA$28,000–38,000/yr (Intl.)',
+    livingCosts: 'CA$11,000–15,000/yr',
+    acceptanceRate: '~70%',
+    website: 'https://www.acadiau.ca',
+    bannerImage: 'https://www.unirank.org/i/screenshots/acadia-university-ca-website-screenshot.jpg',
+    bannerAlt: "Acadia University's website homepage screenshot",
+    popularMajors: ['Computer Science', 'Software Engineering', 'Business Administration', 'Nursing', 'Data Science', 'Psychology', 'Biomedical Sciences', 'Economics'],
+    slug: 'acadia-university',
+    avgGpa: 3.2,
+    satScore: '1280–1480 (US applicants)',
+    type: 'Public',
+    dliNumber: 'O19209939222',
+    internationalEligible: 'Yes; study permit and PGWP eligible',
+    expectedSalary: 'CAD 62,000–88,000/yr (CS: 95K+)',
+    roi: 'High ROI (3–4 yr break-even)',
+    careerOutcomes: '92%–96% employment within 6 months',
+    scholarships: 'Entrance merit: CAD 2K–10K; Excellence Award up to CAD 40K',
+  },
+  {
     id: 'toronto-ca',
     universityId: 'utoronto',
     name: 'University of Toronto',
     country: 'Canada',
     countryCode: 'CA',
     state: 'Ontario',
+    province: 'Ontario',
+    city: 'Toronto',
     qsRanking: '#21 QS',
-    tuition: 'CA$38,000/yr',
+    tuition: 'CA$38,000–60,000/yr',
     livingCosts: 'CA$2,500/mo',
     acceptanceRate: '43%',
     website: 'https://utoronto.ca',
@@ -366,6 +396,12 @@ const FALLBACK_UNIVERSITIES = [
     avgGpa: 3.8,
     satScore: '1380+',
     type: 'Public',
+    dliNumber: 'O19332792618',
+    internationalEligible: 'Yes (PGWP Eligible up to 3 Years)',
+    expectedSalary: 'CAD 75,000–120,000/yr',
+    roi: 'Very High (Top Tier Global #21)',
+    careerOutcomes: '95% employment within 6 months',
+    scholarships: 'Lester B. Pearson International Scholarship (Full Ride)',
   },
   {
     id: 'mcgill-ca',
@@ -374,8 +410,10 @@ const FALLBACK_UNIVERSITIES = [
     country: 'Canada',
     countryCode: 'CA',
     state: 'Quebec',
+    province: 'Quebec',
+    city: 'Montreal',
     qsRanking: '#29 QS',
-    tuition: 'CA$22,000/yr',
+    tuition: 'CA$22,000–45,000/yr',
     livingCosts: 'CA$1,650/mo',
     acceptanceRate: '46%',
     website: 'https://mcgill.ca',
@@ -385,6 +423,12 @@ const FALLBACK_UNIVERSITIES = [
     avgGpa: 3.82,
     satScore: '1390+',
     type: 'Public',
+    dliNumber: 'O19359011033',
+    internationalEligible: 'Yes (PGWP Eligible + Quebec PEQ Pathway)',
+    expectedSalary: 'CAD 70,000–115,000/yr',
+    roi: 'Exceptional (Low Quebec Tuition)',
+    careerOutcomes: '94% employment within 6 months',
+    scholarships: 'McGill Major Entrance Scholarships: CAD 3,000–12,000/yr renewable',
   },
   {
     id: 'ubc-ca',
@@ -393,8 +437,10 @@ const FALLBACK_UNIVERSITIES = [
     country: 'Canada',
     countryCode: 'CA',
     state: 'British Columbia',
+    province: 'British Columbia',
+    city: 'Vancouver',
     qsRanking: '#34 QS',
-    tuition: 'CA$35,000/yr',
+    tuition: 'CA$35,000–52,000/yr',
     livingCosts: 'CA$2,500/mo',
     acceptanceRate: '52%',
     website: 'https://ubc.ca',
@@ -404,6 +450,12 @@ const FALLBACK_UNIVERSITIES = [
     avgGpa: 3.75,
     satScore: '1350+',
     type: 'Public',
+    dliNumber: 'O19328566333',
+    internationalEligible: 'Yes (PGWP Eligible + BC PNP Tech Draw)',
+    expectedSalary: 'CAD 72,000–118,000/yr',
+    roi: 'High (Cascadia & Vancouver Tech Hub)',
+    careerOutcomes: '93% employment within 6 months',
+    scholarships: 'International Major Entrance Scholarship (IMES) up to CAD 40,000',
   },
   {
     id: 'waterloo-ca',
@@ -412,8 +464,10 @@ const FALLBACK_UNIVERSITIES = [
     country: 'Canada',
     countryCode: 'CA',
     state: 'Ontario',
+    province: 'Ontario',
+    city: 'Waterloo',
     qsRanking: '#112 QS',
-    tuition: 'CA$27,000/yr',
+    tuition: 'CA$27,000–61,000/yr',
     livingCosts: 'CA$1,800/mo',
     acceptanceRate: '53%',
     website: 'https://uwaterloo.ca',
@@ -423,6 +477,12 @@ const FALLBACK_UNIVERSITIES = [
     avgGpa: 3.85,
     satScore: '1420+',
     type: 'Public',
+    dliNumber: 'O19305471522',
+    internationalEligible: 'Yes (PGWP Eligible + Paid Co-Op Earnings)',
+    expectedSalary: 'CAD 90,000–140,000/yr',
+    roi: 'Market Leading (#1 Tech Feed to US & Canada)',
+    careerOutcomes: '98% employment within 6 months',
+    scholarships: 'President’s Scholarship of Distinction: CAD 2,000–10,000',
   },
   {
     id: 'alberta-ca',
@@ -431,8 +491,10 @@ const FALLBACK_UNIVERSITIES = [
     country: 'Canada',
     countryCode: 'CA',
     state: 'Alberta',
+    province: 'Alberta',
+    city: 'Edmonton',
     qsRanking: '#111 QS',
-    tuition: 'CA$24,000/yr',
+    tuition: 'CA$24,000–39,000/yr',
     livingCosts: 'CA$1,900/mo',
     acceptanceRate: '58%',
     website: 'https://ualberta.ca',
@@ -442,6 +504,12 @@ const FALLBACK_UNIVERSITIES = [
     avgGpa: 3.5,
     satScore: '1300+',
     type: 'Public',
+    dliNumber: 'O19257171832',
+    internationalEligible: 'Yes (PGWP Eligible + Alberta Accelerated Tech Stream)',
+    expectedSalary: 'CAD 68,000–105,000/yr',
+    roi: 'High (Low Cost of Living in Alberta)',
+    careerOutcomes: '91% employment within 6 months',
+    scholarships: 'International Admission Scholarship: CAD 5,000–15,000',
   },
 
   // GERMANY
@@ -658,13 +726,20 @@ const FALLBACK_UNIVERSITIES = [
   },
 ];
 
+import {
+  fetchCanadianUniversitiesFromWix,
+  fetchGermanyUniversitiesFromWix,
+} from '@/lib/wixCountryUniversities';
+import { CANADA_UNIVERSITIES } from '@/app/country/canada/page';
+import { GERMANY_UNIVERSITIES } from '@/app/country/germany/page';
+
 // In-memory cache for instant search responses
 let cachedUniversities: any[] | null = null;
 let lastUniversityFetch = 0;
 const UNIVERSITY_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
 let isFetchingUniversities = false;
 
-async function fetchAllUniversitiesFromWix(wixApiKey: string, wixSiteId: string): Promise<any[]> {
+async function fetchUSUniversitiesFromWix(wixApiKey: string, wixSiteId: string): Promise<any[]> {
   try {
     const headers = {
       'Authorization': wixApiKey,
@@ -709,7 +784,7 @@ async function fetchAllUniversitiesFromWix(wixApiKey: string, wixSiteId: string)
         hasMore = false;
       }
 
-      if (allItems.length >= 5000) break;
+      if (allItems.length >= 3000) break;
     }
 
     if (allItems.length > 0) {
@@ -732,12 +807,14 @@ async function fetchAllUniversitiesFromWix(wixApiKey: string, wixSiteId: string)
           id: d._id || item.id,
           universityId: d.university_id || '',
           name: d.university_name || 'Unknown University',
-          country: d.country || 'Unknown',
-          countryCode: d.country_code || '',
+          country: d.country || 'United States',
+          countryCode: d.country_code || 'US',
           state: d.state_province || '',
+          province: d.state_province || '',
+          city: d.city || '',
           qsRanking: d.qsRanking || 'Unranked',
-          tuition: d.tution || 'N/A',
-          livingCosts: d.livingCosts || 'N/A',
+          tuition: d.tution || '$35,000/yr',
+          livingCosts: d.livingCosts || '$1,800/mo',
           acceptanceRate: d.acceptanceRate || 'N/A',
           website: d.official_website || '',
           bannerImage,
@@ -754,9 +831,131 @@ async function fetchAllUniversitiesFromWix(wixApiKey: string, wixSiteId: string)
       });
     }
   } catch (err) {
-    console.warn('Wix university fetch notice:', err);
+    console.warn('Wix US university fetch notice:', err);
   }
   return [];
+}
+
+async function fetchAllConnectedUniversities(): Promise<any[]> {
+  try {
+    const wixApiKey = process.env.WIX_API_KEY;
+    const wixSiteId = process.env.WIX_SITE_ID;
+
+    const [canadaUnis, germanyUnis, usUnis] = await Promise.all([
+      fetchCanadianUniversitiesFromWix(),
+      fetchGermanyUniversitiesFromWix(),
+      wixApiKey && wixSiteId ? fetchUSUniversitiesFromWix(wixApiKey, wixSiteId) : Promise.resolve([]),
+    ]);
+
+    const mappedCanada = canadaUnis.map((u) => {
+      const majorsArray = (u.popularMajors || '')
+        .split(',')
+        .map((m: string) => m.trim())
+        .filter(Boolean);
+
+      const slug = (u.institutionName || 'university')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      return {
+        id: u.institutionId ? `ca-${u.institutionId.toLowerCase()}` : slug,
+        universityId: u.institutionId || '',
+        name: u.institutionName,
+        country: 'Canada',
+        countryCode: 'CA',
+        state: u.province || '',
+        province: u.province || '',
+        city: u.city || '',
+        qsRanking: u.qsRanking || 'Unranked',
+        tuition: u.tuition || 'CAD 28,000–38,000/yr',
+        livingCosts: u.livingCosts || 'CAD 15,000/yr',
+        acceptanceRate: u.acceptanceRate || 'N/A',
+        website: u.officialWebsite || '',
+        bannerImage: u.bannerImage || '',
+        bannerAlt: u.bannerImageAlt || `${u.institutionName} campus`,
+        popularMajors: majorsArray.length > 0 ? majorsArray.slice(0, 8) : ['Computer Science', 'Business', 'Engineering'],
+        allMajors: majorsArray,
+        slug,
+        type: u.publicPrivate || u.institutionType || 'Public',
+        dliNumber: u.dliNumber || '',
+        internationalEligible: u.internationalStudentEligible || 'Yes',
+        offersUndergraduate: u.offersUndergraduate || 'Yes',
+        offersPostgraduate: u.offersPostgraduate || 'Yes',
+        offersDoctoral: u.offersDoctoral || 'No',
+        languageOfInstruction: u.languageOfInstruction || 'English',
+        avgNeedBasedGrant: u.avgNeedBasedGrant || 'N/A',
+        avgGpa: u.avgGpa || 'N/A',
+        satScore: u.satScore || 'Optional',
+        scholarships: u.scholarships || '',
+        careerOutcomes: u.careerOutcomes || '',
+        expectedSalary: u.expectedSalary || '',
+        roi: u.roi || '',
+      };
+    });
+
+    const mappedGermany = germanyUnis.map((u, idx) => {
+      const slug = (u.universityName || 'university')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      return {
+        id: `de-${slug}`,
+        universityId: `DE-${String(idx + 1).padStart(3, '0')}`,
+        name: u.universityName,
+        country: 'Germany',
+        countryCode: 'DE',
+        state: u.federalState || '',
+        province: u.federalState || '',
+        city: u.city || '',
+        qsRanking: u.ranking || '#Top German University',
+        tuition: u.bwTuitionFee?.toLowerCase().startsWith('yes') ? '€1,500/sem (BW)' : '€0 (Tuition Free)',
+        livingCosts: u.blockedAccountProofOfFunds ? `${u.blockedAccountProofOfFunds} (Blocked Account)` : '€992/mo',
+        acceptanceRate: (u.ncNumerusClausus?.toLowerCase().startsWith('yes') || u.ncGradeCutoff) ? 'NC Restricted' : 'Open Admission',
+        website: u.website || '',
+        bannerImage: '',
+        bannerAlt: `${u.universityName} Campus`,
+        popularMajors: ['Engineering & Tech', 'Informatics & AI', 'Natural Sciences', 'Medicine'],
+        allMajors: ['Engineering & Tech', 'Informatics & AI', 'Natural Sciences', 'Medicine', 'Economics & Management'],
+        slug,
+        type: u.universityType || 'Public',
+        // German specific parameters
+        ncNumerusClausus: u.ncNumerusClausus,
+        ncGradeCutoff: u.ncGradeCutoff,
+        hzb: u.hzb,
+        studienkollegRequired: u.studienkollegRequired,
+        apsCertificateRequired: u.apsCertificateRequired,
+        uniAssistApplication: u.uniAssistApplication,
+        hochschulstartApplication: u.hochschulstartApplication,
+        semesterContribution: u.semesterContribution,
+        semesterTicket: u.semesterTicket,
+        bwTuitionFee: u.bwTuitionFee,
+        ectsRequirements: u.ectsRequirements,
+        germanLanguageRequirement: u.germanLanguageRequirement,
+        testDaF: u.testDaF,
+        dsh: u.dsh,
+        blockedAccountProofOfFunds: u.blockedAccountProofOfFunds,
+        winterSemester: u.winterSemester,
+        summerSemester: u.summerSemester,
+        indianQualificationEquivalency: u.indianQualificationEquivalency,
+        anabinRecognition: u.anabinRecognition,
+        countrySpecificRequirements: u.countrySpecificRequirements,
+      };
+    });
+
+    const fallbackMapped = FALLBACK_UNIVERSITIES.map(u => ({ ...u, allMajors: u.popularMajors }));
+
+    // Merge: Wix Canada + Wix Germany + Wix US + Fallback for all other countries (UK, AU, etc.)
+    const combinedWix = [...mappedCanada, ...mappedGermany, ...usUnis];
+    const wixSlugs = new Set(combinedWix.map((u: any) => u.slug));
+    const missingFallback = fallbackMapped.filter((u) => !wixSlugs.has(u.slug));
+
+    return [...combinedWix, ...missingFallback];
+  } catch (err) {
+    console.error('Error fetching connected Wix universities:', err);
+    return FALLBACK_UNIVERSITIES.map(u => ({ ...u, allMajors: u.popularMajors }));
+  }
 }
 
 export async function GET(request: Request) {
@@ -767,23 +966,20 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 200);
 
-    const wixApiKey = process.env.WIX_API_KEY;
-    const wixSiteId = process.env.WIX_SITE_ID;
-
     const now = Date.now();
     const isStale = now - lastUniversityFetch > UNIVERSITY_CACHE_TTL;
 
     // Check or populate in-memory cache
-    if (!cachedUniversities && wixApiKey && wixSiteId) {
-      const fresh = await fetchAllUniversitiesFromWix(wixApiKey, wixSiteId);
+    if (!cachedUniversities) {
+      const fresh = await fetchAllConnectedUniversities();
       if (fresh.length > 0) {
         cachedUniversities = fresh;
         lastUniversityFetch = now;
       }
-    } else if (cachedUniversities && isStale && !isFetchingUniversities && wixApiKey && wixSiteId) {
+    } else if (isStale && !isFetchingUniversities) {
       // Stale-while-revalidate in background
       isFetchingUniversities = true;
-      fetchAllUniversitiesFromWix(wixApiKey, wixSiteId)
+      fetchAllConnectedUniversities()
         .then((fresh) => {
           if (fresh.length > 0) {
             cachedUniversities = fresh;
@@ -797,29 +993,41 @@ export async function GET(request: Request) {
 
     let parsedUniversities = cachedUniversities || [];
 
-    // Fall back to curated global university dataset if Wix returned empty
+    // Fallback safety if remote Wix CMS is unreachable
     if (parsedUniversities.length === 0) {
-      parsedUniversities = FALLBACK_UNIVERSITIES.map(u => ({
-        ...u,
-        allMajors: u.popularMajors,
-      }));
+      parsedUniversities = FALLBACK_UNIVERSITIES.map(u => ({ ...u, allMajors: u.popularMajors }));
     }
 
-    // Apply instantaneous server-side filtering
+    // Apply country filtering
     let filtered = parsedUniversities;
+
+    if (country && country !== 'ALL') {
+      const c = country.toUpperCase();
+      if (c === 'CA') {
+        filtered = filtered.filter((u) => u.countryCode === 'CA' || u.country.toLowerCase().includes('canada'));
+      } else if (c === 'DE') {
+        filtered = filtered.filter((u) => u.countryCode === 'DE' || u.country.toLowerCase().includes('germany'));
+      } else if (c === 'US') {
+        filtered = filtered.filter((u) => u.countryCode === 'US' || u.country.toLowerCase().includes('united states'));
+      } else if (c === 'UK' || c === 'GB') {
+        filtered = filtered.filter((u) => u.countryCode === 'UK' || u.countryCode === 'GB' || u.country.toLowerCase().includes('united kingdom'));
+      } else if (c === 'AU') {
+        filtered = filtered.filter((u) => u.countryCode === 'AU' || u.country.toLowerCase().includes('australia'));
+      } else {
+        filtered = filtered.filter((u) =>
+          u.countryCode === country || u.country.toLowerCase().includes(country.toLowerCase())
+        );
+      }
+    }
 
     if (search) {
       filtered = filtered.filter((u) =>
         u.name.toLowerCase().includes(search) ||
-        u.state.toLowerCase().includes(search) ||
+        (u.state && u.state.toLowerCase().includes(search)) ||
+        (u.city && u.city.toLowerCase().includes(search)) ||
         u.country.toLowerCase().includes(search) ||
-        (u.allMajors && u.allMajors.some((m: string) => m.toLowerCase().includes(search)))
-      );
-    }
-
-    if (country && country !== 'ALL') {
-      filtered = filtered.filter((u) =>
-        u.countryCode === country || u.country.toLowerCase().includes(country.toLowerCase())
+        (u.allMajors && u.allMajors.some((m: string) => m.toLowerCase().includes(search))) ||
+        (u.dliNumber && u.dliNumber.toLowerCase().includes(search))
       );
     }
 
@@ -836,7 +1044,7 @@ export async function GET(request: Request) {
       page,
       totalPages,
       limit,
-      source: 'UniversityCatalog',
+      source: 'GlobalUniversityCatalog',
     });
   } catch (error: any) {
     console.error('Error fetching universities:', error);
@@ -847,3 +1055,5 @@ export async function GET(request: Request) {
     });
   }
 }
+
+

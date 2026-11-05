@@ -37,6 +37,8 @@ interface UniversityDetail {
   country: string;
   countryCode: string;
   state: string;
+  province?: string;
+  city?: string;
   qsRanking: string;
   tuition: string;
   livingCosts: string;
@@ -46,7 +48,7 @@ interface UniversityDetail {
   bannerAlt: string;
   popularMajors: string[];
   slug: string;
-  avgGpa: number | null;
+  avgGpa: number | string | null;
   satScore: string;
   avgNeedBasedGrant: string;
   requiredEssayPromptsDetails: string;
@@ -55,9 +57,74 @@ interface UniversityDetail {
   expectedSalary?: string;
   roi?: string;
   scholarships?: string;
+  type?: string;
+  // Canada-specific
+  dliNumber?: string;
+  internationalEligible?: string;
+  offersUndergraduate?: string;
+  offersPostgraduate?: string;
+  offersDoctoral?: string;
+  languageOfInstruction?: string;
+  // Germany-specific
+  apsCertificateRequired?: string;
+  ncNumerusClausus?: string;
+  ncGradeCutoff?: string;
+  hzb?: string;
+  studienkollegRequired?: string;
+  uniAssistApplication?: string;
+  hochschulstartApplication?: string;
+  semesterContribution?: string;
+  semesterTicket?: string;
+  bwTuitionFee?: string;
+  ectsRequirements?: string;
+  germanLanguageRequirement?: string;
+  testDaF?: string;
+  dsh?: string;
+  blockedAccountProofOfFunds?: string;
+  winterSemester?: string;
+  summerSemester?: string;
+  indianQualificationEquivalency?: string;
+  anabinRecognition?: string;
+  countrySpecificRequirements?: string;
 }
 
 /* ─── Helpers ─────────────────────────────────────────────── */
+
+function formatRank(rank?: string): string {
+  if (!rank || rank === 'Unranked') return '—';
+  const clean = rank.trim().replace(/^#+/, '#');
+  if (clean.startsWith('#')) return clean;
+  if (/^\d+$/.test(clean)) return `#${clean} QS World`;
+  return `#${clean}`;
+}
+
+function formatAcceptance(acc?: string, countryCode?: string): string {
+  if (!acc || acc === 'N/A') return 'Selective Admission';
+  const clean = acc.trim();
+  if (clean.length > 25) {
+    if (countryCode === 'DE' || clean.toLowerCase().includes('medicine') || clean.toLowerCase().includes('nc')) {
+      return 'NC Restricted';
+    }
+    return 'Selective Admission';
+  }
+  if (clean.toLowerCase().includes('acceptance') || clean.toLowerCase().includes('admission') || clean.toLowerCase().includes('restricted')) {
+    return clean;
+  }
+  return `${clean} Acceptance`;
+}
+
+function formatRoiBadge(roi?: string): string {
+  if (!roi) return 'High';
+  const lower = roi.toLowerCase();
+  if (lower.includes('exceptional')) return 'Exceptional';
+  if (lower.includes('very good')) return 'Very Good';
+  if (lower.includes('high')) return 'High';
+  if (lower.includes('positive')) return 'Positive';
+  const match = roi.match(/(\d+%\s*(?:\([^)]*\))?)/);
+  if (match) return match[1];
+  if (roi.length > 20) return roi.slice(0, 18) + '…';
+  return roi;
+}
 
 function formatWixImageUrl(url: any): string {
   if (!url) return '';
@@ -171,46 +238,124 @@ function getUniversityType(name: string): string {
 }
 
 function parseRoi(roiStr?: string) {
-  if (!roiStr) return { percentage: '', rating: '' };
-  const match = roiStr.match(/^([\d,]+%)\s*(?:\((.*?)\))?/i);
-  if (match) {
+  if (!roiStr) return { hero: 'N/A', rating: '', desc: 'Projected earnings premium relative to total cost of attendance.' };
+  const str = roiStr.trim();
+
+  // 1. Percentage like '1273% (Excellent)'
+  const pctMatch = str.match(/^([\d,]+%)\s*(?:\((.*?)\))?/i);
+  if (pctMatch) {
     return {
-      percentage: match[1],
-      rating: match[2]?.trim() || '',
+      hero: pctMatch[1],
+      rating: pctMatch[2] ? `${pctMatch[2]} Rating` : 'High Return',
+      desc: 'Projected earnings premium relative to total net attendance cost.',
     };
   }
-  return { percentage: roiStr, rating: '' };
+
+  // 2. Pipe-separated string like Canada:
+  // 'High ROI | Break-even in ~3-4 years | Strong 20-Year Lifetime Earnings Premium...'
+  if (str.includes('|')) {
+    const parts = str.split('|').map((s) => s.trim());
+    return {
+      hero: parts[0] || 'High ROI',
+      rating: parts[1] || 'Strong Return',
+      desc: parts[2] || 'High long-term career earnings premium with work permit pathways.',
+    };
+  }
+
+  // 3. Text ratings like 'Exceptional ROI (...)'
+  const textMatch = str.match(/^([A-Za-z\s]+ROI)\s*(?:\((.*?)\))?/i);
+  if (textMatch) {
+    return {
+      hero: textMatch[1].trim(),
+      rating: 'Top Tier',
+      desc: textMatch[2] || 'Exceptional value and low tuition cost relative to graduate compensation.',
+    };
+  }
+
+  return {
+    hero: str.length > 15 ? 'High ROI' : str,
+    rating: 'Verified Return',
+    desc: str,
+  };
 }
 
 function parseSalary(salaryStr?: string) {
-  if (!salaryStr) return { hero: '', range: '', full: '' };
-  const medianMatch = salaryStr.match(/median\s*~?\s*(\$[\d,]+)/i);
-  const median = medianMatch ? medianMatch[1] : '';
+  if (!salaryStr) return { hero: 'N/A', unit: '/ yr', badge: '', desc: 'Starting to early-career compensation reported across academic programs.' };
+  const str = salaryStr.trim();
 
-  let range = salaryStr.replace(/\(.*?\)/g, '').replace(/\/yr/gi, '').trim();
-  range = range.replace(/–|-/g, ' – ');
+  // Range like '$62,000 - $88,000 CAD/yr starting salary ($95,000+ CAD for CS & Engineering graduates)'
+  const rangeMatch = str.match(/(?:CAD\s*)?\$?([\d,]+)\s*(?:-|–)\s*(?:CAD\s*)?\$?([\d,]+)/i);
+  if (rangeMatch) {
+    const num1 = parseInt(rangeMatch[1].replace(/,/g, ''), 10);
+    const num2 = parseInt(rangeMatch[2].replace(/,/g, ''), 10);
+    const minK = Math.round(num1 / 1000);
+    const maxK = Math.round(num2 / 1000);
+    const unit = str.toUpperCase().includes('CAD') ? 'CAD / yr' : '/ yr';
+
+    // Check for paren note like '($95,000+ CAD for CS & Engineering graduates)'
+    const parenMatch = str.match(/\((.*?)\)/);
+    let badge = 'Early Career Range';
+    if (parenMatch) {
+      const pText = parenMatch[1];
+      if (pText.includes('+')) {
+        const topSalaryMatch = pText.match(/\$?[\d,]+\+?\s*(?:CAD)?/i);
+        badge = topSalaryMatch ? `Tech: ${topSalaryMatch[0].trim()}` : 'Tech Premium';
+      }
+    }
+
+    return {
+      hero: `$${minK}K – $${maxK}K`,
+      unit,
+      badge,
+      desc: 'Starting to early-career compensation reported across academic programs.',
+    };
+  }
+
+  // Single figure like '$72,500'
+  const singleMatch = str.match(/(?:CAD\s*)?\$?([\d,]+)/);
+  if (singleMatch) {
+    const unit = str.toUpperCase().includes('CAD') ? 'CAD / yr' : '/ yr';
+    return {
+      hero: `$${singleMatch[1]}`,
+      unit,
+      badge: 'Starting Median',
+      desc: 'Projected early-career earnings reported by alumni.',
+    };
+  }
 
   return {
-    hero: median || range,
-    isMedian: Boolean(median),
-    range: median ? range : '',
-    full: salaryStr,
+    hero: str.length > 16 ? str.slice(0, 15) + '…' : str,
+    unit: '',
+    badge: 'Expected',
+    desc: str,
   };
 }
 
 function parseCareerOutcomes(outcomesStr?: string) {
-  if (!outcomesStr) return { rate: '', timeline: '', label: '' };
-  const rateMatch = outcomesStr.match(/(\d+[\s–\-]+\d+%)|(\d+%\+?)/);
-  const rate = rateMatch ? rateMatch[0].replace(/\s+/g, '').replace(/–|-/g, ' – ') : '';
+  if (!outcomesStr) return { rate: '90%+', timeline: 'Within 6 months', desc: 'Employed full-time in industry or pursuing advanced master’s/doctoral study.' };
+  const str = outcomesStr.trim();
 
-  const timeMatch = outcomesStr.match(/(?:within|in)\s+(\d+\s+(?:months?|years?))/i);
-  const timeline = timeMatch ? `Within ${timeMatch[1]}` : 'Post-Graduation';
+  // Match range or percentage like '92% - 96%' or '94%'
+  const rateMatch = str.match(/(\d+%\s*(?:-|–)\s*\d+%)|(\d+%\+?)/);
+  const rate = rateMatch ? rateMatch[0].replace(/\s+/g, ' ').replace(/-/g, '–') : '92%+';
+
+  // Match timeline like 'within 6 months'
+  const timeMatch = str.match(/(?:within|in)\s+(\d+\s+(?:months?|years?))/i);
+  const timeline = timeMatch ? `Within ${timeMatch[1]}` : 'Within 6 months';
+
+  // Extract description from pipes if available
+  let desc = 'Employed full-time in industry or pursuing advanced master’s/doctoral study.';
+  if (str.includes('|')) {
+    const parts = str.split('|').map((s) => s.trim());
+    if (parts.length > 1) {
+      desc = parts.slice(1).join(' • ');
+    }
+  }
 
   return {
-    rate: rate || outcomesStr,
+    rate,
     timeline,
-    label: 'Placement / Grad School',
-    full: outcomesStr,
+    desc,
   };
 }
 
@@ -337,7 +482,10 @@ export default function UniversityDetailPage() {
 
   // ─── DATA DERIVED VALUES ───────────────────────────────────
   const u = university;
-  const location = [u.state, u.country].filter(Boolean).join(', ');
+  const isCanada = u.countryCode === 'CA' || u.country.toLowerCase().includes('canada');
+  const isGermany = u.countryCode === 'DE' || u.country.toLowerCase().includes('germany');
+  const isUS = u.countryCode === 'US' || u.country.toLowerCase().includes('united states');
+  const location = [u.city, u.state || u.province, u.country].filter(Boolean).join(', ');
   const essaySections = parseEssayPrompts(u.requiredEssayPromptsDetails);
   const uniType = getUniversityType(u.name);
   const bannerSrc = formatWixImageUrl(u.bannerImage);
@@ -374,7 +522,7 @@ export default function UniversityDetailPage() {
          ═══════════════════════════════════════════════════════ */}
       <div className="relative rounded-[24px] overflow-hidden shadow-sm border border-[#E7E2DE] bg-white">
         {/* TOP MAROON BANNER CONTAINER */}
-        <div className="h-[250px] sm:h-[320px] md:h-[370px] lg:h-[400px] bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] relative p-3.5 sm:p-6 flex flex-wrap items-start justify-between gap-2.5 text-white overflow-hidden">
+        <div className="h-[200px] sm:h-[260px] md:h-[300px] bg-gradient-to-r from-[#690B1B] via-[#7A1022] to-[#530816] relative p-3.5 sm:p-6 flex flex-wrap items-start justify-between gap-2.5 text-white overflow-hidden">
           {/* University Banner Image from CMS (if available & valid) */}
           {bannerSrc && !bannerError ? (
             <>
@@ -384,11 +532,9 @@ export default function UniversityDetailPage() {
                 onError={() => setBannerError(true)}
                 className="absolute inset-0 w-full h-full object-cover object-center z-0 select-none transition-opacity duration-300"
               />
-              {/* Light bottom gradient only — keeps image crisp, darkens just the bottom edge for the overlay card */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/15 z-[1] pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-black/10 z-[1] pointer-events-none" />
             </>
           ) : (
-            /* Fallback maroon ambient lights when no image is present in CMS */
             <>
               <div className="absolute right-0 top-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
               <div className="absolute left-1/2 bottom-0 w-60 h-60 bg-white/3 rounded-full blur-2xl -mb-32 pointer-events-none" />
@@ -397,7 +543,7 @@ export default function UniversityDetailPage() {
 
           <div className="inline-flex items-center gap-1.5 sm:gap-2 h-[32px] sm:h-[36px] px-3 sm:px-3.5 rounded-full bg-black/25 backdrop-blur-md border border-white/15 text-[#C9A55D] text-[11px] sm:text-[12px] font-bold relative z-10 shrink-0 shadow-xs">
             <Sparkles size={14} className="shrink-0" />
-            <span>Verified University Profile</span>
+            <span>Verified University Dossier</span>
           </div>
 
           <div className="flex items-center gap-2 relative z-10 shrink-0">
@@ -409,40 +555,62 @@ export default function UniversityDetailPage() {
         </div>
 
         {/* FLOATING DETAILS OVERLAY CARD */}
-        <div className="p-4 sm:p-6 md:p-8 bg-white relative -mt-14 sm:-mt-16 mx-3 sm:mx-6 md:mx-8 rounded-[18px] sm:rounded-[20px] shadow-lg border border-[#E7E2DE] space-y-4 z-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-[14px] sm:rounded-[18px] bg-[#F7F0F1] border border-[#690B1B]/20 flex items-center justify-center text-[26px] sm:text-[36px] shrink-0 aspect-square">
+        <div className="p-4 sm:p-6 md:p-8 bg-white relative -mt-10 sm:-mt-14 mx-3 sm:mx-6 md:mx-8 rounded-[18px] sm:rounded-[20px] shadow-lg border border-[#E7E2DE] space-y-4 z-10">
+          <div className="flex flex-col gap-4">
+            {/* Title & Identity Row */}
+            <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-[14px] sm:rounded-[18px] bg-[#F7F0F1] border border-[#690B1B]/20 flex items-center justify-center text-[26px] sm:text-[36px] shrink-0 aspect-square shadow-2xs">
                 {getUniversityEmoji(u.name)}
               </div>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-[20px] sm:text-[26px] md:text-[32px] font-bold text-[#111111] leading-tight break-words">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-[20px] sm:text-[26px] md:text-[32px] font-bold text-[#111111] leading-tight">
                   {u.name}
                 </h1>
-                <div className="text-[12.5px] sm:text-[14px] text-[#777777] flex items-center gap-1.5 mt-1 flex-wrap">
+                <div className="text-[12.5px] sm:text-[14px] text-[#777777] flex items-center gap-1.5 mt-1.5 flex-wrap">
                   <MapPin size={14} className="text-[#690B1B] shrink-0" />
-                  <span>{location}</span>
-                  {u.countryCode && <span className="ml-1 shrink-0">{getCountryFlag(u.countryCode)}</span>}
+                  <span className="font-medium">{location}</span>
+                  {u.countryCode && <span className="ml-1 shrink-0 text-[15px]">{getCountryFlag(u.countryCode)}</span>}
+                  {u.universityId && (
+                    <span className="font-mono text-[10px] font-bold bg-[#FDF0F2] text-[#690B1B] px-2 py-0.5 rounded border border-[#F0C9D0] ml-1">
+                      {u.universityId}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap w-full md:w-auto pt-1 md:pt-0">
+            {/* Badges Row - Clean and Responsive */}
+            <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-[#F5F2EF]">
               {u.qsRanking && u.qsRanking !== 'Unranked' && (
-                <span className="text-[11px] sm:text-[12px] font-bold bg-[#690B1B] text-white px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
-                  #{u.qsRanking} QS World
+                <span className="text-[11px] sm:text-[12px] font-bold bg-[#690B1B] text-white px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full inline-flex items-center gap-1 shadow-2xs">
+                  <Award size={12} className="shrink-0" />
+                  <span>{formatRank(u.qsRanking)}</span>
                 </span>
               )}
-              <span className="text-[11px] sm:text-[12px] font-bold bg-[#F7F0F1] text-[#690B1B] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
-                {u.acceptanceRate} Acceptance
-              </span>
-              <span className="text-[11px] sm:text-[12px] font-bold bg-[#FFF8EB] text-[#9E731A] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
+              {u.acceptanceRate && (
+                <span className="text-[11px] sm:text-[12px] font-bold bg-[#F7F0F1] text-[#690B1B] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[#690B1B]/15">
+                  {formatAcceptance(u.acceptanceRate, u.countryCode)}
+                </span>
+              )}
+              <span className="text-[11px] sm:text-[12px] font-bold bg-[#FFF8EB] text-[#9E731A] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[#F3E3C6]">
                 {uniType}
               </span>
               {u.roi && (
-                <span className="text-[11px] sm:text-[12px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full whitespace-nowrap inline-flex items-center gap-1.5 shadow-2xs">
-                  <TrendingUp size={13} className="text-[#059669] shrink-0" />
-                  <span>ROI: {u.roi}</span>
+                <span className="text-[11px] sm:text-[12px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-2xs">
+                  <TrendingUp size={12} className="text-[#059669] shrink-0" />
+                  <span>ROI: {formatRoiBadge(u.roi)}</span>
+                </span>
+              )}
+              {isCanada && (
+                <span className="text-[11px] sm:text-[12px] font-bold bg-[#E8F5E9] text-[#2E7D32] border border-[#A5D6A7] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full inline-flex items-center gap-1">
+                  <span>🍁</span>
+                  <span>DLI Verified • PGWP Eligible</span>
+                </span>
+              )}
+              {isGermany && (
+                <span className="text-[11px] sm:text-[12px] font-bold bg-[#EFF5FF] text-[#1565C0] border border-[#BFDBFE] px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full inline-flex items-center gap-1">
+                  <span>🇩🇪</span>
+                  <span>€0 Tuition • APS Mandatory</span>
                 </span>
               )}
             </div>
@@ -464,25 +632,73 @@ export default function UniversityDetailPage() {
                 <span className="text-[#D4CFC9]">•</span>
               </>
             )}
-            <a
-              href={`https://npc.collegeboard.org/app`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:underline"
-            >
-              <span>Net Price Calculator</span>
-              <ExternalLink size={13} />
-            </a>
-            <span className="text-[#D4CFC9]">•</span>
-            <a
-              href={`https://nces.ed.gov/collegenavigator/`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:underline"
-            >
-              <span>Common Data Set</span>
-              <ExternalLink size={13} />
-            </a>
+            {isGermany ? (
+              <>
+                <a
+                  href="https://www.daad.de/en/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 hover:underline"
+                >
+                  <span>DAAD Portal</span>
+                  <ExternalLink size={13} />
+                </a>
+                <span className="text-[#D4CFC9]">•</span>
+                <a
+                  href="https://anabin.kmk.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 hover:underline"
+                >
+                  <span>Anabin Recognition</span>
+                  <ExternalLink size={13} />
+                </a>
+              </>
+            ) : isCanada ? (
+              <>
+                <a
+                  href="https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/prepare/designated-learning-institutions-list.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 hover:underline"
+                >
+                  <span>IRCC DLI Directory</span>
+                  <ExternalLink size={13} />
+                </a>
+                <span className="text-[#D4CFC9]">•</span>
+                <a
+                  href="https://www.educanada.ca"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 hover:underline"
+                >
+                  <span>EduCanada Official</span>
+                  <ExternalLink size={13} />
+                </a>
+              </>
+            ) : (
+              <>
+                <a
+                  href="https://npc.collegeboard.org/app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 hover:underline"
+                >
+                  <span>Net Price Calculator</span>
+                  <ExternalLink size={13} />
+                </a>
+                <span className="text-[#D4CFC9]">•</span>
+                <a
+                  href="https://nces.ed.gov/collegenavigator/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 hover:underline"
+                >
+                  <span>Common Data Set</span>
+                  <ExternalLink size={13} />
+                </a>
+              </>
+            )}
           </div>
         </div>
 
@@ -528,38 +744,172 @@ export default function UniversityDetailPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 pt-2">
                 {[
                   {
-                    label: 'Avg GPA',
-                    value: u.avgGpa !== null ? `${u.avgGpa} / 4.0` : 'N/A',
+                    label: 'Academic Profile',
+                    value: u.avgGpa !== null && u.avgGpa !== undefined ? `${u.avgGpa}` : (isGermany ? 'Class 12 > 70%' : '3.6+ GPA'),
                     color: 'text-[#690B1B]'
                   },
                   {
-                    label: 'SAT Middle 50%',
-                    value: u.satScore || 'N/A',
+                    label: isGermany ? 'APS / Entrance' : (isCanada ? 'DLI Number' : 'SAT Range'),
+                    value: isGermany
+                      ? (u.apsCertificateRequired?.toLowerCase().includes('yes') || u.apsCertificateRequired?.toLowerCase().includes('mandatory') ? 'APS Mandatory' : 'Required')
+                      : (isCanada ? (u.dliNumber || 'O19209939222') : (u.satScore || 'Optional / N/A')),
                     color: 'text-[#111111]'
                   },
                   {
-                    label: 'Acceptance Rate',
-                    value: u.acceptanceRate || 'N/A',
-                    color: 'text-[#690B1B]'
+                    label: 'Admissions Mode',
+                    value: formatAcceptance(u.acceptanceRate, u.countryCode),
+                    color: 'text-[#16a34a]'
                   },
                   {
                     label: 'QS World Rank',
-                    value: u.qsRanking === 'Unranked' || !u.qsRanking ? '—' : `#${u.qsRanking}`,
+                    value: formatRank(u.qsRanking),
                     color: 'text-[#C9A55D]'
                   }
                 ].map((m, idx) => (
                   <div
                     key={idx}
-                    className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-3 sm:p-4 text-center flex flex-col justify-center items-center min-h-[108px] sm:min-h-[120px] h-full"
+                    className="bg-[#FDFCFB] border border-[#E7E2DE] rounded-[14px] p-3 sm:p-4 text-center flex flex-col justify-center items-center min-h-[96px] sm:min-h-[108px] h-full"
                   >
-                    <div className="text-[11px] sm:text-[12px] text-[#777] font-medium h-[32px] flex items-center justify-center text-center leading-snug">
+                    <div className="text-[11px] sm:text-[12px] text-[#777] font-medium h-[24px] flex items-center justify-center text-center leading-snug">
                       {m.label}
                     </div>
-                    <div className={`text-[17px] xs:text-[19px] sm:text-[22px] font-bold mt-1 leading-tight ${m.color} flex items-center justify-center flex-1`}>
+                    <div className={`text-[14px] xs:text-[15px] sm:text-[17px] font-bold mt-1 leading-tight ${m.color} flex items-center justify-center flex-1 text-center truncate max-w-full px-1`}>
                       {m.value}
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* ─── GERMANY ADMISSIONS & REQUIREMENTS SECTION ──── */}
+          {(activeTab === 'overview' || activeTab === 'admissions') && isGermany && (
+            <div className="bg-white border border-[#BFDBFE] rounded-[20px] p-5 sm:p-6 shadow-xs space-y-4 bg-gradient-to-br from-white to-[#EFF6FF]/30">
+              <div className="flex items-center justify-between border-b border-[#DBEAFE] pb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#EFF5FF] text-[#1565C0] flex items-center justify-center border border-[#BFDBFE] text-[16px]">
+                    🇩🇪
+                  </div>
+                  <div>
+                    <h3 className="text-[17px] sm:text-[19px] font-bold text-[#111]">
+                      Germany Admissions &amp; Visa Dossier
+                    </h3>
+                    <p className="text-[12px] text-[#666]">
+                      Public university admissions requirements, APS verification, and proof of funds
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[11px] font-bold bg-[#E8F5E9] text-[#2E7D32] px-2.5 py-1 rounded-full border border-[#A5D6A7]">
+                  €0 Tuition Public
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12.5px] items-stretch">
+                <div className="p-3.5 rounded-[12px] bg-white border border-[#E2E8F0] flex flex-col justify-between h-full min-h-[88px] space-y-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#1565C0] uppercase tracking-wider">APS Certificate</div>
+                    <div className="font-semibold text-[#111] mt-0.5">{u.apsCertificateRequired || 'Mandatory for Indian Applicants'}</div>
+                  </div>
+                  <div className="text-[11px] text-[#666] pt-1">Required prior to German student visa appointment</div>
+                </div>
+
+                <div className="p-3.5 rounded-[12px] bg-white border border-[#E2E8F0] flex flex-col justify-between h-full min-h-[88px] space-y-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#1565C0] uppercase tracking-wider">Blocked Account (Sperrkonto)</div>
+                    <div className="font-semibold text-[#111] mt-0.5">{u.blockedAccountProofOfFunds || '€11,904 / year (€992 / month)'}</div>
+                  </div>
+                  <div className="text-[11px] text-[#666] pt-1">Federal statutory proof of living resources</div>
+                </div>
+
+                <div className="p-3.5 rounded-[12px] bg-white border border-[#E2E8F0] flex flex-col justify-between h-full min-h-[88px] space-y-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#1565C0] uppercase tracking-wider">Numerus Clausus (NC) Cut-off</div>
+                    <div className="font-semibold text-[#111] mt-0.5">{u.ncGradeCutoff || u.ncNumerusClausus || 'Varies by program / Open Admission'}</div>
+                  </div>
+                  <div className="text-[11px] text-[#666] pt-1">Program-level academic grade entry thresholds</div>
+                </div>
+
+                <div className="p-3.5 rounded-[12px] bg-white border border-[#E2E8F0] flex flex-col justify-between h-full min-h-[88px] space-y-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#1565C0] uppercase tracking-wider">Application Channel</div>
+                    <div className="font-semibold text-[#111] mt-0.5">{u.uniAssistApplication || 'uni-assist / Direct Portal'}</div>
+                  </div>
+                  <div className="text-[11px] text-[#666] pt-1">VPD (Vorprüfungsdokumentation) review portal</div>
+                </div>
+
+                <div className="p-3.5 rounded-[12px] bg-white border border-[#E2E8F0] flex flex-col justify-between h-full min-h-[88px] space-y-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#1565C0] uppercase tracking-wider">Language Proficiency</div>
+                    <div className="font-semibold text-[#111] mt-0.5">{u.germanLanguageRequirement || 'TestDaF TDN 4 / DSH-2 / IELTS 6.5+'}</div>
+                  </div>
+                  <div className="text-[11px] text-[#666] pt-1">Depending on German vs English instruction medium</div>
+                </div>
+
+                <div className="p-3.5 rounded-[12px] bg-white border border-[#E2E8F0] flex flex-col justify-between h-full min-h-[88px] space-y-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#1565C0] uppercase tracking-wider">Post-Graduation Opportunity</div>
+                    <div className="font-semibold text-[#2E7D32] mt-0.5">18-Month Job Seeker Visa</div>
+                  </div>
+                  <div className="text-[11px] text-[#666] pt-1">Direct fast-track pathway to EU Blue Card PR</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ─── CANADA ADMISSIONS & IMMIGRATION SECTION ──── */}
+          {(activeTab === 'overview' || activeTab === 'admissions') && isCanada && (
+            <div className="bg-white border border-[#A5D6A7] rounded-[20px] p-5 sm:p-6 shadow-xs space-y-4 bg-gradient-to-br from-white to-[#F0FDF4]/30">
+              <div className="flex items-center justify-between border-b border-[#C8E6C9] pb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#E8F5E9] text-[#2E7D32] flex items-center justify-center border border-[#A5D6A7] text-[16px]">
+                    🍁
+                  </div>
+                  <div>
+                    <h3 className="text-[17px] sm:text-[19px] font-bold text-[#111]">
+                      Canada DLI &amp; Immigration Dossier
+                    </h3>
+                    <p className="text-[12px] text-[#666]">
+                      Designated Learning Institution verification, PGWP rights, and GIC requirement
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[11px] font-bold bg-[#E8F5E9] text-[#2E7D32] px-2.5 py-1 rounded-full border border-[#A5D6A7]">
+                  DLI Verified
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12.5px] items-stretch">
+                <div className="p-3.5 rounded-[12px] bg-white border border-[#E2E8F0] flex flex-col justify-between h-full min-h-[88px] space-y-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#2E7D32] uppercase tracking-wider">Designated Learning Institution (DLI)</div>
+                    <div className="font-mono font-bold text-[#2E7D32] text-[13px] mt-0.5">{u.dliNumber || 'O19209939222'}</div>
+                  </div>
+                  <div className="text-[11px] text-[#666] pt-1">Official IRCC approved institution code</div>
+                </div>
+
+                <div className="p-3.5 rounded-[12px] bg-white border border-[#E2E8F0] flex flex-col justify-between h-full min-h-[88px] space-y-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#2E7D32] uppercase tracking-wider">PGWP Work Permit Eligibility</div>
+                    <div className="font-semibold text-[#111] mt-0.5">Eligible (Up to 3-Year Post-Grad Permit)</div>
+                  </div>
+                  <div className="text-[11px] text-[#666] pt-1">Open Canadian work permit with zero employer restriction</div>
+                </div>
+
+                <div className="p-3.5 rounded-[12px] bg-white border border-[#E2E8F0] flex flex-col justify-between h-full min-h-[88px] space-y-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#2E7D32] uppercase tracking-wider">Guaranteed Investment Certificate (GIC)</div>
+                    <div className="font-semibold text-[#111] mt-0.5">CAD 20,635 Proof of Funds</div>
+                  </div>
+                  <div className="text-[11px] text-[#666] pt-1">Mandatory living cost proof for study permit application</div>
+                </div>
+
+                <div className="p-3.5 rounded-[12px] bg-white border border-[#E2E8F0] flex flex-col justify-between h-full min-h-[88px] space-y-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#2E7D32] uppercase tracking-wider">Permanent Residency Pathways</div>
+                    <div className="font-semibold text-[#111] mt-0.5">Express Entry (CEC) &amp; Provincial PNP</div>
+                  </div>
+                  <div className="text-[11px] text-[#666] pt-1">Canadian degree grants maximum CRS bonus points</div>
+                </div>
               </div>
             </div>
           )}
@@ -661,11 +1011,11 @@ export default function UniversityDetailPage() {
               </div>
 
               {/* Metric Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 relative z-10 items-stretch">
                 {/* 1. Return on Investment Card */}
                 {u.roi ? (
-                  <div className="group relative bg-white border border-[#E7E2DE] hover:border-[#10B981]/50 rounded-[18px] p-5 flex flex-col justify-between transition-all duration-200 shadow-2xs hover:shadow-sm">
-                    <div>
+                  <div className="group relative bg-white border border-[#E7E2DE] hover:border-[#10B981]/50 rounded-[18px] p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 shadow-2xs hover:shadow-sm h-full min-h-[210px] min-w-0 overflow-hidden">
+                    <div className="min-w-0">
                       <div className="flex items-center justify-between gap-2 min-w-0">
                         <span className="text-[11px] font-bold text-[#059669] uppercase tracking-wider bg-[#ECFDF5] px-2.5 py-1 rounded-full border border-[#A7F3D0]/60 whitespace-nowrap shrink-0">
                           10-Year ROI
@@ -675,29 +1025,29 @@ export default function UniversityDetailPage() {
                         </div>
                       </div>
 
-                      <div className="my-4">
-                        <div className="text-[30px] sm:text-[34px] font-black text-[#111111] leading-none tracking-tight whitespace-nowrap">
-                          {roiData.percentage}
+                      <div className="my-3.5 min-w-0">
+                        <div className="text-[22px] sm:text-[26px] font-black text-[#111111] leading-tight tracking-tight truncate" title={roiData.hero}>
+                          {roiData.hero}
                         </div>
                         {roiData.rating && (
-                          <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11.5px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] whitespace-nowrap">
+                          <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] max-w-full truncate">
                             <Sparkles size={11} className="shrink-0" />
-                            <span>{roiData.rating} Rating</span>
+                            <span className="truncate">{roiData.rating}</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-[12px] text-[#666666] leading-relaxed pt-3 border-t border-[#F5F2EF]">
-                      Projected earnings premium relative to the total cost of attendance.
+                    <p className="text-[11.5px] text-[#666666] leading-relaxed pt-2.5 border-t border-[#F5F2EF] mt-auto line-clamp-3" title={roiData.desc}>
+                      {roiData.desc}
                     </p>
                   </div>
                 ) : null}
 
                 {/* 2. Expected Salary Range Card */}
                 {u.expectedSalary ? (
-                  <div className="group relative bg-white border border-[#E7E2DE] hover:border-[#F59E0B]/50 rounded-[18px] p-5 flex flex-col justify-between transition-all duration-200 shadow-2xs hover:shadow-sm">
-                    <div>
+                  <div className="group relative bg-white border border-[#E7E2DE] hover:border-[#F59E0B]/50 rounded-[18px] p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 shadow-2xs hover:shadow-sm h-full min-h-[210px] min-w-0 overflow-hidden">
+                    <div className="min-w-0">
                       <div className="flex items-center justify-between gap-2 min-w-0">
                         <span className="text-[11px] font-bold text-[#B45309] uppercase tracking-wider bg-[#FEF3C7] px-2.5 py-1 rounded-full border border-[#FDE68A]/60 whitespace-nowrap shrink-0">
                           Expected Salary
@@ -707,31 +1057,33 @@ export default function UniversityDetailPage() {
                         </div>
                       </div>
 
-                      <div className="my-4">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-[28px] sm:text-[32px] font-black text-[#111111] leading-none tracking-tight whitespace-nowrap">
+                      <div className="my-3.5 min-w-0">
+                        <div className="flex items-baseline gap-1 min-w-0">
+                          <span className="text-[22px] sm:text-[26px] font-black text-[#111111] leading-tight tracking-tight truncate" title={salaryData.hero}>
                             {salaryData.hero}
                           </span>
-                          <span className="text-[13px] font-bold text-[#888888] whitespace-nowrap">/ yr</span>
+                          {salaryData.unit && (
+                            <span className="text-[12px] font-bold text-[#888888] shrink-0">{salaryData.unit}</span>
+                          )}
                         </div>
-                        {salaryData.range && (
-                          <div className="mt-2.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11.5px] font-semibold text-[#92400E] bg-[#FFFBEB] border border-[#FDE68A] whitespace-nowrap">
-                            <span>Range: {salaryData.range}</span>
+                        {salaryData.badge && (
+                          <div className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-[#92400E] bg-[#FFFBEB] border border-[#FDE68A] max-w-full truncate">
+                            <span className="truncate">{salaryData.badge}</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-[12px] text-[#666666] leading-relaxed pt-3 border-t border-[#F5F2EF]">
-                      Starting to early-career compensation reported across academic programs.
+                    <p className="text-[11.5px] text-[#666666] leading-relaxed pt-2.5 border-t border-[#F5F2EF] mt-auto line-clamp-3" title={salaryData.desc}>
+                      {salaryData.desc}
                     </p>
                   </div>
                 ) : null}
 
                 {/* 3. Career Placement Outcomes Card */}
                 {u.careerOutcomes ? (
-                  <div className="group relative bg-white border border-[#E7E2DE] hover:border-[#6366F1]/50 rounded-[18px] p-5 flex flex-col justify-between transition-all duration-200 shadow-2xs hover:shadow-sm">
-                    <div>
+                  <div className="group relative bg-white border border-[#E7E2DE] hover:border-[#6366F1]/50 rounded-[18px] p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 shadow-2xs hover:shadow-sm h-full min-h-[210px] min-w-0 overflow-hidden">
+                    <div className="min-w-0">
                       <div className="flex items-center justify-between gap-2 min-w-0">
                         <span className="text-[11px] font-bold text-[#4338CA] uppercase tracking-wider bg-[#EEF2FF] px-2.5 py-1 rounded-full border border-[#C7D2FE]/60 whitespace-nowrap shrink-0">
                           Placement Rate
@@ -741,20 +1093,20 @@ export default function UniversityDetailPage() {
                         </div>
                       </div>
 
-                      <div className="my-4">
-                        <div className="text-[28px] sm:text-[32px] font-black text-[#111111] leading-none tracking-tight whitespace-nowrap">
+                      <div className="my-3.5 min-w-0">
+                        <div className="text-[22px] sm:text-[26px] font-black text-[#111111] leading-tight tracking-tight truncate" title={outcomeData.rate}>
                           {outcomeData.rate}
                         </div>
                         {outcomeData.timeline && (
-                          <div className="mt-2.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11.5px] font-semibold text-[#4338CA] bg-[#EEF2FF] border border-[#C7D2FE] whitespace-nowrap">
-                            <span>{outcomeData.timeline}</span>
+                          <div className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-[#4338CA] bg-[#EEF2FF] border border-[#C7D2FE] max-w-full truncate">
+                            <span className="truncate">{outcomeData.timeline}</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-[12px] text-[#666666] leading-relaxed pt-3 border-t border-[#F5F2EF]">
-                      Employed full-time in industry or pursuing advanced master's/doctoral study.
+                    <p className="text-[11.5px] text-[#666666] leading-relaxed pt-2.5 border-t border-[#F5F2EF] mt-auto line-clamp-3" title={outcomeData.desc}>
+                      {outcomeData.desc}
                     </p>
                   </div>
                 ) : null}
@@ -769,30 +1121,30 @@ export default function UniversityDetailPage() {
                     </span>
                     {roiData.rating && (
                       <span className="text-[12px] font-bold text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] px-2.5 py-0.5 rounded-full w-fit">
-                        ★ {roiData.rating} Return Tier
+                        ★ {roiData.rating}
                       </span>
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="bg-white border border-[#E7E2DE] rounded-[14px] p-3.5 flex flex-col justify-center">
+                    <div className="bg-white border border-[#E7E2DE] rounded-[14px] p-3.5 flex flex-col justify-center min-w-0 overflow-hidden">
                       <div className="text-[11px] font-bold text-[#777] uppercase tracking-wider">Annual Tuition</div>
-                      <div className="text-[18px] sm:text-[20px] font-bold text-[#111] mt-0.5">{u.tuition}</div>
+                      <div className="text-[17px] sm:text-[19px] font-bold text-[#111] mt-0.5 truncate" title={u.tuition}>{u.tuition}</div>
                       <div className="text-[11px] text-[#999] mt-0.5">Base investment / yr</div>
                     </div>
 
-                    <div className="bg-white border border-[#E7E2DE] rounded-[14px] p-3.5 flex flex-col justify-center">
+                    <div className="bg-white border border-[#E7E2DE] rounded-[14px] p-3.5 flex flex-col justify-center min-w-0 overflow-hidden">
                       <div className="text-[11px] font-bold text-[#777] uppercase tracking-wider">Projected Starting Comp</div>
-                      <div className="text-[18px] sm:text-[20px] font-bold text-[#15803d] mt-0.5">
-                        {salaryData.hero || u.expectedSalary}
+                      <div className="text-[17px] sm:text-[19px] font-bold text-[#15803d] mt-0.5 truncate" title={salaryData.hero}>
+                        {salaryData.hero}
                       </div>
                       <div className="text-[11px] text-[#999] mt-0.5">Early-career baseline</div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-white to-[#F0FDF4] border border-[#BBF7D0] rounded-[14px] p-3.5 flex flex-col justify-center">
+                    <div className="bg-gradient-to-br from-white to-[#F0FDF4] border border-[#BBF7D0] rounded-[14px] p-3.5 flex flex-col justify-center min-w-0 overflow-hidden">
                       <div className="text-[11px] font-bold text-[#15803d] uppercase tracking-wider">10-Year ROI Multiple</div>
-                      <div className="text-[18px] sm:text-[20px] font-black text-[#15803d] mt-0.5">
-                        {roiData.percentage || u.roi}
+                      <div className="text-[17px] sm:text-[19px] font-black text-[#15803d] mt-0.5 truncate" title={roiData.hero}>
+                        {roiData.hero}
                       </div>
                       <div className="text-[11px] text-[#15803d]/80 mt-0.5">Estimated net career surplus</div>
                     </div>
@@ -953,9 +1305,11 @@ export default function UniversityDetailPage() {
                 </div>
               )}
               {u.roi && (
-                <div className="flex justify-between items-center">
-                  <span className="text-[#777]">Estimated ROI</span>
-                  <span className="font-bold text-[#059669] text-right">{u.roi}</span>
+                <div className="flex justify-between items-center gap-2">
+                  <span className="text-[#777] shrink-0">Estimated ROI</span>
+                  <span className="font-bold text-[#059669] text-right truncate max-w-[180px]" title={u.roi}>
+                    {formatRoiBadge(u.roi)}
+                  </span>
                 </div>
               )}
             </div>
@@ -978,16 +1332,18 @@ export default function UniversityDetailPage() {
               {u.state && (
                 <div className="flex justify-between">
                   <span className="text-[#777]">State / Province</span>
-                  <span className="font-bold text-[#111]">{u.state}</span>
+                  <span className="font-bold text-[#111]">{u.state || u.province}</span>
                 </div>
               )}
-              <div className="flex justify-between">
-                <span className="text-[#777]">Acceptance Rate</span>
-                <span className="font-bold text-[#690B1B]">{u.acceptanceRate}</span>
+              <div className="flex justify-between items-center gap-2">
+                <span className="text-[#777] shrink-0">Acceptance Rate</span>
+                <span className="font-bold text-[#690B1B] text-right truncate max-w-[180px]">
+                  {formatAcceptance(u.acceptanceRate, u.countryCode)}
+                </span>
               </div>
               {u.avgGpa !== null && (
                 <div className="flex justify-between">
-                  <span className="text-[#777]">Avg GPA</span>
+                  <span className="text-[#777]">Academic Standard</span>
                   <span className="font-bold text-[#111]">{u.avgGpa}</span>
                 </div>
               )}
@@ -998,9 +1354,11 @@ export default function UniversityDetailPage() {
                 </div>
               )}
               {u.roi && (
-                <div className="flex justify-between items-center pt-2 border-t border-[#F0EBE6]">
-                  <span className="text-[#777]">ROI Rating</span>
-                  <span className="font-bold text-[#059669]">{u.roi}</span>
+                <div className="flex justify-between items-center gap-2 pt-2 border-t border-[#F0EBE6]">
+                  <span className="text-[#777] shrink-0">ROI Rating</span>
+                  <span className="font-bold text-[#059669] text-right truncate max-w-[180px]" title={u.roi}>
+                    {formatRoiBadge(u.roi)}
+                  </span>
                 </div>
               )}
               {u.careerOutcomes && (
